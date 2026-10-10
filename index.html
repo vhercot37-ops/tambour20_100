@@ -3,394 +3,362 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contrôle Filtration</title>
+    <title>Dashboard Tambour (BLE & Cloud)</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root {
-            --bg-color: #f4f7f6;
-            --card-bg: #ffffff;
-            --primary: #007bff;
-            --text-main: #333;
-            --text-muted: #666;
-            --border: #ddd;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-        header {
-            background-color: var(--primary);
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 1.2em;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        #ble-btn {
-            background-color: white;
-            color: var(--primary);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .nav-tabs {
-            display: flex;
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border);
-        }
-        .tab {
-            flex: 1;
-            padding: 15px 0;
-            text-align: center;
-            font-weight: bold;
-            color: var(--text-muted);
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-        }
-        .tab.active {
-            color: var(--primary);
-            border-bottom: 3px solid var(--primary);
-        }
-        .page {
-            display: none;
-            padding: 20px;
-            flex: 1;
-            overflow-y: auto;
-        }
-        .page.active {
-            display: block;
-        }
-        .card {
-            background: var(--card-bg);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        h1.page-title {
-            text-align: center;
-            color: var(--primary);
-            margin-top: 0;
-        }
-        .data-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
-        }
-        .data-row:last-child {
-            border-bottom: none;
-        }
-        .data-label {
-            font-weight: bold;
-            color: var(--text-muted);
-        }
-        .data-value {
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-        input, select, button.action-btn {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 1em;
-        }
-        button.action-btn {
-            background-color: var(--primary);
-            color: white;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            margin-top: 15px;
-        }
-        .btn-group {
-            display: flex;
-            gap: 10px;
-        }
-        .btn-group button {
-            flex: 1;
-            background-color: #e0e0e0;
-            color: #333;
-        }
-        .btn-group button:active {
-            background-color: #ccc;
-        }
-        #loaderWifi {
-            display: none;
-            text-align: center;
-            color: var(--primary);
-            font-weight: bold;
-        }
+        :root { --bg-main: #1a2332; --bg-card: #151c26; --text-white: #ffffff; --text-gray: #94a3b8; --green-ok-bg: #142820; --green-border: #10b981; --dot-green: #10b981; --dot-red: #ef4444; --accent-purple: #9d4edd; --accent-blue: #3b82f6; }
+        body { background-color: #0f141c; color: var(--text-white); font-family: sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .phone-container { width: 100%; max-width: 410px; background-color: var(--bg-main); border-radius: 25px; padding: 25px 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); box-sizing: border-box; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        header { text-align: center; margin-bottom: 20px; position: relative; display: flex; justify-content: center; align-items: center; min-height: 48px; padding: 0 45px 0 0; }
+        .main-title { font-size: 24px; font-weight: bold; margin: 0; width: 100%; text-align: center; }
+        .menu-toggle-btn { position: absolute; right: 0px; top: 50%; transform: translateY(-50%); background: #243145; border: 1px solid #334155; color: var(--text-white); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; }
+        .sidebar-menu { position: absolute; top: 0; right: -240px; width: 220px; height: 100%; background-color: #121824; box-shadow: -5px 0 15px rgba(0,0,0,0.4); z-index: 99; transition: right 0.3s ease; padding: 70px 15px 20px 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+        .sidebar-menu.open { right: 0; }
+        .sidebar-item { background: #1c2635; border: 1px solid #2d3d54; color: var(--text-white); padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+        .sidebar-item.active { background: var(--accent-blue); border-color: var(--accent-blue); }
+        .view { display: none; }
+        .view.active { display: block; }
+        .alarm-banner { border-radius: 12px; padding: 12px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
+        .alarm-banner.success { background-color: var(--green-ok-bg); border: 2px solid var(--green-border); color: #a7f3d0; }
+        .gauge-section { display: flex; justify-content: center; align-items: center; margin-bottom: 15px; position: relative; height: 200px; }
+        .gauge-svg { width: 200px; height: 200px; }
+        .gauge-bg { fill: none; stroke: #243145; stroke-width: 12; stroke-linecap: round; }
+        .gauge-progress { fill: none; stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+        .gauge-text { position: absolute; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .gauge-text .temp-val { font-size: 46px; font-weight: bold; display: block; }
+        .gauge-text .temp-unit { color: var(--text-gray); font-size: 16px; display: block; margin-top: -5px; }
+        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .status-badge { background-color: var(--bg-card); padding: 12px 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; background-color: var(--text-gray); flex-shrink: 0; }
+        .dot.green { background-color: var(--dot-green); box-shadow: 0 0 8px var(--dot-green); }
+        .dot.red { background-color: var(--dot-red); box-shadow: 0 0 8px var(--dot-red); }
+        .wash-counter-block { background-color: var(--bg-card); border-radius: 15px; padding: 15px; text-align: center; margin: 25px 0; }
+        .wash-counter-block .count { font-size: 36px; font-weight: bold; color: var(--accent-blue); margin-top: 5px; display: block; }
+        .btn-action-manuel { flex: 1; background-color: var(--accent-purple); color: white; border: none; padding: 20px; border-radius: 15px; font-weight: bold; font-size: 16px; text-transform: uppercase; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .telegram-config-block { background-color: var(--bg-card); border-radius: 15px; padding: 20px; text-align: center; margin-top: 10px; }
+        .auth-input { width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #334155; background-color: #1a2332; color: white; font-size: 15px; box-sizing: border-box; }
+        .auth-btn { width: 100%; background-color: var(--accent-blue); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .conn-status { position: absolute; left: 15px; top: 15px; font-size: 12px; color: var(--dot-red); font-weight: bold; cursor: pointer; }
+        .conn-status.ble { color: var(--dot-green); }
+        .conn-status.firebase { color: #f59e0b; }
+        .conn-bar { display: flex; gap: 10px; margin-bottom: 15px; }
+        .mode-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #334155; background: #151c26; color: white; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; }
+        .mode-btn.active { border-color: var(--accent-blue); background: #2563eb; }
     </style>
 </head>
 <body>
 
+<div class="phone-container">
+    <div id="status-indic" class="conn-status"><i class="fa-solid fa-signal"></i> Recherche...</div>
     <header>
-        <span id="statusIcon">🔴 Déconnecté</span>
-        <button id="ble-btn">Connexion BLE</button>
+        <div class="main-title" id="val-Mode">Mode Auto</div>
+        <button class="menu-toggle-btn" onclick="toggleSidebarMenu()"><i class="fa-solid fa-bars" id="menu-icon"></i></button>
     </header>
 
-    <div class="nav-tabs">
-        <div class="tab active" onclick="switchTab('auto')">Auto</div>
-        <div class="tab" onclick="switchTab('manu')">Manuel</div>
-        <div class="tab" onclick="switchTab('param')">Paramètres</div>
+    <div class="sidebar-menu" id="sidebarMenu">
+        <div class="sidebar-item active" id="tab-auto" onclick="switchView('auto')"><i class="fa-solid fa-gauge"></i> <span>Mode Auto</span></div>
+        <div class="sidebar-item" id="tab-manuel" onclick="switchView('manuel')"><i class="fa-solid fa-hand-pointer"></i> <span>Mode Manuel</span></div>
+        <div class="sidebar-item" id="tab-config" onclick="switchView('config')"><i class="fa-solid fa-gear"></i> <span>Configuration Tambour</span></div>
+        <div class="sidebar-item" id="tab-wifi" onclick="switchView('wifi')"><i class="fa-solid fa-wifi"></i> <span>Configuration Wi-Fi</span></div>
     </div>
 
-    <!-- PAGE AUTO -->
-    <div id="page-auto" class="page active">
-        <h1 class="page-title" id="titreAuto">Auto 70G</h1>
-        
-        <div class="card">
-            <div class="data-row">
-                <span class="data-label">Identifiant Coffret</span>
-                <span class="data-value" id="val_id">--</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">Température Eau</span>
-                <span class="data-value" id="val_temp">-- °C</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">Niveau Lavage</span>
-                <span class="data-value" id="val_lavage">--</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">Niveau Sécurité</span>
-                <span class="data-value" id="val_secu">--</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">Couvercle</span>
-                <span class="data-value" id="val_couv">--</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">Compteur Lavages</span>
-                <span class="data-value" id="val_cpt">--</span>
-            </div>
-        </div>
+    <div class="conn-bar">
+        <button id="btn-mode-ble" class="mode-btn active" onclick="connecterBLE()"><i class="fa-solid fa-bluetooth"></i> Connexion BLE</button>
+        <button id="btn-mode-cloud" class="mode-btn" onclick="activerModeFirebase()"><i class="fa-solid fa-cloud"></i> Mode Cloud</button>
     </div>
 
-    <!-- PAGE MANUEL -->
-    <div id="page-manu" class="page">
-        <h1 class="page-title" id="titreManu">Manu 70G</h1>
-        
-        <div class="card">
-            <h3>Contrôle Direct</h3>
-            <div class="btn-group">
-                <button class="action-btn" onmousedown="envoyerCommande('Rotation:1')" onmouseup="envoyerCommande('Rotation:0')" ontouchstart="envoyerCommande('Rotation:1')" ontouchend="envoyerCommande('Rotation:0')">Rotation</button>
-                <button class="action-btn" onmousedown="envoyerCommande('Lavage:1')" onmouseup="envoyerCommande('Lavage:0')" ontouchstart="envoyerCommande('Lavage:1')" ontouchend="envoyerCommande('Lavage:0')">Lavage</button>
+    <div id="dashboard-content">
+        <!-- VUE AUTO -->
+        <div id="auto-view" class="view active">
+            <div class="alarm-banner success" id="val-Alarme">Système Prêt</div>
+            <div class="gauge-section">
+                <svg class="gauge-svg" viewBox="0 0 200 200">
+                    <path class="gauge-bg" d="M 46.97 153.03 A 75 75 0 1 1 153.03 153.03"></path>
+                    <path class="gauge-progress" id="gaugeCircle" d="M 46.97 153.03 A 75 75 0 1 1 153.03 153.03" stroke-dasharray="353.4" stroke-dashoffset="353.4"></path>
+                </svg>
+                <div class="gauge-text"><span class="temp-val" id="val-temperature">--.-</span><span class="temp-unit">°C</span></div>
             </div>
-            <p style="text-align:center; font-size:0.9em; color:#666; margin-top:10px;">Maintenez le bouton appuyé pour activer.</p>
-        </div>
-    </div>
-
-    <!-- PAGE PARAMETRES -->
-    <div id="page-param" class="page">
-        <h1 class="page-title">Configuration</h1>
-        
-        <!-- Configuration du Tambour -->
-        <div class="card">
-            <h3>Réglages Tambour</h3>
-            <label>Modèle du tambour :</label>
-            <select id="sel_modele">
-                <option value="30">30</option>
-                <option value="50">50</option>
-                <option value="70">70</option>
-                <option value="90">90</option>
-                <option value="120">120</option>
-            </select>
-            
-            <label>Mode de fonctionnement :</label>
-            <select id="sel_mode">
-                <option value="G">Gravité (G)</option>
-                <option value="P">Pompage (P)</option>
-            </select>
-            
-            <button class="action-btn" onclick="sauvegarderTambour()">Enregistrer Modèle</button>
+            <div class="status-grid">
+                <div class="status-badge"><span>Niveau Sécurité</span><div class="dot" id="dot-niveau_securite"></div></div>
+                <div class="status-badge"><span>Niveau Lavage</span><div class="dot" id="dot-niveau_lavage"></div></div>
+                <div class="status-badge"><span>Couvercle</span><div class="dot" id="dot-couvercle"></div></div>
+                <div class="status-badge"><span>Pompe UV</span><div class="dot" id="dot-pompe_uv"></div></div>
+            </div>
+            <div class="wash-counter-block"><span style="color:var(--text-gray); font-size:14px;">Nombre de Lavages</span><span class="count" id="val-Nbre_lavage">--</span></div>
         </div>
 
-        <!-- Configuration Wi-Fi -->
-        <div class="card">
-            <h3>Connexion Wi-Fi Client</h3>
-            <button class="action-btn" style="background-color: #28a745;" onclick="scannerWifi()">🔍 Scanner les réseaux Wi-Fi</button>
-            
-            <div id="loaderWifi">Recherche en cours (~5 sec)...</div>
-            
-            <div id="zoneWifi" style="display:none; margin-top: 15px;">
-                <label>Sélectionnez le réseau :</label>
-                <select id="wifi_list"></select>
+        <!-- VUE MANUEL -->
+        <div id="manuel-view" class="view">
+            <div class="alarm-banner success" id="val-Alarme-man">Système Prêt</div>
+            <div class="gauge-section">
+                <svg class="gauge-svg" viewBox="0 0 200 200">
+                    <path class="gauge-bg" d="M 46.97 153.03 A 75 75 0 1 1 153.03 153.03"></path>
+                    <path class="gauge-progress" id="gaugeCircle-man" d="M 46.97 153.03 A 75 75 0 1 1 153.03 153.03" stroke-dasharray="353.4" stroke-dashoffset="353.4"></path>
+                </svg>
+                <div class="gauge-text"><span class="temp-val" id="val-temperature-man">--.-</span><span class="temp-unit">°C</span></div>
+            </div>
+            <div class="status-grid">
+                <div class="status-badge"><span>Niveau Sécurité</span><div class="dot" id="dot-niveau_securite-man"></div></div>
+                <div class="status-badge"><span>Niveau Lavage</span><div class="dot" id="dot-niveau_lavage-man"></div></div>
+                <div class="status-badge"><span>Couvercle</span><div class="dot" id="dot-couvercle-man"></div></div>
+                <div class="status-badge"><span>Pompe UV</span><div class="dot" id="dot-pompe_uv-man"></div></div>
+            </div>
+            <div style="display: flex; gap: 15px; margin-top: 15px;">
+                <button id="btn-man-rotation" class="btn-action-manuel"><i class="fa-solid fa-rotate"></i> Rotation</button>
+                <button id="btn-man-lavage" class="btn-action-manuel" style="background-color: #0ea5e9;"><i class="fa-solid fa-water"></i> Lavage</button>
+            </div>
+        </div>
+
+        <!-- CONFIGURATION TAMBOUR -->
+        <div id="config-view" class="view">
+            <div class="telegram-config-block">
+                <h3>Paramètres du Tambour</h3>
+                <div style="text-align: left; margin-bottom: 15px;">
+                    <label class="auth-input" style="border:none; padding:0;">Modèle :</label>
+                    <select id="config-modele-select" class="auth-input">
+                        <option value="30">Modèle 30</option>
+                        <option value="50">Modèle 50</option>
+                        <option value="70">Modèle 70</option>
+                        <option value="90">Modèle 90</option>
+                        <option value="120">Modèle 120</option>
+                    </select>
+                </div>
+                <div style="text-align: left; margin-bottom: 15px;">
+                    <label class="auth-input" style="border:none; padding:0;">Mode :</label>
+                    <select id="config-mode-select" class="auth-input">
+                        <option value="G">Gravitaire (G)</option>
+                        <option value="P">Pompage (P)</option>
+                    </select>
+                </div>
+                <button class="auth-btn" onclick="sauvegarderTambour()"><i class="fa-solid fa-save"></i> Enregistrer Tambour</button>
+            </div>
+        </div>
+
+        <!-- CONFIGURATION WI-FI CLIENT -->
+        <div id="wifi-view" class="view">
+            <div class="telegram-config-block">
+                <h3>Réseau Wi-Fi de la maison</h3>
+                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;">Connectez le boîtier à Internet pour le contrôle à distance.</p>
                 
-                <label>Mot de passe Wi-Fi :</label>
-                <input type="password" id="wifi_pass" placeholder="Clé de sécurité">
+                <button class="auth-btn" style="background-color: #0ea5e9; margin-bottom: 15px;" onclick="scannerWifi()"><i class="fa-solid fa-magnifying-glass"></i> Scanner les réseaux</button>
+                <div id="loaderWifi" style="display:none; color: var(--accent-blue); font-size: 14px; font-weight: bold; margin-bottom: 15px;">Recherche en cours (~5 sec)...</div>
                 
-                <button class="action-btn" onclick="envoyerWifi()">Envoyer au boîtier</button>
+                <div id="zoneWifiSelect" style="display:none; text-align: left;">
+                    <label class="auth-input" style="border:none; padding:0;">Sélectionnez le réseau :</label>
+                    <select id="wifi-ssid-select" class="auth-input"></select>
+                </div>
+
+                <input type="text" id="wifi-ssid-input" class="auth-input" placeholder="Ou tapez le nom du Wi-Fi (SSID)">
+                <input type="password" id="wifi-password-input" class="auth-input" placeholder="Mot de passe Wi-Fi">
+                <button class="auth-btn" onclick="sauvegarderWifiClient()"><i class="fa-solid fa-paper-plane"></i> Envoyer au Boîtier</button>
+                <p id="wifi-success-msg" style="color: var(--dot-green); display: none; font-size: 12px; margin-top: 10px;">Wi-Fi envoyé au coffret !</p>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        const SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-        const RX_UUID      = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
-        const TX_UUID      = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+<script>
+    const SERVICE_UUID           = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+    const CHARACTERISTIC_UUID_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+    const CHARACTERISTIC_UUID_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 
-        let bleDevice, bleServer, rxCharacteristic, txCharacteristic;
-        let reseauxTrouves = [];
+    const FIREBASE_HOST = "https://ton-projet-rtdb.firebaseio.com/"; // Remplace par ton URL Firebase
+    let ID_COFFRET = ""; 
 
-        // Gestion de l'affichage des onglets
-        function switchTab(tabId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('page-' + tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
+    let bleDevice = null;
+    let rxCharacteristic = null;
+    let txCharacteristic = null;
+    let modeActif = "BLE";
+    let timerFirebase = null;
+    let reseauxTrouves = [];
+
+    // --- GESTION DU TITRE DYNAMIQUE ---
+    function rafraichirTitres() {
+        let modele = localStorage.getItem("tambour_modele") || "70";
+        let mode = localStorage.getItem("tambour_mode") || "G";
+        
+        document.getElementById('config-modele-select').value = modele;
+        document.getElementById('config-mode-select').value = mode;
+
+        let activeView = document.querySelector('.sidebar-item.active').id;
+        if (activeView === 'tab-auto') {
+            document.getElementById('val-Mode').innerText = `Auto ${modele}${mode}`;
+        } else if (activeView === 'tab-manuel') {
+            document.getElementById('val-Mode').innerText = `Manu ${modele}${mode}`;
+        }
+    }
+
+    async function connecterBLE() {
+        modeActif = "BLE";
+        if (timerFirebase) clearInterval(timerFirebase);
+        misesAJourInterfaceBoutons("BLE");
+
+        try {
+            bleDevice = await navigator.bluetooth.requestDevice({
+                filters: [{ namePrefix: 'Tambour_' }],
+                optionalServices: [SERVICE_UUID]
+            });
+            bleDevice.addEventListener('gattserverdisconnected', () => {
+                if (modeActif === "BLE") setTimeout(activerModeFirebase, 2000);
+            });
+            const server = await bleDevice.gatt.connect();
+            const service = await server.getPrimaryService(SERVICE_UUID);
+            rxCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_RX);
+            txCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_TX);
+
+            await txCharacteristic.startNotifications();
+            txCharacteristic.addEventListener('characteristicvaluechanged', (e) => {
+                let text = new TextDecoder("utf-8").decode(e.target.value);
+                
+                if (text.startsWith("ID:")) {
+                    let parts = text.split(",D:");
+                    if (parts.length >= 2) {
+                        ID_COFFRET = parts[0].replace("ID:", ""); 
+                        let donnees = parts[1].split(",");
+                        if (donnees.length >= 6) {
+                            afficherMaitresDonnees(
+                                parseFloat(donnees[0]), parseInt(donnees[1]), parseInt(donnees[2]),
+                                parseInt(donnees[3]), parseInt(donnees[4]), donnees[5]
+                            );
+                        }
+                    }
+                }
+                // --- AJOUT : Réception des trames Wi-Fi (WNET) ---
+                else if (text.startsWith("WNET:")) {
+                    let reseau = text.substring(5);
+                    if (reseau === "END") {
+                        afficherListeWifi();
+                    } else if (reseau === "NONE") {
+                        document.getElementById('loaderWifi').style.display = 'none';
+                        alert("Aucun réseau Wi-Fi trouvé.");
+                    } else {
+                        reseauxTrouves.push(reseau);
+                    }
+                }
+            });
+            document.getElementById('status-indic').className = "conn-status ble";
+            document.getElementById('status-indic').innerHTML = `<i class="fa-solid fa-bluetooth"></i> BLE Connecté`;
+        } catch (error) {
+            console.warn("Connexion BLE annulée ou échouée", error);
+            activerModeFirebase();
+        }
+    }
+
+    function activerModeFirebase() {
+        modeActif = "FIREBASE";
+        misesAJourInterfaceBoutons("FIREBASE");
+        document.getElementById('status-indic').className = "conn-status firebase";
+        document.getElementById('status-indic').innerHTML = `<i class="fa-solid fa-cloud"></i> Cloud Actif`;
+        if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect();
+
+        if (ID_COFFRET === "") {
+            alert("Aucun ID de coffret mémorisé. Connectez-vous d'abord une fois en Bluetooth à proximité du boîtier.");
+            return;
         }
 
-        // Initialisation des titres au chargement
-        function rafraichirTitres() {
-            let modele = localStorage.getItem("tambour_modele") || "70";
-            let mode = localStorage.getItem("tambour_mode") || "G";
-            
-            document.getElementById("titreAuto").innerText = `Auto ${modele}${mode}`;
-            document.getElementById("titreManu").innerText = `Manu ${modele}${mode}`;
-            
-            document.getElementById("sel_modele").value = modele;
-            document.getElementById("sel_mode").value = mode;
-        }
-        window.onload = rafraichirTitres;
+        lireDonneesFirebase();
+        if (timerFirebase) clearInterval(timerFirebase);
+        timerFirebase = setInterval(lireDonneesFirebase, 5000);
+    }
 
-        // --- GESTION DU BLUETOOTH ---
-        document.getElementById('ble-btn').addEventListener('click', async () => {
-            try {
-                bleDevice = await navigator.bluetooth.requestDevice({
-                    filters: [{ namePrefix: 'Tambour_' }],
-                    optionalServices: [SERVICE_UUID]
-                });
-
-                bleDevice.addEventListener('gattserverdisconnected', () => {
-                    document.getElementById('statusIcon').innerText = "🔴 Déconnecté";
-                    document.getElementById('ble-btn').innerText = "Connexion BLE";
-                });
-
-                document.getElementById('statusIcon').innerText = "🟡 Connexion...";
-                bleServer = await bleDevice.gatt.connect();
-                
-                const service = await bleServer.getPrimaryService(SERVICE_UUID);
-                rxCharacteristic = await service.getCharacteristic(RX_UUID);
-                txCharacteristic = await service.getCharacteristic(TX_UUID);
-
-                await txCharacteristic.startNotifications();
-                txCharacteristic.addEventListener('characteristicvaluechanged', receptionDonnees);
-
-                document.getElementById('statusIcon').innerText = "🟢 Connecté";
-                document.getElementById('ble-btn').innerText = "Connecté";
-            } catch (error) {
-                console.error("Erreur BLE:", error);
-                alert("Erreur de connexion. Vérifiez que le Bluetooth est activé.");
+    async function lireDonneesFirebase() {
+        if (!ID_COFFRET) return;
+        try {
+            let url = `${FIREBASE_HOST}${ID_COFFRET}.json`;
+            let response = await fetch(url);
+            if (response.ok) {
+                let data = await response.json();
+                if (data) {
+                    afficherMaitresDonnees(
+                        data.temperature || 0, data.niveau_secu || 0, data.niveau_lav || 0,
+                        data.couvercle || 0, data.pompe_uv || 0, data.compteur_lavage || 0
+                    );
+                }
             }
+        } catch (error) {
+            console.error("Erreur lecture Firebase", error);
+        }
+    }
+
+    async function envoyerCommande(action, valeur) {
+        if (modeActif === "BLE" && rxCharacteristic) {
+            let enc = new TextEncoder();
+            // Si la valeur est vide (ex: SCAN), on envoie juste SCAN: (géré par le C++)
+            let trame = valeur === "" ? action : `${action}:${valeur}`;
+            await rxCharacteristic.writeValue(enc.encode(trame));
+        } else if (modeActif === "FIREBASE") {
+            if (!ID_COFFRET) { alert("ID du coffret inconnu !"); return; }
+            let url = `${FIREBASE_HOST}${ID_COFFRET}/commandes.json`;
+            await fetch(url, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ [action]: valeur, timestamp: Date.now() }) });
+        }
+    }
+
+    // --- SAUVEGARDE TAMBOUR ---
+    function sauvegarderTambour() {
+        let modele = document.getElementById("config-modele-select").value;
+        let mode = document.getElementById("config-mode-select").value;
+        
+        localStorage.setItem("tambour_modele", modele);
+        localStorage.setItem("tambour_mode", mode);
+        rafraichirTitres(); // Met à jour le titre instantanément
+        
+        let modeInt = (mode === "G") ? 0 : 1;
+        envoyerCommande("config_tambour", `${modele},${modeInt}`);
+        alert(`Paramètres envoyés : ${modele}${mode}`);
+    }
+
+    // --- GESTION DU SCAN WI-FI ---
+    function scannerWifi() {
+        if (modeActif !== "BLE" || !rxCharacteristic) {
+            alert("Connectez-vous d'abord en BLE pour scanner les réseaux !");
+            return;
+        }
+        reseauxTrouves = [];
+        document.getElementById('loaderWifi').style.display = 'block';
+        document.getElementById('zoneWifiSelect').style.display = 'none';
+        envoyerCommande("SCAN", "");
+    }
+
+    function afficherListeWifi() {
+        document.getElementById('loaderWifi').style.display = 'none';
+        document.getElementById('zoneWifiSelect').style.display = 'block';
+        
+        let select = document.getElementById('wifi-ssid-select');
+        select.innerHTML = "";
+        
+        reseauxTrouves.forEach(net => {
+            let opt = document.createElement('option');
+            opt.value = net;
+            opt.innerHTML = net;
+            select.appendChild(opt);
         });
 
-        // --- RECEPTION DES DONNEES (Capteurs & Scan Wi-Fi) ---
-        function receptionDonnees(event) {
-            let texte = new TextDecoder().decode(event.target.value);
-            
-            // 1. Trame de données classique (ID:...,D:...)
-            if (texte.startsWith("ID:")) {
-                let parts = texte.split(",D:");
-                if (parts.length === 2) {
-                    let idCoffret = parts[0].replace("ID:", "");
-                    let data = parts[1].split(",");
-                    
-                    document.getElementById('val_id').innerText = idCoffret;
-                    document.getElementById('val_temp').innerText = data[0] + " °C";
-                    document.getElementById('val_secu').innerText = data[1] === "1" ? "OK" : "ALERTE";
-                    document.getElementById('val_lavage').innerText = data[2] === "1" ? "Lavage Requis" : "Niveau OK";
-                    document.getElementById('val_couv').innerText = data[3] === "1" ? "Fermé" : "Ouvert";
-                    document.getElementById('val_cpt').innerText = data[5];
-                }
-            } 
-            // 2. Trame de réponse du Scan Wi-Fi (WNET:...)
-            else if (texte.startsWith("WNET:")) {
-                let reseau = texte.substring(5);
-                if (reseau === "END") {
-                    afficherListeWifi();
-                } else if (reseau === "NONE") {
-                    document.getElementById('loaderWifi').style.display = 'none';
-                    alert("Aucun réseau Wi-Fi détecté autour du boîtier.");
-                } else {
-                    reseauxTrouves.push(reseau);
-                }
-            }
-        }
+        // Remplit le champ texte si l'utilisateur change la liste
+        select.addEventListener('change', function() {
+            document.getElementById('wifi-ssid-input').value = this.value;
+        });
 
-        // --- ENVOI DE COMMANDES ---
-        async function envoyerCommande(cmd) {
-            if (!rxCharacteristic) return;
-            let encoder = new TextEncoder();
-            await rxCharacteristic.writeValue(encoder.encode(cmd));
+        // Remplir automatiquement avec le premier de la liste
+        if(reseauxTrouves.length > 0) {
+            document.getElementById('wifi-ssid-input').value = reseauxTrouves[0];
         }
+    }
 
-        // --- CONFIGURATION TAMBOUR ---
-        function sauvegarderTambour() {
-            let modele = document.getElementById("sel_modele").value;
-            let mode = document.getElementById("sel_mode").value;
-            
-            // Sauvegarde dans le navigateur pour modifier les titres immédiatement
-            localStorage.setItem("tambour_modele", modele);
-            localStorage.setItem("tambour_mode", mode);
-            rafraichirTitres();
-
-            // Envoi à l'ESP32 : G devient 0, P devient 1 (selon ta logique C++)
-            let modeInt = (mode === "G") ? 0 : 1;
-            envoyerCommande(`config_tambour:${modele},${modeInt}`);
-            alert(`Paramètres enregistrés : ${modele}${mode}`);
+    function sauvegarderWifiClient() {
+        if (modeActif !== "BLE" || !rxCharacteristic) {
+            alert("Vous devez être connecté en Bluetooth (à proximité du coffret) pour paramétrer le Wi-Fi.");
+            return;
         }
+        let ssid = document.getElementById('wifi-ssid-input').value;
+        let pass = document.getElementById('wifi-password-input').value;
+        if(ssid === "") { alert("Veuillez entrer un nom de Wi-Fi"); return; }
+        
+        envoyerCommande("WIFI", ssid + "|" + pass);
+        document.getElementById('wifi-success-msg').style.display = 'block';
+        setTimeout(() => document.getElementById('wifi-success-msg').style.display = 'none', 4000);
+    }
 
-        // --- CONFIGURATION WI-FI ---
-        function scannerWifi() {
-            if (!rxCharacteristic) {
-                alert("Connectez-vous d'abord en Bluetooth !");
-                return;
-            }
-            reseauxTrouves = [];
-            document.getElementById('loaderWifi').style.display = 'block';
-            document.getElementById('zoneWifi').style.display = 'none';
-            envoyerCommande("SCAN"); // Lève le drapeau dans l'ESP32
-        }
-
-        function afficherListeWifi() {
-            document.getElementById('loaderWifi').style.display = 'none';
-            document.getElementById('zoneWifi').style.display = 'block';
-            
-            let select = document.getElementById('wifi_list');
-            select.innerHTML = "";
-            reseauxTrouves.forEach(net => {
-                let opt = document.createElement('option');
-                opt.value = net;
-                opt.innerHTML = net;
-                select.appendChild(opt);
-            });
-        }
-
-        function envoyerWifi() {
-            let ssid = document.getElementById('wifi_list').value;
-            let pass = document.getElementById('wifi_pass').value;
-            
-            if (ssid) {
-                envoyerCommande(`WIFI:${ssid}|${pass}`);
-                alert("Identifiants envoyés au boîtier ! Il va tenter de se connecter à Internet.");
-                document.getElementById('wifi_pass').value = '';
-            }
-        }
-    </script>
-</body>
-</html>
+    function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur) {
+        mettreAJourJauge(temp, "");
