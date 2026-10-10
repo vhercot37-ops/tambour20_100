@@ -293,17 +293,29 @@
         }
     }
 
-    async function envoyerCommande(action, valeur) {
-        if (modeActif === "BLE" && rxCharacteristic) {
+   async function envoyerCommande(action, valeur) {
+    if (modeActif === "BLE" && rxCharacteristic) {
+        try {
             let enc = new TextEncoder();
             let trame = valeur === "" ? action : `${action}:${valeur}`;
-            await rxCharacteristic.writeValue(enc.encode(trame));
-        } else if (modeActif === "FIREBASE") {
-            if (!ID_COFFRET) { alert("ID inconnu !"); return; }
-            let url = `${FIREBASE_HOST}${ID_COFFRET}/commandes.json`;
-            await fetch(url, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ [action]: valeur, timestamp: Date.now() }) });
+            console.log("[BLE] Envoi vers ESP32 : " + trame);
+            
+            // On utilise writeValueWithoutResponse pour éviter les blocages de protocole GATT
+            await rxCharacteristic.writeValueWithoutResponse(enc.encode(trame));
+            
+            console.log("[BLE] Commande envoyée avec succès !");
+        } catch (error) {
+            console.error("[BLE] Erreur lors de l'envoi de la commande :", error);
+            alert("Erreur d'envoi BLE : " + error.message);
         }
+    } else if (modeActif === "FIREBASE") {
+        if (!ID_COFFRET) { alert("ID inconnu !"); return; }
+        let url = `${FIREBASE_HOST}${ID_COFFRET}/commandes.json`;
+        await fetch(url, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ [action]: valeur, timestamp: Date.now() }) });
+    } else {
+        alert("Non connecté en Bluetooth !");
     }
+}
 
     function sauvegarderTambour() {
         let modele = document.getElementById("config-modele-select").value;
