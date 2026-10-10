@@ -12,7 +12,7 @@
         body { background-color: #0f141c; color: var(--text-white); font-family: sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .phone-container { width: 100%; max-width: 410px; background-color: var(--bg-main); border-radius: 25px; padding: 25px 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); box-sizing: border-box; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         header { text-align: center; margin-bottom: 20px; position: relative; display: flex; justify-content: center; align-items: center; min-height: 48px; padding: 0 45px 0 0; }
-        .main-title { font-size: 24px; font-weight: bold; margin: 0; width: 100%; text-align: center; }
+        .main-title { font-size: 24px; font-weight: bold; margin: 0; width: 100%; text-align: center; color: var(--accent-blue); }
         .menu-toggle-btn { position: absolute; right: 0px; top: 50%; transform: translateY(-50%); background: #243145; border: 1px solid #334155; color: var(--text-white); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; }
         .sidebar-menu { position: absolute; top: 0; right: -240px; width: 220px; height: 100%; background-color: #121824; box-shadow: -5px 0 15px rgba(0,0,0,0.4); z-index: 99; transition: right 0.3s ease; padding: 70px 15px 20px 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
         .sidebar-menu.open { right: 0; }
@@ -20,9 +20,7 @@
         .sidebar-item.active { background: var(--accent-blue); border-color: var(--accent-blue); }
         .view { display: none; }
         .view.active { display: block; }
-        .alarm-banner { border-radius: 12px; padding: 12px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
-        .alarm-banner.success { background-color: var(--green-ok-bg); border: 2px solid var(--green-border); color: #a7f3d0; }
-        .gauge-section { display: flex; justify-content: center; align-items: center; margin-bottom: 15px; position: relative; height: 200px; }
+        .gauge-section { display: flex; justify-content: center; align-items: center; margin-bottom: 15px; position: relative; height: 200px; margin-top: 15px; }
         .gauge-svg { width: 200px; height: 200px; }
         .gauge-bg { fill: none; stroke: #243145; stroke-width: 12; stroke-linecap: round; }
         .gauge-progress { fill: none; stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
@@ -51,9 +49,10 @@
 <body>
 
 <div class="phone-container">
-    <div id="status-indic" class="conn-status"><i class="fa-solid fa-signal"></i> Recherche...</div>
+    <div id="status-indic" class="conn-status"><i class="fa-solid fa-signal"></i> Attente...</div>
+    
     <header>
-        <div class="main-title" id="val-Mode">Mode Auto</div>
+        <div class="main-title" id="val-Mode">Auto 70G</div>
         <button class="menu-toggle-btn" onclick="toggleSidebarMenu()"><i class="fa-solid fa-bars" id="menu-icon"></i></button>
     </header>
 
@@ -72,7 +71,6 @@
     <div id="dashboard-content">
         <!-- VUE AUTO -->
         <div id="auto-view" class="view active">
-            <div class="alarm-banner success" id="val-Alarme">Système Prêt</div>
             <div class="gauge-section">
                 <svg class="gauge-svg" viewBox="0 0 200 200">
                     <path class="gauge-bg" d="M 46.97 153.03 A 75 75 0 1 1 153.03 153.03"></path>
@@ -91,7 +89,6 @@
 
         <!-- VUE MANUEL -->
         <div id="manuel-view" class="view">
-            <div class="alarm-banner success" id="val-Alarme-man">Système Prêt</div>
             <div class="gauge-section">
                 <svg class="gauge-svg" viewBox="0 0 200 200">
                     <path class="gauge-bg" d="M 46.97 153.03 A 75 75 0 1 1 153.03 153.03"></path>
@@ -139,8 +136,8 @@
         <!-- CONFIGURATION WI-FI CLIENT -->
         <div id="wifi-view" class="view">
             <div class="telegram-config-block">
-                <h3>Réseau Wi-Fi de la maison</h3>
-                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;">Connectez le boîtier à Internet pour le contrôle à distance.</p>
+                <h3>Connexion au réseau local</h3>
+                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;">Reliez le boîtier à Internet pour activer le mode Cloud.</p>
                 
                 <button class="auth-btn" style="background-color: #0ea5e9; margin-bottom: 15px;" onclick="scannerWifi()"><i class="fa-solid fa-magnifying-glass"></i> Scanner les réseaux</button>
                 <div id="loaderWifi" style="display:none; color: var(--accent-blue); font-size: 14px; font-weight: bold; margin-bottom: 15px;">Recherche en cours (~5 sec)...</div>
@@ -150,10 +147,10 @@
                     <select id="wifi-ssid-select" class="auth-input"></select>
                 </div>
 
-                <input type="text" id="wifi-ssid-input" class="auth-input" placeholder="Ou tapez le nom du Wi-Fi (SSID)">
+                <input type="text" id="wifi-ssid-input" class="auth-input" placeholder="Ou tapez le nom (SSID)">
                 <input type="password" id="wifi-password-input" class="auth-input" placeholder="Mot de passe Wi-Fi">
                 <button class="auth-btn" onclick="sauvegarderWifiClient()"><i class="fa-solid fa-paper-plane"></i> Envoyer au Boîtier</button>
-                <p id="wifi-success-msg" style="color: var(--dot-green); display: none; font-size: 12px; margin-top: 10px;">Wi-Fi envoyé au coffret !</p>
+                <p id="wifi-success-msg" style="color: var(--dot-green); display: none; font-size: 12px; margin-top: 10px;">Identifiants envoyés !</p>
             </div>
         </div>
     </div>
@@ -163,10 +160,9 @@
     const SERVICE_UUID           = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
     const CHARACTERISTIC_UUID_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
     const CHARACTERISTIC_UUID_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
-
-    const FIREBASE_HOST = "https://ton-projet-rtdb.firebaseio.com/"; // Remplace par ton URL Firebase
+    const FIREBASE_HOST = "https://ton-projet-rtdb.firebaseio.com/"; 
+    
     let ID_COFFRET = ""; 
-
     let bleDevice = null;
     let rxCharacteristic = null;
     let txCharacteristic = null;
@@ -174,35 +170,54 @@
     let timerFirebase = null;
     let reseauxTrouves = [];
 
-    // --- GESTION DU TITRE DYNAMIQUE ---
     function rafraichirTitres() {
-        let modele = localStorage.getItem("tambour_modele") || "70";
-        let mode = localStorage.getItem("tambour_mode") || "G";
-        
-        document.getElementById('config-modele-select').value = modele;
-        document.getElementById('config-mode-select').value = mode;
+        try {
+            let modele = localStorage.getItem("tambour_modele") || "70";
+            let mode = localStorage.getItem("tambour_mode") || "G";
+            
+            let selModele = document.getElementById('config-modele-select');
+            if (selModele) selModele.value = modele;
+            
+            let selMode = document.getElementById('config-mode-select');
+            if (selMode) selMode.value = mode;
 
-        let activeView = document.querySelector('.sidebar-item.active').id;
-        if (activeView === 'tab-auto') {
-            document.getElementById('val-Mode').innerText = `Auto ${modele}${mode}`;
-        } else if (activeView === 'tab-manuel') {
-            document.getElementById('val-Mode').innerText = `Manu ${modele}${mode}`;
+            let activeViewElement = document.querySelector('.sidebar-item.active');
+            if (activeViewElement) {
+                let activeView = activeViewElement.id;
+                let titre = document.getElementById('val-Mode');
+                
+                if (titre) {
+                    if (activeView === 'tab-auto') {
+                        titre.innerText = `Auto ${modele}${mode}`;
+                    } else if (activeView === 'tab-manuel') {
+                        titre.innerText = `Manu ${modele}${mode}`;
+                    } else if (activeView === 'tab-config') {
+                        titre.innerText = `Paramètres Tambour`;
+                    } else if (activeView === 'tab-wifi') {
+                        titre.innerText = `Connexion Wi-Fi`;
+                    }
+                }
+            }
+        } catch (e) {
+            console.error(e);
         }
     }
 
     async function connecterBLE() {
-        modeActif = "BLE";
-        if (timerFirebase) clearInterval(timerFirebase);
-        misesAJourInterfaceBoutons("BLE");
-
         try {
+            modeActif = "BLE";
+            if (timerFirebase) clearInterval(timerFirebase);
+            misesAJourInterfaceBoutons("BLE");
+
             bleDevice = await navigator.bluetooth.requestDevice({
                 filters: [{ namePrefix: 'Tambour_' }],
                 optionalServices: [SERVICE_UUID]
             });
+            
             bleDevice.addEventListener('gattserverdisconnected', () => {
                 if (modeActif === "BLE") setTimeout(activerModeFirebase, 2000);
             });
+            
             const server = await bleDevice.gatt.connect();
             const service = await server.getPrimaryService(SERVICE_UUID);
             rxCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_RX);
@@ -225,7 +240,6 @@
                         }
                     }
                 }
-                // --- AJOUT : Réception des trames Wi-Fi (WNET) ---
                 else if (text.startsWith("WNET:")) {
                     let reseau = text.substring(5);
                     if (reseau === "END") {
@@ -241,7 +255,7 @@
             document.getElementById('status-indic').className = "conn-status ble";
             document.getElementById('status-indic').innerHTML = `<i class="fa-solid fa-bluetooth"></i> BLE Connecté`;
         } catch (error) {
-            console.warn("Connexion BLE annulée ou échouée", error);
+            console.warn("Erreur BLE:", error);
             activerModeFirebase();
         }
     }
@@ -253,10 +267,7 @@
         document.getElementById('status-indic').innerHTML = `<i class="fa-solid fa-cloud"></i> Cloud Actif`;
         if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect();
 
-        if (ID_COFFRET === "") {
-            alert("Aucun ID de coffret mémorisé. Connectez-vous d'abord une fois en Bluetooth à proximité du boîtier.");
-            return;
-        }
+        if (ID_COFFRET === "") return;
 
         lireDonneesFirebase();
         if (timerFirebase) clearInterval(timerFirebase);
@@ -278,41 +289,38 @@
                 }
             }
         } catch (error) {
-            console.error("Erreur lecture Firebase", error);
+            console.error("Erreur Firebase", error);
         }
     }
 
     async function envoyerCommande(action, valeur) {
         if (modeActif === "BLE" && rxCharacteristic) {
             let enc = new TextEncoder();
-            // Si la valeur est vide (ex: SCAN), on envoie juste SCAN: (géré par le C++)
             let trame = valeur === "" ? action : `${action}:${valeur}`;
             await rxCharacteristic.writeValue(enc.encode(trame));
         } else if (modeActif === "FIREBASE") {
-            if (!ID_COFFRET) { alert("ID du coffret inconnu !"); return; }
+            if (!ID_COFFRET) { alert("ID inconnu !"); return; }
             let url = `${FIREBASE_HOST}${ID_COFFRET}/commandes.json`;
             await fetch(url, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ [action]: valeur, timestamp: Date.now() }) });
         }
     }
 
-    // --- SAUVEGARDE TAMBOUR ---
     function sauvegarderTambour() {
         let modele = document.getElementById("config-modele-select").value;
         let mode = document.getElementById("config-mode-select").value;
         
         localStorage.setItem("tambour_modele", modele);
         localStorage.setItem("tambour_mode", mode);
-        rafraichirTitres(); // Met à jour le titre instantanément
+        rafraichirTitres();
         
         let modeInt = (mode === "G") ? 0 : 1;
         envoyerCommande("config_tambour", `${modele},${modeInt}`);
         alert(`Paramètres envoyés : ${modele}${mode}`);
     }
 
-    // --- GESTION DU SCAN WI-FI ---
     function scannerWifi() {
         if (modeActif !== "BLE" || !rxCharacteristic) {
-            alert("Connectez-vous d'abord en BLE pour scanner les réseaux !");
+            alert("Connectez-vous d'abord en BLE !");
             return;
         }
         reseauxTrouves = [];
@@ -335,12 +343,10 @@
             select.appendChild(opt);
         });
 
-        // Remplit le champ texte si l'utilisateur change la liste
         select.addEventListener('change', function() {
             document.getElementById('wifi-ssid-input').value = this.value;
         });
 
-        // Remplir automatiquement avec le premier de la liste
         if(reseauxTrouves.length > 0) {
             document.getElementById('wifi-ssid-input').value = reseauxTrouves[0];
         }
@@ -348,12 +354,12 @@
 
     function sauvegarderWifiClient() {
         if (modeActif !== "BLE" || !rxCharacteristic) {
-            alert("Vous devez être connecté en Bluetooth (à proximité du coffret) pour paramétrer le Wi-Fi.");
+            alert("Vous devez être connecté en Bluetooth !");
             return;
         }
         let ssid = document.getElementById('wifi-ssid-input').value;
         let pass = document.getElementById('wifi-password-input').value;
-        if(ssid === "") { alert("Veuillez entrer un nom de Wi-Fi"); return; }
+        if(ssid === "") { alert("Veuillez entrer un SSID"); return; }
         
         envoyerCommande("WIFI", ssid + "|" + pass);
         document.getElementById('wifi-success-msg').style.display = 'block';
@@ -362,3 +368,70 @@
 
     function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur) {
         mettreAJourJauge(temp, "");
+        mettreAJourJauge(temp, "-man");
+        gererBadgeDot('dot-niveau_securite', secu);
+        gererBadgeDot('dot-niveau_securite-man', secu);
+        gererBadgeDot('dot-niveau_lavage', lav);
+        gererBadgeDot('dot-niveau_lavage-man', lav);
+        gererBadgeDot('dot-couvercle', couv);
+        gererBadgeDot('dot-couvercle-man', couv);
+        gererBadgeDot('dot-pompe_uv', uv);
+        gererBadgeDot('dot-pompe_uv-man', uv);
+        document.getElementById('val-Nbre_lavage').innerText = compteur;
+    }
+
+    function gererBadgeDot(id, status) {
+        const dot = document.getElementById(id);
+        if (dot) dot.className = (status === 1) ? "dot green" : "dot red";
+    }
+
+    function mettreAJourJauge(temp, idCible) {
+        let elTemp = document.getElementById(`val-temperature${idCible}`);
+        let elCircle = document.getElementById(`gaugeCircle${idCible}`);
+        if(elTemp) elTemp.innerText = temp.toFixed(1);
+        if(elCircle) {
+            let pct = Math.min(Math.max((temp - 6.0) / 24.0, 0), 1);
+            elCircle.style.strokeDashoffset = 353.4 - (pct * 353.4);
+        }
+    }
+
+    function misesAJourInterfaceBoutons(mode) {
+        document.getElementById('btn-mode-ble').className = (mode === "BLE") ? "mode-btn active" : "mode-btn";
+        document.getElementById('btn-mode-cloud').className = (mode === "FIREBASE") ? "mode-btn active" : "mode-btn";
+    }
+
+    function initBoutonsManuels() {
+        const lier = (idBtn, nomAction) => {
+            const btn = document.getElementById(idBtn);
+            if (!btn) return;
+            const onDown = (e) => { e.preventDefault(); envoyerCommande(nomAction, 1); };
+            const onUp = (e) => { e.preventDefault(); envoyerCommande(nomAction, 0); };
+            btn.addEventListener('mousedown', onDown); btn.addEventListener('mouseup', onUp);
+            btn.addEventListener('touchstart', onDown, {passive: false}); btn.addEventListener('touchend', onUp, {passive: false});
+        };
+        lier('btn-man-rotation', 'Rotation');
+        lier('btn-man-lavage', 'Lavage');
+    }
+
+    function toggleSidebarMenu() { 
+        document.getElementById('sidebarMenu').classList.toggle('open'); 
+    }
+    
+    function switchView(target) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        
+        document.getElementById(`${target}-view`).classList.add('active');
+        document.getElementById(`tab-${target}`).classList.add('active');
+        
+        rafraichirTitres(); 
+        toggleSidebarMenu();
+    }
+    
+    window.addEventListener('load', () => { 
+        initBoutonsManuels(); 
+        rafraichirTitres(); 
+    });
+</script>
+</body>
+</html>
