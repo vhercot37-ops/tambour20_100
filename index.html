@@ -12,8 +12,11 @@
         :root { --bg-main: #1a2332; --bg-card: #151c26; --text-white: #ffffff; --text-gray: #94a3b8; --green-ok-bg: #142820; --green-border: #10b981; --dot-green: #10b981; --dot-red: #ef4444; --accent-purple: #9d4edd; --accent-blue: #3b82f6; }
         body { background-color: #0f141c; color: var(--text-white); font-family: sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .phone-container { width: 100%; max-width: 410px; background-color: var(--bg-main); border-radius: 25px; padding: 25px 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); box-sizing: border-box; display: flex; flex-direction: column; position: relative; overflow: hidden; min-height: 800px; }
+        
         header { text-align: center; margin-bottom: 20px; position: relative; display: flex; justify-content: center; align-items: center; min-height: 48px; padding: 0 45px 0 0; }
-        .main-title { font-size: 24px; font-weight: bold; margin: 0; width: 100%; text-align: center; color: var(--accent-blue); }
+        /* Modification du titre principal : plus grand et plus visible */
+        .main-title { font-size: 38px; font-weight: 900; margin: 0; width: 100%; text-align: center; color: var(--accent-blue); text-shadow: 0 2px 4px rgba(0,0,0,0.5); letter-spacing: 1px;}
+        
         .menu-toggle-btn { position: absolute; right: 0px; top: 50%; transform: translateY(-50%); background: #243145; border: 1px solid #334155; color: var(--text-white); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; }
         .sidebar-menu { position: absolute; top: 0; right: -250px; width: 230px; height: 100%; background-color: #121824; box-shadow: -5px 0 15px rgba(0,0,0,0.4); z-index: 99; transition: right 0.3s ease; padding: 70px 15px 20px 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
         .sidebar-menu.open { right: 0; }
@@ -21,6 +24,7 @@
         .sidebar-item.active { background: var(--accent-blue); border-color: var(--accent-blue); }
         .view { display: none; }
         .view.active { display: block; }
+        
         .gauge-section { display: flex; justify-content: center; align-items: center; margin-bottom: 15px; position: relative; height: 200px; margin-top: 15px; }
         .gauge-svg { width: 200px; height: 200px; }
         .gauge-bg { fill: none; stroke: #243145; stroke-width: 12; stroke-linecap: round; }
@@ -28,26 +32,45 @@
         .gauge-text { position: absolute; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .gauge-text .temp-val { font-size: 46px; font-weight: bold; display: block; }
         .gauge-text .temp-unit { color: var(--text-gray); font-size: 16px; display: block; margin-top: -5px; }
+        
         .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         .status-badge { background-color: var(--bg-card); padding: 12px 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; }
         .dot { width: 12px; height: 12px; border-radius: 50%; background-color: var(--text-gray); flex-shrink: 0; }
         .dot.green { background-color: var(--dot-green); box-shadow: 0 0 8px var(--dot-green); }
         .dot.red { background-color: var(--dot-red); box-shadow: 0 0 8px var(--dot-red); }
+        
         .wash-counter-block { background-color: var(--bg-card); border-radius: 15px; padding: 15px; text-align: center; margin: 25px 0; }
         .wash-counter-block .count { font-size: 36px; font-weight: bold; color: var(--accent-blue); margin-top: 5px; display: block; }
-        .btn-action-manuel { flex: 1; background-color: var(--accent-purple); color: white; border: none; padding: 20px; border-radius: 15px; font-weight: bold; font-size: 16px; text-transform: uppercase; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        
+        /* Boutons d'action manuels (Rotation / Lavage) avec effet actif */
+        .btn-action-manuel { flex: 1; background-color: var(--bg-card); border: 2px solid #334155; color: white; padding: 20px; border-radius: 15px; font-weight: bold; font-size: 16px; text-transform: uppercase; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.1s ease; user-select: none; -webkit-user-select: none; }
+        /* Style quand le bouton est enfoncé/actif */
+        .btn-action-manuel.active { background-color: var(--accent-blue); border-color: var(--accent-blue); transform: scale(0.95); box-shadow: inset 0 3px 6px rgba(0,0,0,0.4); }
+        /* Couleur spécifique pour Rotation actif */
+        #btn-man-rotation.active { background-color: var(--accent-purple); border-color: var(--accent-purple); }
+        
         .telegram-config-block { background-color: var(--bg-card); border-radius: 15px; padding: 20px; text-align: center; margin-top: 10px; }
         .auth-input { width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #334155; background-color: #1a2332; color: white; font-size: 15px; box-sizing: border-box; }
-        .auth-btn { width: 100%; background-color: var(--accent-blue); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        .conn-status { position: absolute; left: 15px; top: 15px; font-size: 12px; color: var(--dot-red); font-weight: bold; cursor: pointer; }
+        .auth-btn { width: 100%; background-color: var(--accent-blue); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: transform 0.1s; }
+        .auth-btn:active { transform: scale(0.98); }
+        
+        .conn-status { position: absolute; left: 15px; top: 15px; font-size: 12px; color: var(--dot-red); font-weight: bold; cursor: pointer; z-index: 10;}
         .conn-status.ble { color: var(--dot-green); }
         .conn-status.firebase { color: #f59e0b; }
+        
         .conn-bar { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .mode-btn { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #334155; background: #151c26; color: white; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center; margin-bottom: 10px;}
         .mode-btn.active { border-color: var(--accent-blue); background: #2563eb; }
+        
         .lang-btn { flex: 1; padding: 15px; background: #151c26; border: 1px solid #334155; color: white; font-weight: bold; border-radius: 10px; cursor: pointer;}
         .lang-btn.active { background: var(--accent-purple); border-color: var(--accent-purple); }
+        
         .chart-container { background: var(--bg-card); border-radius: 15px; padding: 15px; margin-bottom: 15px; }
+
+        /* Styles pour la barre de progression OTA */
+        .progress-container { width: 100%; background-color: #1a2332; border-radius: 8px; margin-top: 15px; overflow: hidden; display: none; border: 1px solid #334155;}
+        .progress-bar { height: 20px; background-color: var(--green-border); width: 0%; transition: width 0.3s; }
+        .progress-text { font-size: 12px; margin-top: 5px; color: var(--text-gray); }
     </style>
 </head>
 <body>
@@ -66,8 +89,10 @@
         <div class="sidebar-item" id="tab-manuel" onclick="switchView('manuel')"><i class="fa-solid fa-hand-pointer"></i> <span data-i18n="menu_manuel">Mode Manuel</span></div>
         <div class="sidebar-item" id="tab-config" onclick="switchView('config')"><i class="fa-solid fa-gear"></i> <span data-i18n="menu_config">Config. Tambour</span></div>
         <div class="sidebar-item" id="tab-wifi" onclick="switchView('wifi')"><i class="fa-solid fa-wifi"></i> <span data-i18n="menu_wifi">Config. Wi-Fi</span></div>
+        <div class="sidebar-item" id="tab-telegram" onclick="switchView('telegram')"><i class="fa-brands fa-telegram"></i> <span data-i18n="menu_telegram">Telegram</span></div>
         <div class="sidebar-item" id="tab-ble" onclick="switchView('ble')"><i class="fa-solid fa-bluetooth"></i> <span data-i18n="menu_ble">Connexion BLE</span></div>
         <div class="sidebar-item" id="tab-history" onclick="switchView('history')"><i class="fa-solid fa-chart-line"></i> <span data-i18n="menu_history">Historique</span></div>
+        <div class="sidebar-item" id="tab-ota" onclick="switchView('ota')"><i class="fa-solid fa-download"></i> <span data-i18n="menu_ota">Mise à jour</span></div>
         <div class="sidebar-item" id="tab-lang" onclick="switchView('lang')"><i class="fa-solid fa-language"></i> <span data-i18n="menu_lang">Langue / Taal</span></div>
     </div>
 
@@ -106,8 +131,9 @@
                 <div class="status-badge"><span data-i18n="pompe">Pompe UV</span><div class="dot" id="dot-pompe_uv-man"></div></div>
             </div>
             <div style="display: flex; gap: 15px; margin-top: 15px;">
+                <!-- Boutons avec style modifié pour le feedback -->
                 <button id="btn-man-rotation" class="btn-action-manuel"><i class="fa-solid fa-rotate"></i> <span data-i18n="btn_rot">Rotation</span></button>
-                <button id="btn-man-lavage" class="btn-action-manuel" style="background-color: #0ea5e9;"><i class="fa-solid fa-water"></i> <span data-i18n="btn_lav">Lavage</span></button>
+                <button id="btn-man-lavage" class="btn-action-manuel"><i class="fa-solid fa-water"></i> <span data-i18n="btn_lav">Lavage</span></button>
             </div>
         </div>
 
@@ -150,6 +176,21 @@
             </div>
         </div>
 
+        <!-- CONFIGURATION TELEGRAM -->
+        <div id="telegram-view" class="view">
+            <div class="telegram-config-block">
+                <h3 data-i18n="titre_tele">Alertes Telegram</h3>
+                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;" data-i18n="desc_tele">Recevez les alarmes directement sur votre smartphone.</p>
+                <input type="text" id="tele-token-input" class="auth-input" placeholder="Bot Token" data-i18n-ph="ph_token">
+                <input type="text" id="tele-chatid-input" class="auth-input" placeholder="Chat ID" data-i18n-ph="ph_chatid">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin:15px 0;">
+                    <span style="font-size:14px; font-weight:bold;" data-i18n="lbl_tele_actif">Activer les alertes :</span>
+                    <input type="checkbox" id="tele-active-check" style="transform: scale(1.5);">
+                </div>
+                <button class="auth-btn" onclick="sauvegarderTelegram()"><i class="fa-solid fa-save"></i> <span data-i18n="btn_save_tele">Enregistrer</span></button>
+            </div>
+        </div>
+
         <!-- ONGLET CONNEXION BLE & CLOUD -->
         <div id="ble-view" class="view">
             <div class="telegram-config-block">
@@ -158,6 +199,28 @@
                     <button id="btn-mode-ble" class="mode-btn active" onclick="connecterBLE()"><i class="fa-solid fa-bluetooth"></i> <span data-i18n="btn_ble">Connexion BLE (Locale)</span></button>
                     <button id="btn-mode-cloud" class="mode-btn" onclick="activerModeFirebase()"><i class="fa-solid fa-cloud"></i> <span data-i18n="btn_cloud">Mode Cloud (Distance)</span></button>
                 </div>
+            </div>
+        </div>
+
+        <!-- ONGLET MISE A JOUR (OTA) -->
+        <div id="ota-view" class="view">
+            <div class="telegram-config-block">
+                <h3 data-i18n="titre_ota">Mise à jour du système</h3>
+                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;" data-i18n="desc_ota">Vérifiez si une nouvelle version du logiciel est disponible pour le coffret.</p>
+                
+                <div style="background:#1a2332; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #334155;">
+                    <p style="margin:0 0 5px 0; font-size:14px;"><span data-i18n="lbl_ver_act">Version actuelle :</span> <strong id="lbl-version-actuelle" style="color:var(--text-white);">v1.0.0</strong></p>
+                    <p style="margin:0; font-size:14px;"><span data-i18n="lbl_ver_dispo">Version dispo. :</span> <strong id="lbl-version-dispo" style="color:var(--text-gray);">Recherche...</strong></p>
+                </div>
+
+                <button class="auth-btn" id="btn-check-ota" style="background-color: #0ea5e9; margin-bottom:10px;" onclick="verifierMaj()"><i class="fa-solid fa-arrows-rotate"></i> <span data-i18n="btn_check_ota">Vérifier</span></button>
+                
+                <button class="auth-btn" id="btn-start-ota" style="background-color: var(--green-border); display:none;" onclick="lancerMaj()"><i class="fa-solid fa-download"></i> <span data-i18n="btn_start_ota">Installer la mise à jour</span></button>
+
+                <div class="progress-container" id="ota-progress-container">
+                    <div class="progress-bar" id="ota-progress-bar"></div>
+                </div>
+                <div class="progress-text" id="ota-progress-text" style="display:none;">0%</div>
             </div>
         </div>
 
@@ -190,23 +253,29 @@
     const dict = {
         fr: {
             status_wait: "Attente...", menu_auto: "Mode Auto", menu_manuel: "Mode Manuel", menu_config: "Config. Tambour",
-            menu_wifi: "Config. Wi-Fi", menu_ble: "Connexion BLE", menu_history: "Historique", menu_lang: "Langue / Taal",
+            menu_wifi: "Config. Wi-Fi", menu_telegram: "Telegram", menu_ble: "Connexion BLE", menu_history: "Historique", 
+            menu_ota: "Mise à jour", menu_lang: "Langue / Taal",
             niv_secu: "Niveau Sécurité", niv_lav: "Niveau Lavage", couv: "Couvercle", pompe: "Pompe UV", nbre_lav: "Nombre de Lavages",
             btn_rot: "Rotation", btn_lav: "Lavage", titre_config: "Paramètres du Tambour", lbl_modele: "Modèle :", lbl_mode: "Mode :",
-            opt_grav: "Gravitaire (G)", opt_pomp: "Pompage (P)", btn_save_tamb: "Enregistrer Tambour", titre_wifi: "Connexion Wi-Fi",
+            opt_grav: "Gravitaire (G)", opt_pomp: "Pompage (P)", btn_save_tamb: "Enregistrer", titre_wifi: "Connexion Wi-Fi",
             btn_scan: "Scanner les réseaux", lbl_sel_wifi: "Sélectionnez le réseau :", ph_ssid: "Nom du Wi-Fi (SSID)", ph_pass: "Mot de passe",
             btn_send_wifi: "Envoyer au Boîtier", titre_conn: "Type de Connexion", btn_ble: "Connexion BLE (Locale)", btn_cloud: "Mode Cloud (Distance)",
-            titre_hist: "Historique (15 jours)", titre_lang: "Choisissez votre langue"
+            titre_hist: "Historique (15 jours)", titre_lang: "Choisissez votre langue",
+            titre_tele: "Alertes Telegram", desc_tele: "Recevez les alarmes directement sur votre smartphone.", ph_token: "Bot Token", ph_chatid: "Chat ID", lbl_tele_actif: "Activer les alertes :", btn_save_tele: "Enregistrer Telegram",
+            titre_ota: "Mise à jour du système", desc_ota: "Vérifiez si une nouvelle version du logiciel est disponible pour le coffret.", lbl_ver_act: "Version actuelle :", lbl_ver_dispo: "Version dispo. :", btn_check_ota: "Vérifier", btn_start_ota: "Installer la mise à jour"
         },
         nl: {
             status_wait: "Wachten...", menu_auto: "Auto Modus", menu_manuel: "Handmatig", menu_config: "Trommel Config",
-            menu_wifi: "Wi-Fi Config", menu_ble: "BLE Verbinding", menu_history: "Geschiedenis", menu_lang: "Langue / Taal",
+            menu_wifi: "Wi-Fi Config", menu_telegram: "Telegram", menu_ble: "BLE Verbinding", menu_history: "Geschiedenis", 
+            menu_ota: "Update", menu_lang: "Langue / Taal",
             niv_secu: "Beveiligingsniveau", niv_lav: "Spoelniveau", couv: "Deksel", pompe: "UV Pomp", nbre_lav: "Aantal Spoelingen",
             btn_rot: "Rotatie", btn_lav: "Spoelen", titre_config: "Trommel Instellingen", lbl_modele: "Model:", lbl_mode: "Modus:",
             opt_grav: "Zwaartekracht (G)", opt_pomp: "Pomp (P)", btn_save_tamb: "Opslaan", titre_wifi: "Wi-Fi Instellen",
             btn_scan: "Netwerken Scannen", lbl_sel_wifi: "Selecteer netwerk:", ph_ssid: "Wi-Fi Naam (SSID)", ph_pass: "Wachtwoord",
             btn_send_wifi: "Verzenden naar controller", titre_conn: "Verbindingstype", btn_ble: "BLE Verbinding (Lokaal)", btn_cloud: "Cloud Modus (Op afstand)",
-            titre_hist: "Geschiedenis (15 dagen)", titre_lang: "Kies uw taal"
+            titre_hist: "Geschiedenis (15 dagen)", titre_lang: "Kies uw taal",
+            titre_tele: "Telegram Meldingen", desc_tele: "Ontvang alarmen direct op uw smartphone.", ph_token: "Bot Token", ph_chatid: "Chat ID", lbl_tele_actif: "Meldingen activeren:", btn_save_tele: "Telegram Opslaan",
+            titre_ota: "Systeemupdate", desc_ota: "Controleer of er een nieuwe softwareversie beschikbaar is.", lbl_ver_act: "Huidige versie:", lbl_ver_dispo: "Beschikbare versie:", btn_check_ota: "Controleren", btn_start_ota: "Update installeren"
         }
     };
 
@@ -230,7 +299,7 @@
         document.getElementById('btn-nl').className = (lang === 'nl') ? 'lang-btn active' : 'lang-btn';
         
         rafraichirTitres();
-        updateChartsText(); // Traduire les légendes des graphiques
+        updateChartsText(); 
     }
 
     // --- GRAPHIQUES HISTORIQUE ---
@@ -238,7 +307,6 @@
     let chartWashInstance = null;
     
     function initCharts() {
-        // Données fictives pour la démonstration (15 jours)
         const labels = ["J-14","J-13","J-12","J-11","J-10","J-9","J-8","J-7","J-6","J-5","J-4","J-3","J-2","J-1","Auj."];
         const dataTemp = [12.1, 12.5, 12.2, 13.0, 13.5, 13.1, 12.8, 14.2, 14.5, 15.1, 15.0, 14.8, 14.2, 13.9, 14.1];
         const dataWash = [22, 24, 21, 19, 25, 28, 30, 22, 20, 18, 19, 21, 23, 22, 20];
@@ -272,7 +340,7 @@
     const SERVICE_UUID           = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
     const CHARACTERISTIC_UUID_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
     const CHARACTERISTIC_UUID_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
-    const FIREBASE_HOST = "https://ton-projet-rtdb.firebaseio.com/"; 
+    const FIREBASE_HOST = "https://ton-projet-rtdb.firebaseio.com/"; // Remplace par ton URL
     
     let ID_COFFRET = ""; 
     let bleDevice = null;
@@ -281,6 +349,10 @@
     let modeActif = "BLE";
     let timerFirebase = null;
     let reseauxTrouves = [];
+
+    // --- OTA VARIABLES ---
+    let firmwareVersionActuelle = "v1.0.0"; // Sera remplacée par la vraie valeur lue depuis l'ESP
+    let firmwareUrlMaj = "";
 
     function rafraichirTitres() {
         let modele = localStorage.getItem("tambour_modele") || "70";
@@ -295,8 +367,10 @@
         else if (activeView === 'tab-manuel') titre.innerText = (currentLang==='fr') ? `Manu ${modele}${mode}` : `Hand ${modele}${mode}`;
         else if (activeView === 'tab-config') titre.innerText = dict[currentLang]['menu_config'];
         else if (activeView === 'tab-wifi') titre.innerText = dict[currentLang]['menu_wifi'];
+        else if (activeView === 'tab-telegram') titre.innerText = dict[currentLang]['menu_telegram'];
         else if (activeView === 'tab-ble') titre.innerText = dict[currentLang]['menu_ble'];
         else if (activeView === 'tab-history') titre.innerText = dict[currentLang]['menu_history'];
+        else if (activeView === 'tab-ota') titre.innerText = dict[currentLang]['menu_ota'];
         else if (activeView === 'tab-lang') titre.innerText = dict[currentLang]['menu_lang'];
     }
 
@@ -321,13 +395,8 @@
         
         rafraichirTitres(); 
         toggleSidebarMenu();
-
-        // 🔴 ENVOI DE LA COMMANDE PAGE POUR LA LED RGB ESP32
         envoyerCommande("PAGE", target.toUpperCase());
     }
-
-    // Le reste des fonctions techniques (BLE, Firebase, Scanner Wi-Fi) restent inchangées 
-    // par rapport à la version précédente qui fonctionne.
 
     async function connecterBLE() {
         try {
@@ -352,17 +421,28 @@
                         ID_COFFRET = parts[0].replace("ID:", ""); 
                         let d = parts[1].split(",");
                         if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5]);
+                        
+                        // Récupération version firmware si présente (ex: ID:Coffret_123,D:...,V:1.0.1)
+                        let vIndex = parts[1].indexOf(",V:");
+                        if(vIndex !== -1) {
+                            firmwareVersionActuelle = parts[1].substring(vIndex + 3);
+                            document.getElementById('lbl-version-actuelle').innerText = firmwareVersionActuelle;
+                        }
                     }
                 } else if (text.startsWith("WNET:")) {
                     let reseau = text.substring(5);
                     if (reseau === "END") afficherListeWifi();
                     else if (reseau !== "NONE") reseauxTrouves.push(reseau);
+                } else if (text.startsWith("OTA:")) {
+                    // Maj de la barre de progression BLE (ex: OTA:45)
+                    let pct = parseInt(text.substring(4));
+                    document.getElementById('ota-progress-bar').style.width = pct + '%';
+                    document.getElementById('ota-progress-text').innerText = pct + '%';
+                    if (pct === 100) setTimeout(() => alert("Mise à jour terminée ! Le boîtier redémarre."), 500);
                 }
             });
             document.getElementById('status-indic').className = "conn-status ble";
             document.getElementById('status-indic').innerHTML = `<i class="fa-solid fa-bluetooth"></i> BLE`;
-            
-            // On envoie la commande de la page actuelle dès la connexion
             envoyerCommande("PAGE", document.querySelector('.sidebar-item.active').id.replace('tab-', '').toUpperCase());
         } catch (error) { console.warn(error); activerModeFirebase(); }
     }
@@ -374,6 +454,13 @@
         document.getElementById('status-indic').className = "conn-status firebase";
         document.getElementById('status-indic').innerHTML = `<i class="fa-solid fa-cloud"></i> Cloud`;
         if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect();
+        
+        // Lire la version actuelle si déjà connue dans la DB
+        if(ID_COFFRET) {
+            fetch(`${FIREBASE_HOST}${ID_COFFRET}/version.json`)
+            .then(r => r.json())
+            .then(v => { if(v) { firmwareVersionActuelle = v; document.getElementById('lbl-version-actuelle').innerText = v; }});
+        }
     }
 
     function sauvegarderTambour() {
@@ -384,8 +471,70 @@
         envoyerCommande("config_tambour", `${modele},${(mode === "G") ? 0 : 1}`);
     }
 
+    function sauvegarderTelegram() {
+        let token = document.getElementById("tele-token-input").value;
+        let chatid = document.getElementById("tele-chatid-input").value;
+        let actif = document.getElementById("tele-active-check").checked ? 1 : 0;
+        envoyerCommande("config_tele", `${token}|${chatid}|${actif}`);
+        alert("Configuration Telegram envoyée !");
+    }
+
     function scannerWifi() { envoyerCommande("SCAN", ""); }
     function sauvegarderWifiClient() { envoyerCommande("WIFI", document.getElementById('wifi-ssid-input').value + "|" + document.getElementById('wifi-password-input').value); }
+
+    // --- GESTION OTA ---
+    async function verifierMaj() {
+        document.getElementById('lbl-version-dispo').innerText = "Recherche...";
+        document.getElementById('lbl-version-dispo').style.color = "var(--text-gray)";
+        document.getElementById('btn-start-ota').style.display = 'none';
+
+        try {
+            // Lecture du noeud centralisé des firmwares sur Firebase
+            let url = `${FIREBASE_HOST}firmware_latest.json`;
+            let response = await fetch(url);
+            if(response.ok) {
+                let data = await response.json();
+                if(data && data.version && data.url) {
+                    document.getElementById('lbl-version-dispo').innerText = data.version;
+                    
+                    if(data.version !== firmwareVersionActuelle) {
+                        document.getElementById('lbl-version-dispo').style.color = "var(--dot-green)";
+                        document.getElementById('btn-start-ota').style.display = 'block';
+                        firmwareUrlMaj = data.url;
+                    } else {
+                        document.getElementById('lbl-version-dispo').style.color = "var(--text-gray)";
+                        document.getElementById('lbl-version-dispo').innerText += " (À jour)";
+                    }
+                } else {
+                    document.getElementById('lbl-version-dispo').innerText = "Aucune version trouvée.";
+                }
+            }
+        } catch(e) {
+            document.getElementById('lbl-version-dispo').innerText = "Erreur de connexion";
+        }
+    }
+
+    function lancerMaj() {
+        if(!confirm("Le boîtier va télécharger la mise à jour et redémarrer. Cette opération peut prendre 1 à 2 minutes. Voulez-vous continuer ?")) return;
+        
+        document.getElementById('ota-progress-container').style.display = 'block';
+        document.getElementById('ota-progress-text').style.display = 'block';
+        document.getElementById('btn-start-ota').style.display = 'none';
+        
+        envoyerCommande("UPDATE_OTA", firmwareUrlMaj);
+        
+        // Simuler une progression si on est en Firebase (car pas de retour BLE temps réel)
+        if(modeActif === "FIREBASE") {
+            let pct = 0;
+            let simInt = setInterval(() => {
+                pct += 5;
+                if(pct > 95) clearInterval(simInt);
+                document.getElementById('ota-progress-bar').style.width = pct + '%';
+                document.getElementById('ota-progress-text').innerText = pct + '%';
+            }, 1000);
+        }
+    }
+
 
     function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur) {
         document.getElementById('val-temperature').innerText = temp.toFixed(1);
@@ -405,10 +554,22 @@
         const lier = (idBtn, nomAction) => {
             const btn = document.getElementById(idBtn);
             if (!btn) return;
-            const onDown = (e) => { e.preventDefault(); envoyerCommande(nomAction, 1); };
-            const onUp = (e) => { e.preventDefault(); envoyerCommande(nomAction, 0); };
+            const onDown = (e) => { 
+                e.preventDefault(); 
+                btn.classList.add('active'); // Ajoute la classe active pour le CSS
+                envoyerCommande(nomAction, 1); 
+            };
+            const onUp = (e) => { 
+                e.preventDefault(); 
+                btn.classList.remove('active'); // Retire la classe
+                envoyerCommande(nomAction, 0); 
+            };
             btn.addEventListener('mousedown', onDown); btn.addEventListener('mouseup', onUp);
-            btn.addEventListener('touchstart', onDown, {passive: false}); btn.addEventListener('touchend', onUp, {passive: false});
+            btn.addEventListener('mouseleave', onUp); // Sécurité si la souris sort du bouton
+            
+            btn.addEventListener('touchstart', onDown, {passive: false}); 
+            btn.addEventListener('touchend', onUp, {passive: false});
+            btn.addEventListener('touchcancel', onUp, {passive: false});
         };
         lier('btn-man-rotation', 'Rotation'); lier('btn-man-lavage', 'Lavage');
     }
@@ -417,8 +578,8 @@
     
     window.addEventListener('load', () => { 
         initBoutonsManuels(); 
-        setLang(currentLang); // Applique la langue au démarrage
-        initCharts(); // Dessine les graphiques
+        setLang(currentLang); 
+        initCharts(); 
     });
 </script>
 </body>
