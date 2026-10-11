@@ -69,6 +69,10 @@
         .progress-text { font-size: 12px; margin-top: 5px; color: var(--text-gray); }
 
         .alarm-banner { background-color: #dc2626; color: white; padding: 15px; border-radius: 12px; font-weight: bold; text-align: center; margin-bottom: 15px; font-size: 18px; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4); border: 2px solid #ef4444; }
+        
+        /* Conteneur pour l'œil du mot de passe */
+        .pwd-container { position: relative; width: 100%; }
+        .pwd-icon { position: absolute; right: 15px; top: 18px; cursor: pointer; color: var(--text-gray); }
     </style>
 </head>
 <body>
@@ -180,15 +184,41 @@
         <div id="wifi-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_wifi">Connexion Wi-Fi</h3>
-                <button class="auth-btn" style="background-color: #0ea5e9; margin-bottom: 15px;" onclick="scannerWifi()"><i class="fa-solid fa-magnifying-glass"></i> <span data-i18n="btn_scan">Scanner</span></button>
-                <div id="loaderWifi" style="display:none; color: var(--accent-blue); font-size: 14px; margin-bottom: 15px;">...</div>
+                
+                <!-- Bloc d'état du Wi-Fi -->
+                <div style="background:#1a2332; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #334155;">
+                    <p style="margin:0 0 5px 0; font-size:14px; text-align: left;">
+                        <span data-i18n="lbl_wifi_etat">État Wi-Fi :</span> 
+                        <strong id="lbl-wifi-status" style="color:var(--dot-red);">Déconnecté</strong>
+                    </p>
+                    <p style="margin:0; font-size:14px; text-align: left;">
+                        <span data-i18n="lbl_wifi_signal">Signal (RSSI) :</span> 
+                        <strong id="lbl-wifi-rssi" style="color:var(--text-gray);">-- dBm</strong>
+                    </p>
+                </div>
+
+                <button class="auth-btn" id="btn-scanner" style="background-color: #0ea5e9; margin-bottom: 15px;" onclick="scannerWifi()">
+                    <i class="fa-solid fa-magnifying-glass" id="icon-scanner"></i> <span data-i18n="btn_scan">Scanner</span>
+                </button>
+                
+                <!-- Loader plus joli -->
+                <div id="loaderWifi" style="display:none; color: var(--accent-blue); font-size: 15px; margin-bottom: 15px; font-weight: bold;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> <span data-i18n="lbl_scanning">Recherche en cours...</span>
+                </div>
                 
                 <div id="zoneWifiSelect" style="display:none; text-align: left;">
                     <label class="auth-input" style="border:none; padding:0;" data-i18n="lbl_sel_wifi">Sélection :</label>
                     <select id="wifi-ssid-select" class="auth-input"></select>
                 </div>
+                
                 <input type="text" id="wifi-ssid-input" class="auth-input" placeholder="SSID" data-i18n-ph="ph_ssid">
-                <input type="password" id="wifi-password-input" class="auth-input" placeholder="Mot de passe" data-i18n-ph="ph_pass">
+                
+                <!-- Mot de passe avec œil -->
+                <div class="pwd-container">
+                    <input type="password" id="wifi-password-input" class="auth-input" placeholder="Mot de passe" data-i18n-ph="ph_pass">
+                    <i class="fa-solid fa-eye pwd-icon" id="togglePasswordIcon" onclick="togglePasswordVis()"></i>
+                </div>
+
                 <button class="auth-btn" onclick="sauvegarderWifiClient()"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="btn_send_wifi">Envoyer</span></button>
             </div>
         </div>
@@ -264,13 +294,14 @@
             niv_secu: "Niveau Sécurité", niv_lav: "Niveau Lavage", couv: "Couvercle", pompe: "Pompe UV", nbre_lav: "Nombre de Lavages",
             btn_rot: "Rotation", btn_lav: "Lavage", titre_config: "Paramètres du Tambour", lbl_modele: "Modèle :", lbl_mode: "Mode :",
             opt_grav: "Gravitaire (G)", opt_pomp: "Pompage (P)", btn_save_tamb: "Enregistrer", titre_wifi: "Connexion Wi-Fi",
-            btn_scan: "Scanner les réseaux", lbl_sel_wifi: "Sélectionnez le réseau :", ph_ssid: "Nom du Wi-Fi (SSID)", ph_pass: "Mot de passe",
+            btn_scan: "Scanner", lbl_sel_wifi: "Sélectionnez le réseau :", ph_ssid: "Nom du Wi-Fi (SSID)", ph_pass: "Mot de passe",
             btn_send_wifi: "Envoyer au Boîtier", titre_conn: "Type de Connexion", btn_ble: "Connexion BLE (Locale)", btn_cloud: "Mode Cloud (Distance)",
             titre_hist: "Historique (15 jours)", titre_lang: "Choisissez votre langue",
             titre_tele: "Alertes Telegram", desc_tele: "Recevez les alarmes directement sur votre smartphone.", ph_token: "Bot Token", ph_chatid: "Chat ID", lbl_tele_actif: "Activer les alertes :", btn_save_tele: "Enregistrer Telegram",
             titre_ota: "Mise à jour du système", desc_ota: "Vérifiez si une nouvelle version du logiciel est disponible pour le coffret.", lbl_ver_act: "Version actuelle :", lbl_ver_dispo: "Version dispo. :", btn_check_ota: "Vérifier", btn_start_ota: "Installer la mise à jour",
             titre_alarme: "ÉTAT D'ALARME", btn_reset: "RESET ALARME",
-            al_eau: "ALARME : NIVEAU D'EAU", al_couv: "ALARME : COUVERCLE OUVERT", al_15: "ALARME : 15 LAVAGES CONSÉCUTIFS", al_inc: "ALARME INCONNUE"
+            al_eau: "ALARME : NIVEAU D'EAU", al_couv: "ALARME : COUVERCLE OUVERT", al_15: "ALARME : 15 LAVAGES CONSÉCUTIFS", al_inc: "ALARME INCONNUE",
+            lbl_scanning: "Recherche en cours...", lbl_wifi_etat: "État Wi-Fi :", lbl_wifi_signal: "Signal (RSSI) :", wifi_conn: "Connecté", wifi_dec: "Déconnecté"
         },
         nl: {
             status_wait: "Wachten...", menu_auto: "Auto Modus", menu_manuel: "Handmatig", menu_config: "Trommel Config",
@@ -279,13 +310,14 @@
             niv_secu: "Beveiligingsniveau", niv_lav: "Spoelniveau", couv: "Deksel", pompe: "UV Pomp", nbre_lav: "Aantal Spoelingen",
             btn_rot: "Rotatie", btn_lav: "Spoelen", titre_config: "Trommel Instellingen", lbl_modele: "Model:", lbl_mode: "Modus:",
             opt_grav: "Zwaartekracht (G)", opt_pomp: "Pomp (P)", btn_save_tamb: "Opslaan", titre_wifi: "Wi-Fi Instellen",
-            btn_scan: "Netwerken Scannen", lbl_sel_wifi: "Selecteer netwerk:", ph_ssid: "Wi-Fi Naam (SSID)", ph_pass: "Wachtwoord",
+            btn_scan: "Scannen", lbl_sel_wifi: "Selecteer netwerk:", ph_ssid: "Wi-Fi Naam (SSID)", ph_pass: "Wachtwoord",
             btn_send_wifi: "Verzenden naar controller", titre_conn: "Verbindingstype", btn_ble: "BLE Verbinding (Lokaal)", btn_cloud: "Cloud Modus (Op afstand)",
             titre_hist: "Geschiedenis (15 dagen)", titre_lang: "Kies uw taal",
             titre_tele: "Telegram Meldingen", desc_tele: "Ontvang alarmen direct op uw smartphone.", ph_token: "Bot Token", ph_chatid: "Chat ID", lbl_tele_actif: "Meldingen activeren:", btn_save_tele: "Telegram Opslaan",
             titre_ota: "Systeemupdate", desc_ota: "Controleer of er een nieuwe softwareversie beschikbaar is.", lbl_ver_act: "Huidige versie:", lbl_ver_dispo: "Beschikbare versie:", btn_check_ota: "Controleren", btn_start_ota: "Update installeren",
             titre_alarme: "ALARM STATUS", btn_reset: "RESET ALARM",
-            al_eau: "ALARM: WATERNIVEAU", al_couv: "ALARM: DEKSEL OPEN", al_15: "ALARM: 15 SPOELINGEN", al_inc: "ONBEKEND ALARM"
+            al_eau: "ALARM: WATERNIVEAU", al_couv: "ALARM: DEKSEL OPEN", al_15: "ALARM: 15 SPOELINGEN", al_inc: "ONBEKEND ALARM",
+            lbl_scanning: "Bezig met scannen...", lbl_wifi_etat: "Wi-Fi Status:", lbl_wifi_signal: "Signaal (RSSI):", wifi_conn: "Verbonden", wifi_dec: "Niet verbonden"
         }
     };
 
@@ -396,7 +428,6 @@
 
     // --- FONCTION D'ADAPTATION DE L'INTERFACE (BLE vs FIREBASE) ---
     function adapterInterfaceSelonMode() {
-        // En mode Firebase, on cache les onglets "dangereux" du menu latéral
         let styleDisplay = (modeActif === "FIREBASE") ? "none" : "flex";
         
         document.getElementById('tab-manuel').style.display = styleDisplay;
@@ -405,7 +436,6 @@
         document.getElementById('tab-telegram').style.display = styleDisplay;
         document.getElementById('tab-ota').style.display = styleDisplay;
         
-        // Si on passe en Cloud alors qu'on était sur un écran caché, on force le retour en AUTO
         if (modeActif === "FIREBASE") {
             let activeView = document.querySelector('.view.active').id;
             if (['manuel-view', 'config-view', 'wifi-view', 'telegram-view', 'ota-view'].includes(activeView)) {
@@ -420,20 +450,39 @@
         if (dot) dot.className = (status === 1 || status === true) ? "dot green" : "dot red";
     }
 
-    function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur, alarme_code = 0) {
+    // MISE A JOUR: On ajoute wifi_stat et wifi_rssi à la réception
+    function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur, alarme_code = 0, wifi_stat = 0, wifi_rssi = 0) {
         try {
             ['val-temperature', 'val-temperature-man', 'val-temperature-al'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = temp.toFixed(1); });
             
             let pct = Math.min(Math.max((temp - 6.0) / 24.0, 0), 1);
             ['gaugeCircle', 'gaugeCircle-man', 'gaugeCircle-al'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).style.strokeDashoffset = 353.4 - (pct * 353.4); });
             
-            // Inversion de logique (!couv) pour l'affichage visuel
             gererBadgeDot('dot-niveau_securite', secu); gererBadgeDot('dot-niveau_securite-man', secu); gererBadgeDot('dot-niveau_securite-al', secu);
             gererBadgeDot('dot-niveau_lavage', lav); gererBadgeDot('dot-niveau_lavage-man', lav); gererBadgeDot('dot-niveau_lavage-al', lav);
             gererBadgeDot('dot-couvercle', !couv); gererBadgeDot('dot-couvercle-man', !couv); gererBadgeDot('dot-couvercle-al', !couv);
             gererBadgeDot('dot-pompe_uv', uv); gererBadgeDot('dot-pompe_uv-man', uv); gererBadgeDot('dot-pompe_uv-al', uv);
             
             if(document.getElementById('val-Nbre_lavage')) document.getElementById('val-Nbre_lavage').innerText = compteur;
+
+            // --- NOUVEAU : Affichage de l'état Wi-Fi
+            let elWifiStatus = document.getElementById('lbl-wifi-status');
+            let elWifiRssi = document.getElementById('lbl-wifi-rssi');
+            if (elWifiStatus && elWifiRssi) {
+                if (wifi_stat === 1) {
+                    elWifiStatus.innerText = dict[currentLang]['wifi_conn'] || "Connecté";
+                    elWifiStatus.style.color = "var(--dot-green)";
+                    elWifiRssi.innerText = wifi_rssi + " dBm";
+                    if(wifi_rssi > -60) elWifiRssi.style.color = "var(--dot-green)";
+                    else if(wifi_rssi > -80) elWifiRssi.style.color = "#f59e0b";
+                    else elWifiRssi.style.color = "var(--dot-red)";
+                } else {
+                    elWifiStatus.innerText = dict[currentLang]['wifi_dec'] || "Déconnecté";
+                    elWifiStatus.style.color = "var(--dot-red)";
+                    elWifiRssi.innerText = "-- dBm";
+                    elWifiRssi.style.color = "var(--text-gray)";
+                }
+            }
 
             // GESTION BASCULE AUTOMATIQUE ECRAN ALARME + BLOCAGE MENU
             const btnMenu = document.querySelector('.menu-toggle-btn');
@@ -460,13 +509,10 @@
 
     function resetAlarme() {
         envoyerCommande("RESET_ALARM", "1");
-        
-        // Comportement différent selon le mode (BLE ou FIREBASE)
         if (modeActif === "BLE") {
-            switchView("manuel"); // En local, on passe en manuel pour vérifier le tambour
+            switchView("manuel"); 
         } else {
-            switchView("auto");   // À distance, on repasse en monitoring Auto (écran manuel caché)
-            // On retire la protection visuelle manuellement pour l'UI en attendant le retour Firebase
+            switchView("auto");  
             document.querySelector('.menu-toggle-btn').classList.remove('disabled');
         }
     }
@@ -481,7 +527,8 @@
                 if (data) {
                     afficherMaitresDonnees(
                         data.temperature || 0, data.niveau_secu || 0, data.niveau_lav || 0,
-                        data.couvercle || 0, data.pompe_uv || 0, data.compteur_lavage || 0, data.alarme || 0
+                        data.couvercle || 0, data.pompe_uv || 0, data.compteur_lavage || 0, data.alarme || 0,
+                        data.wifi_stat || 0, data.wifi_rssi || 0 // Ajout pour Firebase
                     );
                 }
             }
@@ -491,7 +538,7 @@
     async function connecterBLE() {
         try {
             modeActif = "BLE";
-            adapterInterfaceSelonMode(); // Réaffiche les menus
+            adapterInterfaceSelonMode(); 
             if (timerFirebase) clearInterval(timerFirebase);
             document.getElementById('btn-mode-ble').className = "mode-btn active";
             document.getElementById('btn-mode-cloud').className = "mode-btn";
@@ -511,8 +558,12 @@
                     if (parts.length >= 2) {
                         ID_COFFRET = parts[0].replace("ID:", ""); 
                         let d = parts[1].split(",");
+                        
                         let alCode = (d.length > 6) ? parseInt(d[6]) : 0;
-                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], alCode);
+                        let wStat = (d.length > 7) ? parseInt(d[7]) : 0; // Lecture état Wi-Fi
+                        let wRssi = (d.length > 8) ? parseInt(d[8]) : 0; // Lecture signal Wi-Fi
+                        
+                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], alCode, wStat, wRssi);
                         
                         let vIndex = parts[1].indexOf(",V:");
                         if(vIndex !== -1) {
@@ -534,7 +585,7 @@
 
     function activerModeFirebase() {
         modeActif = "FIREBASE";
-        adapterInterfaceSelonMode(); // Cache les menus sensibles
+        adapterInterfaceSelonMode(); 
         
         document.getElementById('btn-mode-ble').className = "mode-btn";
         document.getElementById('btn-mode-cloud').className = "mode-btn active";
@@ -550,15 +601,22 @@
     function sauvegarderTambour() { /* ...inchangé... */ }
     function sauvegarderTelegram() { /* ...inchangé... */ }
 
+    // --- MODIFICATION DU SCAN WIFI (Animation) ---
     function scannerWifi() { 
+        document.getElementById('btn-scanner').disabled = true;
+        document.getElementById('icon-scanner').className = "fa-solid fa-spinner fa-spin";
         document.getElementById('loaderWifi').style.display = 'block';
         document.getElementById('zoneWifiSelect').style.display = 'none';
+        reseauxTrouves = []; // On vide la liste avant un nouveau scan
         envoyerCommande("SCAN", ""); 
     }
     
     function afficherListeWifi() {
+        document.getElementById('btn-scanner').disabled = false;
+        document.getElementById('icon-scanner').className = "fa-solid fa-magnifying-glass";
         document.getElementById('loaderWifi').style.display = 'none';
         document.getElementById('zoneWifiSelect').style.display = 'block';
+        
         let select = document.getElementById('wifi-ssid-select');
         select.innerHTML = "";
         reseauxTrouves.forEach(net => {
@@ -568,6 +626,19 @@
         });
         select.addEventListener('change', function() { document.getElementById('wifi-ssid-input').value = this.value; });
         if(reseauxTrouves.length > 0) document.getElementById('wifi-ssid-input').value = reseauxTrouves[0];
+    }
+    
+    // --- FONCTION VOIR MOT DE PASSE ---
+    function togglePasswordVis() {
+        let input = document.getElementById("wifi-password-input");
+        let icon = document.getElementById("togglePasswordIcon");
+        if (input.type === "password") {
+            input.type = "text";
+            icon.className = "fa-solid fa-eye-slash pwd-icon";
+        } else {
+            input.type = "password";
+            icon.className = "fa-solid fa-eye pwd-icon";
+        }
     }
     
     function sauvegarderWifiClient() { envoyerCommande("WIFI", document.getElementById('wifi-ssid-input').value + "|" + document.getElementById('wifi-password-input').value); }
@@ -593,7 +664,7 @@
     
     window.addEventListener('load', () => { 
         initBoutonsManuels(); 
-        adapterInterfaceSelonMode(); // Adapte au démarrage selon le mode (généralement BLE)
+        adapterInterfaceSelonMode(); 
         let viewClassActive = document.querySelector('.view.active').id.replace('-view', '');
         rafraichirTitres(viewClassActive); 
         setLang(currentLang); 
