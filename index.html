@@ -13,7 +13,7 @@
         body { background-color: #0f141c; color: var(--text-white); font-family: sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .phone-container { width: 100%; max-width: 410px; background-color: var(--bg-main); border-radius: 25px; padding: 25px 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); box-sizing: border-box; display: flex; flex-direction: column; position: relative; overflow: hidden; min-height: 800px; }
         
-        header { text-align: center; margin-bottom: 20px; position: relative; display: flex; justify-content: center; align-items: center; min-height: 48px; padding: 0 45px 0 0; }
+        header { text-align: center; margin-bottom: 20px; position: relative; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 0 45px 0 15px; }
         .main-title { font-size: 38px; font-weight: 900; margin: 0; width: 100%; text-align: center; color: var(--accent-blue); text-shadow: 0 2px 4px rgba(0,0,0,0.5); letter-spacing: 1px;}
         
         .menu-toggle-btn { position: absolute; right: 0px; top: 50%; transform: translateY(-50%); background: #243145; border: 1px solid #334155; color: var(--text-white); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; transition: 0.3s;}
@@ -62,15 +62,17 @@
         .chart-container { background: var(--bg-card); border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .progress-container { width: 100%; background-color: #1a2332; border-radius: 8px; margin-top: 15px; overflow: hidden; display: none; border: 1px solid #334155;}
         .progress-bar { height: 20px; background-color: var(--green-border); width: 0%; transition: width 0.3s; }
+        .progress-text { font-size: 12px; margin-top: 5px; color: var(--text-gray); }
 
         .alarm-banner { background-color: #dc2626; color: white; padding: 15px; border-radius: 12px; font-weight: bold; text-align: center; margin-bottom: 15px; font-size: 18px; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4); border: 2px solid #ef4444; }
         
         .pwd-container { position: relative; width: 100%; }
         .pwd-icon { position: absolute; right: 15px; top: 18px; cursor: pointer; color: var(--text-gray); }
 
-        .signal-bars { display: inline-flex; align-items: flex-end; gap: 3px; height: 16px; margin-left: 10px; }
-        .bar { width: 5px; background-color: #334155; border-radius: 1px; transition: 0.3s; }
-        .bar-1 { height: 4px; } .bar-2 { height: 8px; } .bar-3 { height: 12px; } .bar-4 { height: 16px; }
+        /* HEADER & BARS */
+        .signal-bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+        .bar { width: 4px; background-color: #334155; border-radius: 1px; transition: 0.3s; }
+        .bar-1 { height: 3px; } .bar-2 { height: 6px; } .bar-3 { height: 9px; } .bar-4 { height: 12px; }
         
         @keyframes pulse-dot { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
         .pulsing { animation: pulse-dot 1s infinite; }
@@ -80,19 +82,21 @@
 
 <div class="phone-container">
     
-    <header style="flex-direction: column; align-items: stretch; padding: 0 45px 0 15px;">
+    <header>
+        <!-- INDICATEURS DE CONNEXION -->
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 5px;">
             <div id="app-conn-status" style="font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 5px;">
                 <i class="fa-solid fa-circle" id="app-conn-dot" style="color: var(--text-gray); font-size: 8px;"></i>
                 <span id="app-conn-text" data-i18n="status_wait">Attente...</span>
             </div>
             <div id="esp-wifi-status" style="display: none; align-items: center; gap: 5px; font-size: 11px; font-weight: bold; color: var(--text-gray);">
-                <span>Boîtier:</span>
+                <span data-i18n="lbl_boitier">Boîtier:</span>
                 <span class="signal-bars" id="header-wifi-bars" style="margin-left: 2px;">
                     <span class="bar bar-1"></span><span class="bar bar-2"></span><span class="bar bar-3"></span><span class="bar bar-4"></span>
                 </span>
             </div>
         </div>
+        
         <div class="main-title" id="val-Mode">Auto 70G</div>
         <button class="menu-toggle-btn" onclick="toggleSidebarMenu()"><i class="fa-solid fa-bars" id="menu-icon"></i></button>
     </header>
@@ -194,7 +198,6 @@
         <div id="wifi-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_wifi">Connexion Wi-Fi</h3>
-                
                 <div style="background:#1a2332; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #334155;">
                     <p style="margin:0 0 5px 0; font-size:14px; text-align: left;">
                         <span data-i18n="lbl_wifi_etat">État Wi-Fi :</span> 
@@ -202,32 +205,28 @@
                     </p>
                     <p style="margin:0; font-size:14px; text-align: left; display: flex; align-items: center;">
                         <span data-i18n="lbl_wifi_signal">Signal :</span> 
-                        <span class="signal-bars" id="wifi-bars">
+                        <span class="signal-bars" id="wifi-bars" style="margin-left:10px;">
                             <span class="bar bar-1"></span><span class="bar bar-2"></span><span class="bar bar-3"></span><span class="bar bar-4"></span>
                         </span>
                         <span id="lbl-wifi-rssi" style="color:var(--text-gray); font-size: 11px; margin-left: 8px;">-- dBm</span>
                     </p>
                 </div>
 
-                <!-- BOUTON SCANNER SIMPLIFIÉ -->
                 <button class="auth-btn" id="btn-scanner" style="background-color: #0ea5e9; margin-bottom: 15px;" onclick="scannerWifi()">
                     <i class="fa-solid fa-magnifying-glass" id="icon-scanner"></i> <span data-i18n="btn_scan">Scanner</span>
                 </button>
                 
-                <!-- MENU DÉROULANT UNIQUE POUR LE RÉSEAU -->
-                <div id="zoneWifiSelect" style="text-align: left; margin-bottom: 10px;">
-                    <label class="auth-input" style="border:none; padding:0;" data-i18n="lbl_sel_wifi">Sélection :</label>
+                <div id="zoneWifiSelect" style="display:block; text-align: left;">
+                    <label class="auth-input" style="border:none; padding:0;" data-i18n="lbl_sel_wifi">Réseau :</label>
                     <select id="wifi-ssid-select" class="auth-input">
-                        <option value="">Scannez ou sélectionnez...</option>
+                        <option value="">-- Sélectionnez --</option>
                     </select>
                 </div>
                 
-                <!-- MOT DE PASSE -->
                 <div class="pwd-container">
                     <input type="password" id="wifi-password-input" class="auth-input" placeholder="Mot de passe" data-i18n-ph="ph_pass">
                     <i class="fa-solid fa-eye pwd-icon" id="togglePasswordIcon" onclick="togglePasswordVis()"></i>
                 </div>
-                
                 <button class="auth-btn" onclick="sauvegarderWifiClient()"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="btn_send_wifi">Envoyer</span></button>
             </div>
         </div>
@@ -264,10 +263,12 @@
                 <h3 data-i18n="titre_ota">Mise à jour du système</h3>
                 <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;" data-i18n="desc_ota">Vérifiez si une nouvelle version est disponible.</p>
                 <div style="background:#1a2332; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #334155;">
-                    <p style="margin:0 0 5px 0; font-size:14px;"><span data-i18n="lbl_ver_act">Version actuelle :</span> <strong id="lbl-version-actuelle" style="color:var(--text-white);">v1.0.0</strong></p>
-                    <p style="margin:0; font-size:14px;"><span data-i18n="lbl_ver_dispo">Version dispo. :</span> <strong id="lbl-version-dispo" style="color:var(--text-gray);">Recherche...</strong></p>
+                    <p style="margin:0 0 5px 0; font-size:14px; text-align: left;"><span data-i18n="lbl_ver_act">Version actuelle :</span> <strong id="lbl-version-actuelle" style="color:var(--text-white);">v1.0.0</strong></p>
+                    <p style="margin:0; font-size:14px; text-align: left;"><span data-i18n="lbl_ver_dispo">Version dispo. :</span> <strong id="lbl-version-dispo" style="color:var(--text-gray);">Recherche...</strong></p>
                 </div>
                 <button class="auth-btn" id="btn-check-ota" style="background-color: #0ea5e9; margin-bottom:10px;" onclick="verifierMaj()"><i class="fa-solid fa-arrows-rotate"></i> <span data-i18n="btn_check_ota">Vérifier</span></button>
+                <button class="auth-btn" id="btn-start-ota" style="background-color: var(--green-border); display:none;" onclick="lancerMaj()"><i class="fa-solid fa-download"></i> <span data-i18n="btn_start_ota">Installer</span></button>
+                <div class="progress-container" id="ota-progress-container"><div class="progress-bar" id="ota-progress-bar"></div></div>
             </div>
         </div>
 
@@ -300,14 +301,14 @@
             niv_secu: "Niveau Sécurité", niv_lav: "Niveau Lavage", couv: "Couvercle", pompe: "Pompe UV", nbre_lav: "Nombre de Lavages",
             btn_rot: "Rotation", btn_lav: "Lavage", titre_config: "Paramètres du Tambour", lbl_modele: "Modèle :", lbl_mode: "Mode :",
             opt_grav: "Gravitaire (G)", opt_pomp: "Pompage (P)", btn_save_tamb: "Enregistrer", titre_wifi: "Connexion Wi-Fi",
-            btn_scan: "Scanner", lbl_sel_wifi: "Réseau :", ph_pass: "Mot de passe",
+            btn_scan: "Scanner", lbl_sel_wifi: "Réseau :", ph_ssid: "Nom du Wi-Fi (SSID)", ph_pass: "Mot de passe",
             btn_send_wifi: "Envoyer au Boîtier", titre_conn: "Type de Connexion", btn_ble: "Connexion BLE (Locale)", btn_cloud: "Mode Cloud (Distance)",
-            titre_hist: "Historique (15 jours)", titre_lang: "Choisissez votre langue",
+            titre_hist: "Historique (15 jours)", titre_lang: "Choisissez votre langue", lbl_boitier: "Boîtier:",
             titre_tele: "Alertes Telegram", desc_tele: "Recevez les alarmes directement sur votre smartphone.", ph_token: "Bot Token", ph_chatid: "Chat ID", lbl_tele_actif: "Activer les alarmes :", btn_save_tele: "Enregistrer",
-            titre_ota: "Mise à jour du système", desc_ota: "Vérifiez si une nouvelle version est disponible.", lbl_ver_act: "Version actuelle :", lbl_ver_dispo: "Version dispo. :", btn_check_ota: "Vérifier",
+            titre_ota: "Mise à jour du système", desc_ota: "Vérifiez si une nouvelle version est disponible.", lbl_ver_act: "Version actuelle :", lbl_ver_dispo: "Version dispo. :", btn_check_ota: "Vérifier", btn_start_ota: "Installer",
             titre_alarme: "ÉTAT D'ALARME", btn_reset: "RESET ALARME",
             al_eau: "ALARME : NIVEAU D'EAU", al_couv: "ALARME : COUVERCLE OUVERT", al_15: "ALARME : 15 LAVAGES CONSÉCUTIFS", al_inc: "ALARME INCONNUE",
-            lbl_wifi_etat: "État Wi-Fi :", lbl_wifi_signal: "Signal :", wifi_conn: "Connecté", wifi_dec: "Déconnecté"
+            lbl_wifi_etat: "État Wi-Fi :", lbl_wifi_signal: "Signal :", wifi_conn: "Connecté", wifi_dec: "Déconnecté", ota_no_update: "À jour", ota_update_found: "Disponible"
         },
         nl: {
             status_wait: "Wachten...", menu_auto: "Auto Modus", menu_manuel: "Handmatig", menu_config: "Trommel Config",
@@ -316,18 +317,20 @@
             niv_secu: "Beveiligingsniveau", niv_lav: "Spoelniveau", couv: "Deksel", pompe: "UV Pomp", nbre_lav: "Aantal Spoelingen",
             btn_rot: "Rotatie", btn_lav: "Spoelen", titre_config: "Trommel Instellingen", lbl_modele: "Model:", lbl_mode: "Modus:",
             opt_grav: "Zwaartekracht (G)", opt_pomp: "Pomp (P)", btn_save_tamb: "Opslaan", titre_wifi: "Wi-Fi Instellen",
-            btn_scan: "Scannen", lbl_sel_wifi: "Netwerk:", ph_pass: "Wachtwoord",
+            btn_scan: "Scannen", lbl_sel_wifi: "Netwerk:", ph_ssid: "Wi-Fi Naam (SSID)", ph_pass: "Wachtwoord",
             btn_send_wifi: "Verzenden", titre_conn: "Verbindingstype", btn_ble: "BLE Verbinding (Lokaal)", btn_cloud: "Cloud Modus",
-            titre_hist: "Geschiedenis", titre_lang: "Kies uw taal",
+            titre_hist: "Geschiedenis", titre_lang: "Kies uw taal", lbl_boitier: "Controller:",
             titre_tele: "Telegram Meldingen", desc_tele: "Ontvang alarmen op smartphone.", ph_token: "Bot Token", ph_chatid: "Chat ID", lbl_tele_actif: "Activeren:", btn_save_tele: "Opslaan",
-            titre_ota: "Systeemupdate", desc_ota: "Controleer op updates.", lbl_ver_act: "Huidige versie:", lbl_ver_dispo: "Beschikbaar:", btn_check_ota: "Controleren",
+            titre_ota: "Systeemupdate", desc_ota: "Controleer op updates.", lbl_ver_act: "Huidige versie:", lbl_ver_dispo: "Beschikbaar:", btn_check_ota: "Controleren", btn_start_ota: "Installeren",
             titre_alarme: "ALARM STATUS", btn_reset: "RESET ALARM",
             al_eau: "ALARM: WATERNIVEAU", al_couv: "ALARM: DEKSEL OPEN", al_15: "ALARM: 15 SPOELINGEN", al_inc: "ONBEKEND ALARM",
-            lbl_wifi_etat: "Wi-Fi Status:", lbl_wifi_signal: "Signaal:", wifi_conn: "Verbonden", wifi_dec: "Niet verbonden"
+            lbl_wifi_etat: "Wi-Fi Status:", lbl_wifi_signal: "Signaal:", wifi_conn: "Verbonden", wifi_dec: "Niet verbonden", ota_no_update: "Up-to-date", ota_update_found: "Beschikbaar"
         }
     };
 
     let currentLang = localStorage.getItem('app_lang') || 'fr';
+    const currentFirmwareVersion = "v1.0.0"; // VERSION ACTUELLE EN DUR DU DASHBOARD
+    let otaUrl = "";
 
     function setLang(lang) {
         currentLang = lang;
@@ -419,6 +422,7 @@
     function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur, alarme_code = 0, wifi_stat = 0, wifi_rssi = 0, ping = 0) {
         try {
             ['val-temperature', 'val-temperature-man', 'val-temperature-al'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = temp.toFixed(1); });
+            
             let pct = Math.min(Math.max((temp - 6.0) / 24.0, 0), 1);
             ['gaugeCircle', 'gaugeCircle-man', 'gaugeCircle-al'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).style.strokeDashoffset = 353.4 - (pct * 353.4); });
             
@@ -428,41 +432,38 @@
             gererBadgeDot('dot-niveau_lavage', lav); gererBadgeDot('dot-niveau_lavage-man', lav); gererBadgeDot('dot-niveau_lavage-al', lav);
             gererBadgeDot('dot-couvercle', couvLogique); gererBadgeDot('dot-couvercle-man', couvLogique); gererBadgeDot('dot-couvercle-al', couvLogique);
             gererBadgeDot('dot-pompe_uv', uv); gererBadgeDot('dot-pompe_uv-man', uv); gererBadgeDot('dot-pompe_uv-al', uv);
+            
             if(document.getElementById('val-Nbre_lavage')) document.getElementById('val-Nbre_lavage').innerText = compteur;
 
-            // --- GESTION BARRES WIFI (Page WiFi et Header) ---
-            let elWifiStatus = document.getElementById('lbl-wifi-status');
-            let elWifiRssi = document.getElementById('lbl-wifi-rssi');
+            // --- GESTION BARRES WIFI HEADER (ESP32) ---
             let espWifiDiv = document.getElementById('esp-wifi-status');
-            
-            let barsPage = document.querySelectorAll('#wifi-bars .bar');
-            let barsHeader = document.querySelectorAll('#header-wifi-bars .bar');
-            
-            barsPage.forEach(b => b.style.backgroundColor = '#334155');
+            let headerBars = document.querySelectorAll('#header-wifi-bars .bar');
             
             if (modeActif === "FIREBASE") {
                 espWifiDiv.style.display = 'flex';
-                barsHeader.forEach(b => b.style.backgroundColor = '#334155');
-            } else {
-                espWifiDiv.style.display = 'none';
-            }
+                headerBars.forEach(b => b.style.backgroundColor = '#334155');
+                if (wifi_stat === 1) {
+                    let force = (wifi_rssi > -60) ? 4 : (wifi_rssi > -70) ? 3 : (wifi_rssi > -80) ? 2 : 1;
+                    let couleurBarre = (force > 2) ? "var(--dot-green)" : (force === 2) ? "#f59e0b" : "var(--dot-red)";
+                    for(let i=0; i<force; i++) { if(headerBars[i]) headerBars[i].style.backgroundColor = couleurBarre; }
+                }
+            } else { espWifiDiv.style.display = 'none'; }
             
-            if (wifi_stat === 1) {
-                if (elWifiStatus) {
-                    elWifiStatus.innerText = (dict[currentLang]['wifi_conn'] || "Connecté") + " (Ping: " + ping + ")";
+            // --- GESTION BARRES WIFI ONGLET WIFI ---
+            let elWifiStatus = document.getElementById('lbl-wifi-status');
+            let elWifiRssi = document.getElementById('lbl-wifi-rssi');
+            let bars = document.querySelectorAll('#wifi-bars .bar');
+            bars.forEach(b => b.style.backgroundColor = '#334155');
+            
+            if (elWifiStatus && elWifiRssi) {
+                if (wifi_stat === 1) {
+                    elWifiStatus.innerText = (dict[currentLang]['wifi_conn'] || "Connecté");
                     elWifiStatus.style.color = "var(--dot-green)";
                     elWifiRssi.innerText = wifi_rssi + " dBm";
-                }
-                
-                let force = (wifi_rssi > -60) ? 4 : (wifi_rssi > -70) ? 3 : (wifi_rssi > -80) ? 2 : 1;
-                let couleurBarre = (force > 2) ? "var(--dot-green)" : (force === 2) ? "#f59e0b" : "var(--dot-red)";
-                
-                for(let i=0; i<force; i++) { 
-                    if(barsPage[i]) barsPage[i].style.backgroundColor = couleurBarre; 
-                    if(modeActif === "FIREBASE" && barsHeader[i]) barsHeader[i].style.backgroundColor = couleurBarre;
-                }
-            } else {
-                if (elWifiStatus) {
+                    let force = (wifi_rssi > -60) ? 4 : (wifi_rssi > -70) ? 3 : (wifi_rssi > -80) ? 2 : 1;
+                    let couleurBarre = (force > 2) ? "var(--dot-green)" : (force === 2) ? "#f59e0b" : "var(--dot-red)";
+                    for(let i=0; i<force; i++) { bars[i].style.backgroundColor = couleurBarre; }
+                } else {
                     elWifiStatus.innerText = dict[currentLang]['wifi_dec'] || "Déconnecté";
                     elWifiStatus.style.color = "var(--dot-red)";
                     elWifiRssi.innerText = "-- dBm";
@@ -479,6 +480,7 @@
                 document.getElementById('alarm-banner-text').innerText = textAlarme;
                 if(btnMenu) btnMenu.classList.add('disabled');
                 document.getElementById('sidebarMenu').classList.remove('open');
+                
                 if (!document.getElementById('alarme-view').classList.contains('active')) { switchView('alarme'); }
             } else {
                 if(btnMenu) btnMenu.classList.remove('disabled');
@@ -492,7 +494,7 @@
         else { switchView("auto"); document.querySelector('.menu-toggle-btn').classList.remove('disabled'); }
     }
 
-    // --- LECTURE FIREBASE AVEC INDICATEUR DE CONNEXION TELEPHONE ---
+    // --- LECTURE FIREBASE AVEC INDICATEUR TELEPHONE ---
     async function lireDonneesFirebase() {
         if (!ID_COFFRET) return;
         
@@ -530,12 +532,12 @@
                     dot.style.color = "#f59e0b";
                     text.innerText = "Pas de données";
                 }
-            } else { throw new Error("HTTP Erreur"); }
+            } else { throw new Error("HTTP"); }
         } catch (error) { 
             console.error("Erreur Firebase", error); 
             dot.className = "fa-solid fa-circle-xmark";
             dot.style.color = "var(--dot-red)";
-            text.innerText = "Erreur Réseau";
+            text.innerText = "Erreur Cloud";
         }
     }
 
@@ -556,6 +558,10 @@
             if (timerFirebase) clearInterval(timerFirebase);
             document.getElementById('btn-mode-ble').className = "mode-btn active";
             document.getElementById('btn-mode-cloud').className = "mode-btn";
+            
+            document.getElementById('app-conn-dot').className = "fa-solid fa-circle pulsing";
+            document.getElementById('app-conn-dot').style.color = "#f59e0b";
+            document.getElementById('app-conn-text').innerText = "Connexion BLE...";
 
             bleDevice = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'Tambour_' }], optionalServices: [SERVICE_UUID] });
             bleDevice.addEventListener('gattserverdisconnected', () => { setTimeout(activerModeFirebase, 2000); });
@@ -563,6 +569,10 @@
             const service = await server.getPrimaryService(SERVICE_UUID);
             rxCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_RX);
             txCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_TX);
+
+            document.getElementById('app-conn-dot').className = "fa-brands fa-bluetooth";
+            document.getElementById('app-conn-dot').style.color = "var(--accent-blue)";
+            document.getElementById('app-conn-text').innerText = "BLE Connecté";
 
             await txCharacteristic.startNotifications();
             txCharacteristic.addEventListener('characteristicvaluechanged', (e) => {
@@ -584,12 +594,11 @@
                     else if (reseau !== "NONE") reseauxTrouves.push(reseau);
                 }
             });
-            document.getElementById('app-conn-dot').className = "fa-brands fa-bluetooth";
-            document.getElementById('app-conn-dot').style.color = "var(--accent-blue)";
-            document.getElementById('app-conn-text').innerText = "BLE Local Connecté";
-            
             envoyerCommande("PAGE", document.querySelector('.sidebar-item.active').id.replace('tab-', '').toUpperCase());
-        } catch (error) { console.warn(error); activerModeFirebase(); }
+        } catch (error) { 
+            console.warn(error); 
+            activerModeFirebase(); 
+        }
     }
 
     function activerModeFirebase() {
@@ -604,6 +613,7 @@
         timerFirebase = setInterval(lireDonneesFirebase, 5000);
     }
 
+    // --- GESTION DU SCAN WI-FI (Simplifiée) ---
     function scannerWifi() { 
         document.getElementById('btn-scanner').disabled = true;
         document.getElementById('icon-scanner').className = "fa-solid fa-spinner fa-spin";
@@ -616,21 +626,16 @@
         document.getElementById('icon-scanner').className = "fa-solid fa-magnifying-glass";
         
         let select = document.getElementById('wifi-ssid-select');
-        select.innerHTML = "";
+        select.innerHTML = '<option value="">-- Sélectionnez --</option>'; 
+        
+        let memoSSID = localStorage.getItem("wifi_ssid") || "";
         
         reseauxTrouves.forEach(net => {
             let opt = document.createElement('option');
             opt.value = net; opt.innerHTML = net;
+            if(net === memoSSID) opt.selected = true;
             select.appendChild(opt);
         });
-        
-        // Auto-sélection du réseau s'il est déjà mémorisé
-        let savedSsid = localStorage.getItem('wifi_ssid');
-        if (savedSsid && reseauxTrouves.includes(savedSsid)) {
-            select.value = savedSsid;
-        } else if(reseauxTrouves.length > 0) {
-            select.value = reseauxTrouves[0];
-        }
     }
     
     function togglePasswordVis() {
@@ -643,23 +648,79 @@
     function sauvegarderWifiClient() { 
         let ssid = document.getElementById('wifi-ssid-select').value;
         let pass = document.getElementById('wifi-password-input').value;
+        if(ssid === "") { alert("Veuillez sélectionner un réseau."); return; }
         
-        if(!ssid) {
-            alert("Veuillez sélectionner un réseau Wi-Fi.");
-            return;
-        }
-        
-        // Mémorisation dans le navigateur
-        localStorage.setItem('wifi_ssid', ssid);
-        localStorage.setItem('wifi_pass', pass);
+        localStorage.setItem("wifi_ssid", ssid);
+        localStorage.setItem("wifi_pass", pass);
         
         envoyerCommande("WIFI", ssid + "|" + pass); 
-        alert("Paramètres Wi-Fi envoyés au boîtier !");
+        alert("Identifiants Wi-Fi envoyés !");
+    }
+    
+    function chargerMemos() {
+        let memoPass = localStorage.getItem("wifi_pass");
+        if(memoPass) document.getElementById('wifi-password-input').value = memoPass;
+        document.getElementById('lbl-version-actuelle').innerText = currentFirmwareVersion;
     }
 
-    function sauvegarderTelegram() { 
-        envoyerCommande("TELE", document.getElementById('tele-token-input').value + "|" + document.getElementById('tele-chatid-input').value + "|" + (document.getElementById('tele-active-check').checked ? "1":"0")); 
-        alert("Telegram enregistré !"); 
+    // --- GESTION OTA ---
+    async function verifierMaj() {
+        let icon = document.querySelector('#btn-check-ota i');
+        icon.className = "fa-solid fa-spinner fa-spin";
+        let lblDispo = document.getElementById('lbl-version-dispo');
+        lblDispo.innerText = "Recherche...";
+
+        try {
+            // Lecture du noeud firmware à la racine de Firebase
+            let url = `${FIREBASE_HOST}firmware.json?auth=${FIREBASE_AUTH}`;
+            let response = await fetch(url);
+            if(response.ok) {
+                let data = await response.json();
+                if(data && data.version && data.url) {
+                    lblDispo.innerText = data.version;
+                    otaUrl = data.url;
+                    
+                    if(data.version !== currentFirmwareVersion) {
+                        lblDispo.style.color = "var(--dot-green)";
+                        document.getElementById('btn-start-ota').style.display = "inline-block";
+                    } else {
+                        lblDispo.style.color = "var(--text-gray)";
+                        lblDispo.innerText += " (" + (dict[currentLang]['ota_no_update'] || "À jour") + ")";
+                        document.getElementById('btn-start-ota').style.display = "none";
+                    }
+                } else {
+                    lblDispo.innerText = "Erreur lecture FB";
+                }
+            } else {
+                lblDispo.innerText = "Erreur réseau";
+            }
+        } catch(e) {
+            lblDispo.innerText = "Erreur";
+            console.error(e);
+        }
+        icon.className = "fa-solid fa-arrows-rotate";
+    }
+
+    function lancerMaj() {
+        if(otaUrl === "") return;
+        // On envoie la commande OTA à l'ESP avec l'URL de téléchargement
+        envoyerCommande("OTA", otaUrl);
+        document.getElementById('ota-progress-container').style.display = 'block';
+        document.getElementById('btn-start-ota').disabled = true;
+        
+        // Simulation d'une barre de progression (l'ESP32 fera le vrai travail en arrière-plan)
+        let bar = document.getElementById('ota-progress-bar');
+        let width = 0;
+        let int = setInterval(() => {
+            if(width >= 100) {
+                clearInterval(int);
+                bar.style.backgroundColor = "var(--dot-green)";
+                alert("Mise à jour envoyée au boîtier. Veuillez patienter 1 minute pendant son redémarrage.");
+            } else {
+                width += 5;
+                bar.style.width = width + '%';
+            }
+        }, 500);
     }
 
     function initBoutonsManuels() {
@@ -681,20 +742,10 @@
     
     window.addEventListener('load', () => { 
         initBoutonsManuels(); 
+        chargerMemos(); 
         adapterInterfaceSelonMode(); 
         rafraichirTitres('auto'); 
         setLang(currentLang); 
-        
-        // Pré-remplissage des champs Wi-Fi mémorisés
-        let savedSsid = localStorage.getItem('wifi_ssid');
-        let savedPass = localStorage.getItem('wifi_pass');
-        if(savedSsid) {
-            let select = document.getElementById('wifi-ssid-select');
-            select.innerHTML = `<option value="${savedSsid}">${savedSsid}</option>`;
-        }
-        if(savedPass) {
-            document.getElementById('wifi-password-input').value = savedPass;
-        }
     });
 </script>
 </body>
