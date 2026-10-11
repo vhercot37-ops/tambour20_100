@@ -16,7 +16,9 @@
         header { text-align: center; margin-bottom: 20px; position: relative; display: flex; justify-content: center; align-items: center; min-height: 48px; padding: 0 45px 0 0; }
         .main-title { font-size: 38px; font-weight: 900; margin: 0; width: 100%; text-align: center; color: var(--accent-blue); text-shadow: 0 2px 4px rgba(0,0,0,0.5); letter-spacing: 1px;}
         
-        .menu-toggle-btn { position: absolute; right: 0px; top: 50%; transform: translateY(-50%); background: #243145; border: 1px solid #334155; color: var(--text-white); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; }
+        .menu-toggle-btn { position: absolute; right: 0px; top: 50%; transform: translateY(-50%); background: #243145; border: 1px solid #334155; color: var(--text-white); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; transition: 0.3s;}
+        .menu-toggle-btn.disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+        
         .sidebar-menu { position: absolute; top: 0; right: -250px; width: 230px; height: 100%; background-color: #121824; box-shadow: -5px 0 15px rgba(0,0,0,0.4); z-index: 99; transition: right 0.3s ease; padding: 70px 15px 20px 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
         .sidebar-menu.open { right: 0; }
         .sidebar-item { background: #1c2635; border: 1px solid #2d3d54; color: var(--text-white); padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
@@ -193,7 +195,6 @@
 
         <!-- CONFIGURATION TELEGRAM -->
         <div id="telegram-view" class="view">
-            <!-- (Code Telegram inchangé) -->
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_tele">Alertes Telegram</h3>
                 <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;" data-i18n="desc_tele">Recevez les alarmes directement sur votre smartphone.</p>
@@ -220,7 +221,6 @@
 
         <!-- ONGLET MISE A JOUR (OTA) -->
         <div id="ota-view" class="view">
-            <!-- (Code OTA inchangé) -->
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_ota">Mise à jour du système</h3>
                 <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;" data-i18n="desc_ota">Vérifiez si une nouvelle version du logiciel est disponible pour le coffret.</p>
@@ -269,8 +269,6 @@
             titre_hist: "Historique (15 jours)", titre_lang: "Choisissez votre langue",
             titre_tele: "Alertes Telegram", desc_tele: "Recevez les alarmes directement sur votre smartphone.", ph_token: "Bot Token", ph_chatid: "Chat ID", lbl_tele_actif: "Activer les alertes :", btn_save_tele: "Enregistrer Telegram",
             titre_ota: "Mise à jour du système", desc_ota: "Vérifiez si une nouvelle version du logiciel est disponible pour le coffret.", lbl_ver_act: "Version actuelle :", lbl_ver_dispo: "Version dispo. :", btn_check_ota: "Vérifier", btn_start_ota: "Installer la mise à jour",
-            
-            // Traductions Alarmes
             titre_alarme: "ÉTAT D'ALARME", btn_reset: "RESET ALARME",
             al_eau: "ALARME : NIVEAU D'EAU", al_couv: "ALARME : COUVERCLE OUVERT", al_15: "ALARME : 15 LAVAGES CONSÉCUTIFS", al_inc: "ALARME INCONNUE"
         },
@@ -286,8 +284,6 @@
             titre_hist: "Geschiedenis (15 dagen)", titre_lang: "Kies uw taal",
             titre_tele: "Telegram Meldingen", desc_tele: "Ontvang alarmen direct op uw smartphone.", ph_token: "Bot Token", ph_chatid: "Chat ID", lbl_tele_actif: "Meldingen activeren:", btn_save_tele: "Telegram Opslaan",
             titre_ota: "Systeemupdate", desc_ota: "Controleer of er een nieuwe softwareversie beschikbaar is.", lbl_ver_act: "Huidige versie:", lbl_ver_dispo: "Beschikbare versie:", btn_check_ota: "Controleren", btn_start_ota: "Update installeren",
-            
-            // Traductions Alarmes
             titre_alarme: "ALARM STATUS", btn_reset: "RESET ALARM",
             al_eau: "ALARM: WATERNIVEAU", al_couv: "ALARM: DEKSEL OPEN", al_15: "ALARM: 15 SPOELINGEN", al_inc: "ONBEKEND ALARM"
         }
@@ -340,7 +336,7 @@
     const SERVICE_UUID           = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
     const CHARACTERISTIC_UUID_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
     const CHARACTERISTIC_UUID_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
-    const FIREBASE_HOST = "https://ton-projet-rtdb.firebaseio.com/"; 
+    const FIREBASE_HOST = "https://ton-projet-rtdb.firebaseio.com/"; // <-- Remets ton vrai lien ici !
     
     let ID_COFFRET = ""; 
     let bleDevice = null;
@@ -398,6 +394,26 @@
         if(target !== 'alarme') envoyerCommande("PAGE", target.toUpperCase());
     }
 
+    // --- FONCTION D'ADAPTATION DE L'INTERFACE (BLE vs FIREBASE) ---
+    function adapterInterfaceSelonMode() {
+        // En mode Firebase, on cache les onglets "dangereux" du menu latéral
+        let styleDisplay = (modeActif === "FIREBASE") ? "none" : "flex";
+        
+        document.getElementById('tab-manuel').style.display = styleDisplay;
+        document.getElementById('tab-config').style.display = styleDisplay;
+        document.getElementById('tab-wifi').style.display = styleDisplay;
+        document.getElementById('tab-telegram').style.display = styleDisplay;
+        document.getElementById('tab-ota').style.display = styleDisplay;
+        
+        // Si on passe en Cloud alors qu'on était sur un écran caché, on force le retour en AUTO
+        if (modeActif === "FIREBASE") {
+            let activeView = document.querySelector('.view.active').id;
+            if (['manuel-view', 'config-view', 'wifi-view', 'telegram-view', 'ota-view'].includes(activeView)) {
+                switchView('auto');
+            }
+        }
+    }
+
     // --- FONCTION D'AFFICHAGE ET GESTION DES ALARMES ---
     function gererBadgeDot(id, status) {
         const dot = document.getElementById(id);
@@ -411,7 +427,7 @@
             let pct = Math.min(Math.max((temp - 6.0) / 24.0, 0), 1);
             ['gaugeCircle', 'gaugeCircle-man', 'gaugeCircle-al'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).style.strokeDashoffset = 353.4 - (pct * 353.4); });
             
-            // INVERSION DU COUVERCLE (!couv) COMME DEMANDÉ
+            // Inversion de logique (!couv) pour l'affichage visuel
             gererBadgeDot('dot-niveau_securite', secu); gererBadgeDot('dot-niveau_securite-man', secu); gererBadgeDot('dot-niveau_securite-al', secu);
             gererBadgeDot('dot-niveau_lavage', lav); gererBadgeDot('dot-niveau_lavage-man', lav); gererBadgeDot('dot-niveau_lavage-al', lav);
             gererBadgeDot('dot-couvercle', !couv); gererBadgeDot('dot-couvercle-man', !couv); gererBadgeDot('dot-couvercle-al', !couv);
@@ -419,7 +435,9 @@
             
             if(document.getElementById('val-Nbre_lavage')) document.getElementById('val-Nbre_lavage').innerText = compteur;
 
-            // GESTION BASCULE AUTOMATIQUE ECRAN ALARME
+            // GESTION BASCULE AUTOMATIQUE ECRAN ALARME + BLOCAGE MENU
+            const btnMenu = document.querySelector('.menu-toggle-btn');
+            
             if(alarme_code > 0) {
                 let textAlarme = dict[currentLang]['al_inc'];
                 if(alarme_code === 1) textAlarme = dict[currentLang]['al_eau'];
@@ -428,18 +446,29 @@
                 
                 document.getElementById('alarm-banner-text').innerText = textAlarme;
                 
-                // Si on n'est pas déjà sur la vue alarme, on bascule de force
+                if(btnMenu) btnMenu.classList.add('disabled');
+                document.getElementById('sidebarMenu').classList.remove('open');
+                
                 if (!document.getElementById('alarme-view').classList.contains('active')) {
                     switchView('alarme');
                 }
+            } else {
+                if(btnMenu) btnMenu.classList.remove('disabled');
             }
         } catch (e) { console.error("Erreur affichage", e); }
     }
 
     function resetAlarme() {
         envoyerCommande("RESET_ALARM", "1");
-        // Le passage en manuel se fera automatiquement ou immédiatement
-        switchView("manuel");
+        
+        // Comportement différent selon le mode (BLE ou FIREBASE)
+        if (modeActif === "BLE") {
+            switchView("manuel"); // En local, on passe en manuel pour vérifier le tambour
+        } else {
+            switchView("auto");   // À distance, on repasse en monitoring Auto (écran manuel caché)
+            // On retire la protection visuelle manuellement pour l'UI en attendant le retour Firebase
+            document.querySelector('.menu-toggle-btn').classList.remove('disabled');
+        }
     }
 
     async function lireDonneesFirebase() {
@@ -462,6 +491,7 @@
     async function connecterBLE() {
         try {
             modeActif = "BLE";
+            adapterInterfaceSelonMode(); // Réaffiche les menus
             if (timerFirebase) clearInterval(timerFirebase);
             document.getElementById('btn-mode-ble').className = "mode-btn active";
             document.getElementById('btn-mode-cloud').className = "mode-btn";
@@ -481,7 +511,6 @@
                     if (parts.length >= 2) {
                         ID_COFFRET = parts[0].replace("ID:", ""); 
                         let d = parts[1].split(",");
-                        // On récupère le 7eme paramètre si existant (alarme_code)
                         let alCode = (d.length > 6) ? parseInt(d[6]) : 0;
                         if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], alCode);
                         
@@ -505,6 +534,8 @@
 
     function activerModeFirebase() {
         modeActif = "FIREBASE";
+        adapterInterfaceSelonMode(); // Cache les menus sensibles
+        
         document.getElementById('btn-mode-ble').className = "mode-btn";
         document.getElementById('btn-mode-cloud').className = "mode-btn active";
         document.getElementById('status-indic').className = "conn-status firebase";
@@ -519,7 +550,6 @@
     function sauvegarderTambour() { /* ...inchangé... */ }
     function sauvegarderTelegram() { /* ...inchangé... */ }
 
-    // Rétablissement correct de l'affichage du Loader pour le Wi-Fi
     function scannerWifi() { 
         document.getElementById('loaderWifi').style.display = 'block';
         document.getElementById('zoneWifiSelect').style.display = 'none';
@@ -529,16 +559,13 @@
     function afficherListeWifi() {
         document.getElementById('loaderWifi').style.display = 'none';
         document.getElementById('zoneWifiSelect').style.display = 'block';
-        
         let select = document.getElementById('wifi-ssid-select');
         select.innerHTML = "";
-        
         reseauxTrouves.forEach(net => {
             let opt = document.createElement('option');
             opt.value = net; opt.innerHTML = net;
             select.appendChild(opt);
         });
-
         select.addEventListener('change', function() { document.getElementById('wifi-ssid-input').value = this.value; });
         if(reseauxTrouves.length > 0) document.getElementById('wifi-ssid-input').value = reseauxTrouves[0];
     }
@@ -559,10 +586,14 @@
         lier('btn-man-rotation', 'Rotation'); lier('btn-man-lavage', 'Lavage');
     }
 
-    function toggleSidebarMenu() { document.getElementById('sidebarMenu').classList.toggle('open'); }
+    function toggleSidebarMenu() { 
+        if(document.querySelector('.menu-toggle-btn').classList.contains('disabled')) return;
+        document.getElementById('sidebarMenu').classList.toggle('open'); 
+    }
     
     window.addEventListener('load', () => { 
         initBoutonsManuels(); 
+        adapterInterfaceSelonMode(); // Adapte au démarrage selon le mode (généralement BLE)
         let viewClassActive = document.querySelector('.view.active').id.replace('-view', '');
         rafraichirTitres(viewClassActive); 
         setLang(currentLang); 
