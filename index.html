@@ -236,8 +236,19 @@
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_tele">Alertes Telegram</h3>
                 <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;" data-i18n="desc_tele">Recevez les alarmes directement sur votre smartphone.</p>
+                
                 <input type="text" id="tele-token-input" class="auth-input" placeholder="Bot Token" data-i18n-ph="ph_token">
-                <input type="text" id="tele-chatid-input" class="auth-input" placeholder="Chat ID" data-i18n-ph="ph_chatid">
+                
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" id="tele-chatid-input" class="auth-input" style="margin-bottom: 0;" placeholder="Chat ID" data-i18n-ph="ph_chatid">
+                    <button class="auth-btn" style="width: 50px; background-color: #f59e0b;" onclick="detecterChatIdTelegram()" title="Détecter automatiquement">
+                        <i class="fa-solid fa-satellite-dish"></i>
+                    </button>
+                </div>
+                <p style="font-size: 11px; color: #f59e0b; margin-top: 5px; text-align: left;">
+                    * Envoyez un message à votre bot depuis l'app Telegram, puis cliquez sur le radar.
+                </p>
+
                 <div style="display:flex; align-items:center; justify-content:space-between; margin:15px 0;">
                     <span style="font-size:14px; font-weight:bold;" data-i18n="lbl_tele_actif">Activer les alarmes :</span>
                     <input type="checkbox" id="tele-active-check" style="transform: scale(1.5);">
@@ -329,7 +340,7 @@
     };
 
     let currentLang = localStorage.getItem('app_lang') || 'fr';
-    const currentFirmwareVersion = "v1.0.0"; // VERSION ACTUELLE EN DUR DU DASHBOARD
+    const currentFirmwareVersion = "v1.0.0"; 
     let otaUrl = "";
 
     function setLang(lang) {
@@ -656,6 +667,47 @@
         envoyerCommande("WIFI", ssid + "|" + pass); 
         alert("Identifiants Wi-Fi envoyés !");
     }
+
+    // --- DETECTION AUTOMATIQUE CHAT ID TELEGRAM ---
+    async function detecterChatIdTelegram() {
+        let token = document.getElementById('tele-token-input').value.trim();
+        if(!token) { 
+            alert("Veuillez d'abord coller le Bot Token fourni par BotFather."); 
+            return; 
+        }
+
+        try {
+            let response = await fetch(`https://api.telegram.org/bot${token}/getUpdates`);
+            let data = await response.json();
+
+            if (data.ok && data.result.length > 0) {
+                let lastUpdate = data.result[data.result.length - 1];
+                
+                if (lastUpdate.message && lastUpdate.message.chat) {
+                    let chatId = lastUpdate.message.chat.id;
+                    let prenom = lastUpdate.message.chat.first_name || "Utilisateur";
+                    
+                    document.getElementById('tele-chatid-input').value = chatId;
+                    alert(`✅ ID trouvé pour ${prenom} : ${chatId} ! \nCliquez sur Enregistrer pour l'envoyer au boîtier.`);
+                } else {
+                    alert("⚠️ Format de message non reconnu.");
+                }
+            } else {
+                alert("⚠️ Aucun message trouvé.\n\nAllez sur l'application Telegram, envoyez 'Bonjour' ou '/start' à votre bot, puis réessayez de cliquer sur le radar.");
+            }
+        } catch (error) {
+            console.error("Erreur Telegram API :", error);
+            alert("❌ Erreur de connexion aux serveurs Telegram.");
+        }
+    }
+    
+    function sauvegarderTelegram() { 
+        let token = document.getElementById('tele-token-input').value;
+        let chatId = document.getElementById('tele-chatid-input').value;
+        let actif = document.getElementById('tele-active-check').checked ? "1":"0";
+        envoyerCommande("TELE", token + "|" + chatId + "|" + actif); 
+        alert("Telegram enregistré !"); 
+    }
     
     function chargerMemos() {
         let memoPass = localStorage.getItem("wifi_pass");
@@ -671,7 +723,6 @@
         lblDispo.innerText = "Recherche...";
 
         try {
-            // Lecture du noeud firmware à la racine de Firebase
             let url = `${FIREBASE_HOST}firmware.json?auth=${FIREBASE_AUTH}`;
             let response = await fetch(url);
             if(response.ok) {
@@ -703,12 +754,10 @@
 
     function lancerMaj() {
         if(otaUrl === "") return;
-        // On envoie la commande OTA à l'ESP avec l'URL de téléchargement
         envoyerCommande("OTA", otaUrl);
         document.getElementById('ota-progress-container').style.display = 'block';
         document.getElementById('btn-start-ota').disabled = true;
         
-        // Simulation d'une barre de progression (l'ESP32 fera le vrai travail en arrière-plan)
         let bar = document.getElementById('ota-progress-bar');
         let width = 0;
         let int = setInterval(() => {
