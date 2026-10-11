@@ -73,7 +73,6 @@
         .pwd-container { position: relative; width: 100%; }
         .pwd-icon { position: absolute; right: 15px; top: 18px; cursor: pointer; color: var(--text-gray); }
 
-        /* STYLE DES BARRES DE RESEAU WIFI */
         .signal-bars { display: inline-flex; align-items: flex-end; gap: 3px; height: 16px; margin-left: 10px; }
         .bar { width: 5px; background-color: #334155; border-radius: 1px; transition: 0.3s; }
         .bar-1 { height: 4px; } .bar-2 { height: 8px; } .bar-3 { height: 12px; } .bar-4 { height: 16px; }
@@ -143,9 +142,7 @@
 
         <!-- VUE ALARME -->
         <div id="alarme-view" class="view">
-            <div class="alarm-banner" id="alarm-banner-text">
-                ALARME
-            </div>
+            <div class="alarm-banner" id="alarm-banner-text">ALARME</div>
             <div class="gauge-section">
                 <svg class="gauge-svg" viewBox="0 0 200 200">
                     <path class="gauge-bg" d="M 46.97 153.03 A 75 75 0 1 1 153.03 153.03"></path>
@@ -188,8 +185,6 @@
         <div id="wifi-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_wifi">Connexion Wi-Fi</h3>
-                
-                <!-- Bloc d'état du Wi-Fi avec BARRES GRAPHIQUES -->
                 <div style="background:#1a2332; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #334155;">
                     <p style="margin:0 0 5px 0; font-size:14px; text-align: left;">
                         <span data-i18n="lbl_wifi_etat">État Wi-Fi :</span> 
@@ -198,10 +193,7 @@
                     <p style="margin:0; font-size:14px; text-align: left; display: flex; align-items: center;">
                         <span data-i18n="lbl_wifi_signal">Signal :</span> 
                         <span class="signal-bars" id="wifi-bars">
-                            <div class="bar bar-1"></div>
-                            <div class="bar bar-2"></div>
-                            <div class="bar bar-3"></div>
-                            <div class="bar bar-4"></div>
+                            <span class="bar bar-1"></span><span class="bar bar-2"></span><span class="bar bar-3"></span><span class="bar bar-4"></span>
                         </span>
                         <span id="lbl-wifi-rssi" style="color:var(--text-gray); font-size: 11px; margin-left: 8px;">-- dBm</span>
                     </p>
@@ -210,8 +202,6 @@
                 <button class="auth-btn" id="btn-scanner" style="background-color: #0ea5e9; margin-bottom: 15px;" onclick="scannerWifi()">
                     <i class="fa-solid fa-magnifying-glass" id="icon-scanner"></i> <span data-i18n="btn_scan">Scanner</span>
                 </button>
-                
-                <!-- Loader -->
                 <div id="loaderWifi" style="display:none; color: var(--accent-blue); font-size: 15px; margin-bottom: 15px; font-weight: bold;">
                     <i class="fa-solid fa-spinner fa-spin"></i> <span data-i18n="lbl_scanning">Recherche en cours...</span>
                 </div>
@@ -222,13 +212,10 @@
                 </div>
                 
                 <input type="text" id="wifi-ssid-input" class="auth-input" placeholder="SSID" data-i18n-ph="ph_ssid">
-                
-                <!-- Mot de passe avec œil -->
                 <div class="pwd-container">
                     <input type="password" id="wifi-password-input" class="auth-input" placeholder="Mot de passe" data-i18n-ph="ph_pass">
                     <i class="fa-solid fa-eye pwd-icon" id="togglePasswordIcon" onclick="togglePasswordVis()"></i>
                 </div>
-
                 <button class="auth-btn" onclick="sauvegarderWifiClient()"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="btn_send_wifi">Envoyer</span></button>
             </div>
         </div>
@@ -241,7 +228,7 @@
                 <input type="text" id="tele-token-input" class="auth-input" placeholder="Bot Token" data-i18n-ph="ph_token">
                 <input type="text" id="tele-chatid-input" class="auth-input" placeholder="Chat ID" data-i18n-ph="ph_chatid">
                 <div style="display:flex; align-items:center; justify-content:space-between; margin:15px 0;">
-                    <span style="font-size:14px; font-weight:bold;" data-i18n="lbl_tele_actif">Activer les alertes :</span>
+                    <span style="font-size:14px; font-weight:bold;" data-i18n="lbl_tele_actif">Activer les alarmes :</span>
                     <input type="checkbox" id="tele-active-check" style="transform: scale(1.5);">
                 </div>
                 <button class="auth-btn" onclick="sauvegarderTelegram()"><i class="fa-solid fa-save"></i> <span data-i18n="btn_save_tele">Enregistrer</span></button>
@@ -263,15 +250,14 @@
         <div id="ota-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_ota">Mise à jour du système</h3>
-                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;" data-i18n="desc_ota">Vérifiez si une nouvelle version du logiciel est disponible pour le coffret.</p>
+                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;" data-i18n="desc_ota">Vérifiez si une nouvelle version est disponible.</p>
                 <div style="background:#1a2332; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #334155;">
                     <p style="margin:0 0 5px 0; font-size:14px;"><span data-i18n="lbl_ver_act">Version actuelle :</span> <strong id="lbl-version-actuelle" style="color:var(--text-white);">v1.0.0</strong></p>
                     <p style="margin:0; font-size:14px;"><span data-i18n="lbl_ver_dispo">Version dispo. :</span> <strong id="lbl-version-dispo" style="color:var(--text-gray);">Recherche...</strong></p>
                 </div>
                 <button class="auth-btn" id="btn-check-ota" style="background-color: #0ea5e9; margin-bottom:10px;" onclick="verifierMaj()"><i class="fa-solid fa-arrows-rotate"></i> <span data-i18n="btn_check_ota">Vérifier</span></button>
-                <button class="auth-btn" id="btn-start-ota" style="background-color: var(--green-border); display:none;" onclick="lancerMaj()"><i class="fa-solid fa-download"></i> <span data-i18n="btn_start_ota">Installer la mise à jour</span></button>
+                <button class="auth-btn" id="btn-start-ota" style="background-color: var(--green-border); display:none;" onclick="lancerMaj()"><i class="fa-solid fa-download"></i> <span data-i18n="btn_start_ota">Installer</span></button>
                 <div class="progress-container" id="ota-progress-container"><div class="progress-bar" id="ota-progress-bar"></div></div>
-                <div class="progress-text" id="ota-progress-text" style="display:none;">0%</div>
             </div>
         </div>
 
@@ -307,8 +293,8 @@
             btn_scan: "Scanner", lbl_sel_wifi: "Sélectionnez le réseau :", ph_ssid: "Nom du Wi-Fi (SSID)", ph_pass: "Mot de passe",
             btn_send_wifi: "Envoyer au Boîtier", titre_conn: "Type de Connexion", btn_ble: "Connexion BLE (Locale)", btn_cloud: "Mode Cloud (Distance)",
             titre_hist: "Historique (15 jours)", titre_lang: "Choisissez votre langue",
-            titre_tele: "Alertes Telegram", desc_tele: "Recevez les alarmes directement sur votre smartphone.", ph_token: "Bot Token", ph_chatid: "Chat ID", lbl_tele_actif: "Activer les alertes :", btn_save_tele: "Enregistrer Telegram",
-            titre_ota: "Mise à jour du système", desc_ota: "Vérifiez si une nouvelle version du logiciel est disponible pour le coffret.", lbl_ver_act: "Version actuelle :", lbl_ver_dispo: "Version dispo. :", btn_check_ota: "Vérifier", btn_start_ota: "Installer la mise à jour",
+            titre_tele: "Alertes Telegram", desc_tele: "Recevez les alarmes directement sur votre smartphone.", ph_token: "Bot Token", ph_chatid: "Chat ID", lbl_tele_actif: "Activer les alarmes :", btn_save_tele: "Enregistrer",
+            titre_ota: "Mise à jour du système", desc_ota: "Vérifiez si une nouvelle version est disponible.", lbl_ver_act: "Version actuelle :", lbl_ver_dispo: "Version dispo. :", btn_check_ota: "Vérifier", btn_start_ota: "Installer",
             titre_alarme: "ÉTAT D'ALARME", btn_reset: "RESET ALARME",
             al_eau: "ALARME : NIVEAU D'EAU", al_couv: "ALARME : COUVERCLE OUVERT", al_15: "ALARME : 15 LAVAGES CONSÉCUTIFS", al_inc: "ALARME INCONNUE",
             lbl_scanning: "Recherche en cours...", lbl_wifi_etat: "État Wi-Fi :", lbl_wifi_signal: "Signal :", wifi_conn: "Connecté", wifi_dec: "Déconnecté"
@@ -321,10 +307,10 @@
             btn_rot: "Rotatie", btn_lav: "Spoelen", titre_config: "Trommel Instellingen", lbl_modele: "Model:", lbl_mode: "Modus:",
             opt_grav: "Zwaartekracht (G)", opt_pomp: "Pomp (P)", btn_save_tamb: "Opslaan", titre_wifi: "Wi-Fi Instellen",
             btn_scan: "Scannen", lbl_sel_wifi: "Selecteer netwerk:", ph_ssid: "Wi-Fi Naam (SSID)", ph_pass: "Wachtwoord",
-            btn_send_wifi: "Verzenden naar controller", titre_conn: "Verbindingstype", btn_ble: "BLE Verbinding (Lokaal)", btn_cloud: "Cloud Modus (Op afstand)",
-            titre_hist: "Geschiedenis (15 dagen)", titre_lang: "Kies uw taal",
-            titre_tele: "Telegram Meldingen", desc_tele: "Ontvang alarmen direct op uw smartphone.", ph_token: "Bot Token", ph_chatid: "Chat ID", lbl_tele_actif: "Meldingen activeren:", btn_save_tele: "Telegram Opslaan",
-            titre_ota: "Systeemupdate", desc_ota: "Controleer of er een nieuwe softwareversie beschikbaar is.", lbl_ver_act: "Huidige versie:", lbl_ver_dispo: "Beschikbare versie:", btn_check_ota: "Controleren", btn_start_ota: "Update installeren",
+            btn_send_wifi: "Verzenden", titre_conn: "Verbindingstype", btn_ble: "BLE Verbinding (Lokaal)", btn_cloud: "Cloud Modus",
+            titre_hist: "Geschiedenis", titre_lang: "Kies uw taal",
+            titre_tele: "Telegram Meldingen", desc_tele: "Ontvang alarmen op smartphone.", ph_token: "Bot Token", ph_chatid: "Chat ID", lbl_tele_actif: "Activeren:", btn_save_tele: "Opslaan",
+            titre_ota: "Systeemupdate", desc_ota: "Controleer op updates.", lbl_ver_act: "Huidige versie:", lbl_ver_dispo: "Beschikbaar:", btn_check_ota: "Controleren", btn_start_ota: "Installeren",
             titre_alarme: "ALARM STATUS", btn_reset: "RESET ALARM",
             al_eau: "ALARM: WATERNIVEAU", al_couv: "ALARM: DEKSEL OPEN", al_15: "ALARM: 15 SPOELINGEN", al_inc: "ONBEKEND ALARM",
             lbl_scanning: "Bezig met scannen...", lbl_wifi_etat: "Wi-Fi Status:", lbl_wifi_signal: "Signaal:", wifi_conn: "Verbonden", wifi_dec: "Niet verbonden"
@@ -346,46 +332,23 @@
         });
         document.getElementById('btn-fr').className = (lang === 'fr') ? 'lang-btn active' : 'lang-btn';
         document.getElementById('btn-nl').className = (lang === 'nl') ? 'lang-btn active' : 'lang-btn';
-        
-        let vueActive = document.querySelector('.view.active').id.replace('-view', '');
-        rafraichirTitres(vueActive);
-        updateChartsText(); 
-    }
-
-    let chartTempInstance = null; let chartWashInstance = null;
-    function initCharts() {
-        if (typeof Chart === 'undefined') return; 
-        const labels = ["J-14","J-13","J-12","J-11","J-10","J-9","J-8","J-7","J-6","J-5","J-4","J-3","J-2","J-1","Auj."];
-        const dataTemp = [12.1, 12.5, 12.2, 13.0, 13.5, 13.1, 12.8, 14.2, 14.5, 15.1, 15.0, 14.8, 14.2, 13.9, 14.1];
-        const dataWash = [22, 24, 21, 19, 25, 28, 30, 22, 20, 18, 19, 21, 23, 22, 20];
-
-        Chart.defaults.color = '#94a3b8'; Chart.defaults.borderColor = '#334155';
-        const ctxTemp = document.getElementById('chartTemp').getContext('2d');
-        chartTempInstance = new Chart(ctxTemp, { type: 'line', data: { labels: labels, datasets: [{ label: 'Température (°C)', data: dataTemp, borderColor: '#ef4444', tension: 0.3, pointRadius: 2 }] } });
-        const ctxWash = document.getElementById('chartWash').getContext('2d');
-        chartWashInstance = new Chart(ctxWash, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Lavages', data: dataWash, backgroundColor: '#3b82f6', borderRadius: 4 }] } });
-    }
-    function updateChartsText() {
-        if(chartTempInstance && chartWashInstance) {
-            chartTempInstance.data.datasets[0].label = (currentLang === 'fr') ? "Température (°C)" : "Temperatuur (°C)";
-            chartWashInstance.data.datasets[0].label = (currentLang === 'fr') ? "Lavages" : "Spoelingen";
-            chartTempInstance.update(); chartWashInstance.update();
-        }
+        rafraichirTitres(document.querySelector('.view.active').id.replace('-view', ''));
     }
 
     const SERVICE_UUID           = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
     const CHARACTERISTIC_UUID_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
     const CHARACTERISTIC_UUID_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
-    const FIREBASE_HOST = "https://ton-projet-rtdb.firebaseio.com/"; // <-- Remets ton vrai lien ici !
     
-    let ID_COFFRET = ""; 
+    const FIREBASE_HOST = "https://tambour20100-29236-default-rtdb.firebaseio.com/";
+    const FIREBASE_AUTH = "rsihDyLcNkHwThAEuCIbkjFm8bwPbnmKxHIr6mkT";
+    
+    let ID_COFFRET = localStorage.getItem("tambour_id") || "Coffret_01"; 
     let bleDevice = null;
     let rxCharacteristic = null;
     let txCharacteristic = null;
     let modeActif = "BLE";
     let timerFirebase = null;
     let reseauxTrouves = [];
-    let firmwareVersionActuelle = "v1.0.0"; let firmwareUrlMaj = "";
 
     function rafraichirTitres(vue) {
         let modele = localStorage.getItem("tambour_modele") || "70";
@@ -394,17 +357,10 @@
         document.getElementById('config-mode-select').value = mode;
 
         let titre = document.getElementById('val-Mode');
-        
         if (vue === 'auto') titre.innerText = `Auto ${modele}${mode}`;
         else if (vue === 'manuel') titre.innerText = (currentLang==='fr') ? `Manu ${modele}${mode}` : `Hand ${modele}${mode}`;
         else if (vue === 'alarme') titre.innerText = dict[currentLang]['titre_alarme'];
-        else if (vue === 'config') titre.innerText = dict[currentLang]['menu_config'];
-        else if (vue === 'wifi') titre.innerText = dict[currentLang]['menu_wifi'];
-        else if (vue === 'telegram') titre.innerText = dict[currentLang]['menu_telegram'];
-        else if (vue === 'ble') titre.innerText = dict[currentLang]['menu_ble'];
-        else if (vue === 'history') titre.innerText = dict[currentLang]['menu_history'];
-        else if (vue === 'ota') titre.innerText = dict[currentLang]['menu_ota'];
-        else if (vue === 'lang') titre.innerText = dict[currentLang]['menu_lang'];
+        else titre.innerText = dict[currentLang]['menu_' + vue] || "Dashboard";
     }
 
     async function envoyerCommande(action, valeur) {
@@ -415,7 +371,7 @@
                 await rxCharacteristic.writeValueWithoutResponse(enc.encode(trame));
             } catch (e) { console.warn("Erreur BLE", e); }
         } else if (modeActif === "FIREBASE" && ID_COFFRET) {
-            let url = `${FIREBASE_HOST}${ID_COFFRET}/commandes.json`;
+            let url = `${FIREBASE_HOST}clients/${ID_COFFRET}/commandes.json?auth=${FIREBASE_AUTH}`;
             await fetch(url, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ [action]: valeur, timestamp: Date.now() }) });
         }
     }
@@ -423,26 +379,20 @@
     function switchView(target) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-        
         document.getElementById(`${target}-view`).classList.add('active');
         let tabObj = document.getElementById(`tab-${target}`);
         if(tabObj) tabObj.classList.add('active');
-        
         rafraichirTitres(target); 
         document.getElementById('sidebarMenu').classList.remove('open');
-        
         if(target !== 'alarme') envoyerCommande("PAGE", target.toUpperCase());
     }
 
     function adapterInterfaceSelonMode() {
         let styleDisplay = (modeActif === "FIREBASE") ? "none" : "flex";
-        
-        document.getElementById('tab-manuel').style.display = styleDisplay;
-        document.getElementById('tab-config').style.display = styleDisplay;
-        document.getElementById('tab-wifi').style.display = styleDisplay;
-        document.getElementById('tab-telegram').style.display = styleDisplay;
-        document.getElementById('tab-ota').style.display = styleDisplay;
-        
+        ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-telegram', 'tab-ota'].forEach(id => {
+            let el = document.getElementById(id);
+            if(el) el.style.display = styleDisplay;
+        });
         if (modeActif === "FIREBASE") {
             let activeView = document.querySelector('.view.active').id;
             if (['manuel-view', 'config-view', 'wifi-view', 'telegram-view', 'ota-view'].includes(activeView)) {
@@ -456,44 +406,36 @@
         if (dot) dot.className = (status === 1 || status === true) ? "dot green" : "dot red";
     }
 
-    function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur, alarme_code = 0, wifi_stat = 0, wifi_rssi = 0) {
+    function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur, alarme_code = 0, wifi_stat = 0, wifi_rssi = 0, ping = 0) {
         try {
             ['val-temperature', 'val-temperature-man', 'val-temperature-al'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = temp.toFixed(1); });
             
             let pct = Math.min(Math.max((temp - 6.0) / 24.0, 0), 1);
             ['gaugeCircle', 'gaugeCircle-man', 'gaugeCircle-al'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).style.strokeDashoffset = 353.4 - (pct * 353.4); });
             
+            let couvLogique = !(couv === 1 || couv === true);
+
             gererBadgeDot('dot-niveau_securite', secu); gererBadgeDot('dot-niveau_securite-man', secu); gererBadgeDot('dot-niveau_securite-al', secu);
             gererBadgeDot('dot-niveau_lavage', lav); gererBadgeDot('dot-niveau_lavage-man', lav); gererBadgeDot('dot-niveau_lavage-al', lav);
-            gererBadgeDot('dot-couvercle', !couv); gererBadgeDot('dot-couvercle-man', !couv); gererBadgeDot('dot-couvercle-al', !couv);
+            gererBadgeDot('dot-couvercle', couvLogique); gererBadgeDot('dot-couvercle-man', couvLogique); gererBadgeDot('dot-couvercle-al', couvLogique);
             gererBadgeDot('dot-pompe_uv', uv); gererBadgeDot('dot-pompe_uv-man', uv); gererBadgeDot('dot-pompe_uv-al', uv);
             
             if(document.getElementById('val-Nbre_lavage')) document.getElementById('val-Nbre_lavage').innerText = compteur;
 
-            // --- MISE A JOUR DES BARRES WIFI ---
+            // --- GESTION BARRES WIFI & PING CLOUD ---
             let elWifiStatus = document.getElementById('lbl-wifi-status');
             let elWifiRssi = document.getElementById('lbl-wifi-rssi');
             let bars = document.querySelectorAll('#wifi-bars .bar');
-            
-            // On grise toutes les barres par défaut
             bars.forEach(b => b.style.backgroundColor = '#334155');
             
             if (elWifiStatus && elWifiRssi) {
                 if (wifi_stat === 1) {
-                    elWifiStatus.innerText = dict[currentLang]['wifi_conn'] || "Connecté";
+                    elWifiStatus.innerText = (dict[currentLang]['wifi_conn'] || "Connecté") + " (Ping: " + ping + ")";
                     elWifiStatus.style.color = "var(--dot-green)";
                     elWifiRssi.innerText = wifi_rssi + " dBm";
-                    
-                    // Calcul des barres
-                    let force = 0; let couleurBarre = "var(--dot-green)";
-                    if(wifi_rssi > -60) { force = 4; couleurBarre = "var(--dot-green)"; } // Excellent
-                    else if(wifi_rssi > -70) { force = 3; couleurBarre = "var(--dot-green)"; } // Bon
-                    else if(wifi_rssi > -80) { force = 2; couleurBarre = "#f59e0b"; } // Moyen (Orange)
-                    else { force = 1; couleurBarre = "var(--dot-red)"; } // Faible (Rouge)
-
-                    // Colorie le bon nombre de barres
+                    let force = (wifi_rssi > -60) ? 4 : (wifi_rssi > -70) ? 3 : (wifi_rssi > -80) ? 2 : 1;
+                    let couleurBarre = (force > 2) ? "var(--dot-green)" : (force === 2) ? "#f59e0b" : "var(--dot-red)";
                     for(let i=0; i<force; i++) { bars[i].style.backgroundColor = couleurBarre; }
-
                 } else {
                     elWifiStatus.innerText = dict[currentLang]['wifi_dec'] || "Déconnecté";
                     elWifiStatus.style.color = "var(--dot-red)";
@@ -509,7 +451,6 @@
                 else if(alarme_code === 3) textAlarme = dict[currentLang]['al_15'];
                 
                 document.getElementById('alarm-banner-text').innerText = textAlarme;
-                
                 if(btnMenu) btnMenu.classList.add('disabled');
                 document.getElementById('sidebarMenu').classList.remove('open');
                 
@@ -524,30 +465,44 @@
 
     function resetAlarme() {
         envoyerCommande("RESET_ALARM", "1");
-        if (modeActif === "BLE") {
-            switchView("manuel"); 
-        } else {
-            switchView("auto");  
-            document.querySelector('.menu-toggle-btn').classList.remove('disabled');
-        }
+        if (modeActif === "BLE") { switchView("manuel"); } 
+        else { switchView("auto"); document.querySelector('.menu-toggle-btn').classList.remove('disabled'); }
     }
 
+    // --- LECTURE FIREBASE (Cloud) ---
     async function lireDonneesFirebase() {
         if (!ID_COFFRET) return;
         try {
-            let url = `${FIREBASE_HOST}${ID_COFFRET}.json`;
+            let url = `${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`;
             let response = await fetch(url);
             if (response.ok) {
                 let data = await response.json();
                 if (data) {
-                    afficherMaitresDonnees(
-                        data.temperature || 0, data.niveau_secu || 0, data.niveau_lav || 0,
-                        data.couvercle || 0, data.pompe_uv || 0, data.compteur_lavage || 0, data.alarme || 0,
-                        data.wifi_stat || 0, data.wifi_rssi || 0
-                    );
+                    let temp = data.temperature !== undefined ? data.temperature : 0;
+                    let secu = data.niveau_securite !== undefined ? data.niveau_securite : 0;
+                    let lav = data.niveau_lavage !== undefined ? data.niveau_lavage : 0;
+                    let couv = data.couvercle !== undefined ? data.couvercle : 0;
+                    let uv = data.pompe_uv !== undefined ? data.pompe_uv : 0;
+                    let cpt = data.Nbre_lavage !== undefined ? data.Nbre_lavage : 0;
+                    let alarme = data.code_alarme !== undefined ? data.code_alarme : 0;
+                    let wStat = data.wifi_stat !== undefined ? data.wifi_stat : 0;
+                    let wRssi = data.wifi_rssi !== undefined ? data.wifi_rssi : 0;
+                    let ping = data.ping !== undefined ? data.ping : 0; // Lecture de la variable ping
+
+                    afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi, ping);
                 }
             }
         } catch (error) { console.error("Erreur Firebase", error); }
+    }
+
+    function sauvegarderTambour() {
+        let mod = document.getElementById('config-modele-select').value;
+        let typ = document.getElementById('config-mode-select').value;
+        localStorage.setItem("tambour_modele", mod);
+        localStorage.setItem("tambour_mode", typ);
+        envoyerCommande("MODELE", mod + typ);
+        rafraichirTitres(document.querySelector('.view.active').id.replace('-view', ''));
+        alert("Modèle enregistré !");
     }
 
     async function connecterBLE() {
@@ -571,20 +526,13 @@
                 if (text.startsWith("ID:")) {
                     let parts = text.split(",D:");
                     if (parts.length >= 2) {
-                        ID_COFFRET = parts[0].replace("ID:", ""); 
+                        ID_COFFRET = parts[0].replace("ID:", "").trim();
+                        localStorage.setItem("tambour_id", ID_COFFRET);
                         let d = parts[1].split(",");
-                        
                         let alCode = (d.length > 6) ? parseInt(d[6]) : 0;
-                        let wStat = (d.length > 7) ? parseInt(d[7]) : 0; 
-                        let wRssi = (d.length > 8) ? parseInt(d[8]) : 0; 
-                        
-                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], alCode, wStat, wRssi);
-                        
-                        let vIndex = parts[1].indexOf(",V:");
-                        if(vIndex !== -1) {
-                            firmwareVersionActuelle = parts[1].substring(vIndex + 3);
-                            document.getElementById('lbl-version-actuelle').innerText = firmwareVersionActuelle;
-                        }
+                        let wStat = (d.length > 7) ? parseInt(d[7]) : 0;
+                        let wRssi = (d.length > 8) ? parseInt(d[8]) : 0;
+                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], alCode, wStat, wRssi, 0);
                     }
                 } else if (text.startsWith("WNET:")) {
                     let reseau = text.substring(5);
@@ -601,7 +549,6 @@
     function activerModeFirebase() {
         modeActif = "FIREBASE";
         adapterInterfaceSelonMode(); 
-        
         document.getElementById('btn-mode-ble').className = "mode-btn";
         document.getElementById('btn-mode-cloud').className = "mode-btn active";
         document.getElementById('status-indic').className = "conn-status firebase";
@@ -627,7 +574,6 @@
         document.getElementById('icon-scanner').className = "fa-solid fa-magnifying-glass";
         document.getElementById('loaderWifi').style.display = 'none';
         document.getElementById('zoneWifiSelect').style.display = 'block';
-        
         let select = document.getElementById('wifi-ssid-select');
         select.innerHTML = "";
         reseauxTrouves.forEach(net => {
@@ -635,24 +581,19 @@
             opt.value = net; opt.innerHTML = net;
             select.appendChild(opt);
         });
-        select.addEventListener('change', function() { document.getElementById('wifi-ssid-input').value = this.value; });
         if(reseauxTrouves.length > 0) document.getElementById('wifi-ssid-input').value = reseauxTrouves[0];
     }
     
     function togglePasswordVis() {
         let input = document.getElementById("wifi-password-input");
         let icon = document.getElementById("togglePasswordIcon");
-        if (input.type === "password") {
-            input.type = "text";
-            icon.className = "fa-solid fa-eye-slash pwd-icon";
-        } else {
-            input.type = "password";
-            icon.className = "fa-solid fa-eye pwd-icon";
-        }
+        input.type = (input.type === "password") ? "text" : "password";
+        icon.className = (input.type === "password") ? "fa-solid fa-eye pwd-icon" : "fa-solid fa-eye-slash pwd-icon";
     }
     
     function sauvegarderWifiClient() { envoyerCommande("WIFI", document.getElementById('wifi-ssid-input').value + "|" + document.getElementById('wifi-password-input').value); }
-    
+    function sauvegarderTelegram() { envoyerCommande("TELE", document.getElementById('tele-token-input').value + "|" + document.getElementById('tele-chatid-input').value + "|" + (document.getElementById('tele-active-check').checked ? "1":"0")); alert("Telegram enregistré !"); }
+
     function initBoutonsManuels() {
         const lier = (idBtn, nomAction) => {
             const btn = document.getElementById(idBtn);
@@ -673,10 +614,8 @@
     window.addEventListener('load', () => { 
         initBoutonsManuels(); 
         adapterInterfaceSelonMode(); 
-        let viewClassActive = document.querySelector('.view.active').id.replace('-view', '');
-        rafraichirTitres(viewClassActive); 
+        rafraichirTitres('auto'); 
         setLang(currentLang); 
-        initCharts(); 
     });
 </script>
 </body>
