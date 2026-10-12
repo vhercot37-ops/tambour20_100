@@ -36,7 +36,7 @@
         
         .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         .status-badge { background-color: var(--bg-card); padding: 12px 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; background-color: var(--text-gray); flex-shrink: 0; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; background-color: #334155; flex-shrink: 0; transition: background-color 0.3s; }
         .dot.green { background-color: var(--dot-green); box-shadow: 0 0 8px var(--dot-green); }
         .dot.red { background-color: var(--dot-red); box-shadow: 0 0 8px var(--dot-red); }
         
@@ -237,7 +237,8 @@
                 <h3 data-i18n="titre_tele">Alertes Telegram</h3>
                 <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;" data-i18n="desc_tele">Recevez les alarmes directement sur votre smartphone.</p>
                 
-                <input type="text" id="tele-token-input" class="auth-input" placeholder="Bot Token" data-i18n-ph="ph_token">
+                <!-- TOKEN PRE-REMPLI -->
+                <input type="text" id="tele-token-input" class="auth-input" placeholder="Bot Token" data-i18n-ph="ph_token" value="8803564628:AAEntgbIiQ4ipAdTukiWDxsHMXKtkk8P_8k">
                 
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <input type="text" id="tele-chatid-input" class="auth-input" style="margin-bottom: 0;" placeholder="Chat ID" data-i18n-ph="ph_chatid">
@@ -343,7 +344,7 @@
     const currentFirmwareVersion = "v1.0.0"; 
     let otaUrl = "";
 
-    // --- VARIABLES DE VERIFICATION DU PING ---
+    // --- VARIABLES PING ---
     let dernierPing = -1;
     let tempsDernierPing = Date.now();
     let premierLecture = true;
@@ -432,17 +433,29 @@
 
     function gererBadgeDot(id, status) {
         const dot = document.getElementById(id);
-        if (dot) dot.className = (status === 1 || status === true) ? "dot green" : "dot red";
+        if (dot) {
+            if (status === null || status === undefined || status === "") {
+                dot.className = "dot"; // Si hors ligne, la pastille redevient grise
+            } else {
+                dot.className = (status === 1 || status === true) ? "dot green" : "dot red";
+            }
+        }
     }
 
     function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur, alarme_code = 0, wifi_stat = 0, wifi_rssi = 0) {
         try {
-            ['val-temperature', 'val-temperature-man', 'val-temperature-al'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = temp.toFixed(1); });
+            // Affichage Température (Si hors-ligne, ce sera la chaîne "--.-")
+            ['val-temperature', 'val-temperature-man', 'val-temperature-al'].forEach(id => { 
+                if(document.getElementById(id)) document.getElementById(id).innerText = (typeof temp === 'number') ? temp.toFixed(1) : temp; 
+            });
             
-            let pct = Math.min(Math.max((temp - 6.0) / 24.0, 0), 1);
-            ['gaugeCircle', 'gaugeCircle-man', 'gaugeCircle-al'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).style.strokeDashoffset = 353.4 - (pct * 353.4); });
+            let pct = 0;
+            if (typeof temp === 'number') { pct = Math.min(Math.max((temp - 6.0) / 24.0, 0), 1); }
+            ['gaugeCircle', 'gaugeCircle-man', 'gaugeCircle-al'].forEach(id => { 
+                if(document.getElementById(id)) document.getElementById(id).style.strokeDashoffset = 353.4 - (pct * 353.4); 
+            });
             
-            let couvLogique = !(couv === 1 || couv === true);
+            let couvLogique = (couv === null) ? null : !(couv === 1 || couv === true);
 
             gererBadgeDot('dot-niveau_securite', secu); gererBadgeDot('dot-niveau_securite-man', secu); gererBadgeDot('dot-niveau_securite-al', secu);
             gererBadgeDot('dot-niveau_lavage', lav); gererBadgeDot('dot-niveau_lavage-man', lav); gererBadgeDot('dot-niveau_lavage-al', lav);
@@ -451,11 +464,11 @@
             
             if(document.getElementById('val-Nbre_lavage')) document.getElementById('val-Nbre_lavage').innerText = compteur;
 
-            // --- GESTION BARRES WIFI HEADER (ESP32) ---
+            // --- GESTION BARRES WIFI HEADER ---
             let espWifiDiv = document.getElementById('esp-wifi-status');
             let headerBars = document.querySelectorAll('#header-wifi-bars .bar');
             
-            if (modeActif === "FIREBASE") {
+            if (modeActif === "FIREBASE" && wifi_stat !== 0 && wifi_rssi !== -100) {
                 espWifiDiv.style.display = 'flex';
                 headerBars.forEach(b => b.style.backgroundColor = '#334155');
                 if (wifi_stat === 1) {
@@ -465,7 +478,7 @@
                 }
             } else { espWifiDiv.style.display = 'none'; }
             
-            // --- GESTION BARRES WIFI ONGLET WIFI ---
+            // --- GESTION BARRES WIFI ONGLET ---
             let elWifiStatus = document.getElementById('lbl-wifi-status');
             let elWifiRssi = document.getElementById('lbl-wifi-rssi');
             let bars = document.querySelectorAll('#wifi-bars .bar');
@@ -510,7 +523,7 @@
         else { switchView("auto"); document.querySelector('.menu-toggle-btn').classList.remove('disabled'); }
     }
 
-    // --- LECTURE FIREBASE AVEC CONTROLE PING ET ETAT CLOUD ---
+    // --- LECTURE FIREBASE AVEC TIMEOUT 15s ---
     async function lireDonneesFirebase() {
         if (!ID_COFFRET) return;
         
@@ -527,11 +540,11 @@
                     let pingActuel = data.ping !== undefined ? data.ping : 0;
                     let espEnLigne = false;
 
-                    // VERIFICATION DU PING POUR SAVOIR SI L'ESP32 EST ALLUME
+                    // Logique Timeout (15 secondes max)
                     if (premierLecture) {
                         dernierPing = pingActuel;
                         tempsDernierPing = Date.now();
-                        espEnLigne = true; // On donne le bénéfice du doute au chargement
+                        espEnLigne = true;
                         premierLecture = false;
                     } else {
                         if (pingActuel !== dernierPing) {
@@ -539,8 +552,7 @@
                             tempsDernierPing = Date.now();
                             espEnLigne = true;
                         } else {
-                            // Si le ping n'a pas bougé depuis 25 secondes, l'ESP est mort.
-                            if (Date.now() - tempsDernierPing > 25000) {
+                            if (Date.now() - tempsDernierPing > 15000) {
                                 espEnLigne = false;
                             } else {
                                 espEnLigne = true;
@@ -548,36 +560,44 @@
                         }
                     }
 
-                    // AFFICHAGE HEADER EN HAUT A GAUCHE
                     if (espEnLigne) {
                         dot.className = "fa-solid fa-circle";
                         dot.style.color = "var(--dot-green)";
                         text.innerText = "Cloud Actif";
                     } else {
                         dot.className = "fa-solid fa-circle-exclamation";
-                        dot.style.color = "#f59e0b"; // Orange
+                        dot.style.color = "#f59e0b";
                         text.innerText = "Boîtier Hors Ligne";
                     }
 
-                    // Pré-remplissage Telegram si présent dans Firebase
-                    if(data.telegram_token && !document.getElementById('tele-token-input').value) {
-                        document.getElementById('tele-token-input').value = data.telegram_token;
-                    }
                     if(data.telegram_chat_id && !document.getElementById('tele-chatid-input').value) {
                         document.getElementById('tele-chatid-input').value = data.telegram_chat_id;
                     }
 
-                    // Si l'ESP est hors ligne, on force son Wifi Status à 0 pour effacer les barres
-                    let wStat = espEnLigne ? (data.wifi_stat !== undefined ? data.wifi_stat : 0) : 0;
-                    let wRssi = espEnLigne ? (data.wifi_rssi !== undefined ? data.wifi_rssi : 0) : -100;
+                    // Affectation des variables (Effacées si hors ligne)
+                    let temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi;
                     
-                    let temp = data.temperature !== undefined ? data.temperature : 0;
-                    let secu = data.niveau_securite !== undefined ? data.niveau_securite : 0;
-                    let lav = data.niveau_lavage !== undefined ? data.niveau_lavage : 0;
-                    let couv = data.couvercle !== undefined ? data.couvercle : 0;
-                    let uv = data.pompe_uv !== undefined ? data.pompe_uv : 0;
-                    let cpt = data.Nbre_lavage !== undefined ? data.Nbre_lavage : 0;
-                    let alarme = data.code_alarme !== undefined ? data.code_alarme : 0;
+                    if (espEnLigne) {
+                        temp = data.temperature !== undefined ? data.temperature : 0;
+                        secu = data.niveau_securite !== undefined ? data.niveau_securite : 0;
+                        lav = data.niveau_lavage !== undefined ? data.niveau_lavage : 0;
+                        couv = data.couvercle !== undefined ? data.couvercle : 0;
+                        uv = data.pompe_uv !== undefined ? data.pompe_uv : 0;
+                        cpt = data.Nbre_lavage !== undefined ? data.Nbre_lavage : 0;
+                        alarme = data.code_alarme !== undefined ? data.code_alarme : 0;
+                        wStat = data.wifi_stat !== undefined ? data.wifi_stat : 0;
+                        wRssi = data.wifi_rssi !== undefined ? data.wifi_rssi : 0;
+                    } else {
+                        temp = "--.-";
+                        secu = null;  // Pastille grise
+                        lav = null;
+                        couv = null;
+                        uv = null;
+                        cpt = "--";
+                        alarme = 0;
+                        wStat = 0;
+                        wRssi = -100; // Efface les barres WiFi
+                    }
 
                     afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi);
                 } else {
@@ -666,7 +686,6 @@
         timerFirebase = setInterval(lireDonneesFirebase, 5000);
     }
 
-    // --- GESTION DU SCAN WI-FI (Simplifiée) ---
     function scannerWifi() { 
         document.getElementById('btn-scanner').disabled = true;
         document.getElementById('icon-scanner').className = "fa-solid fa-spinner fa-spin";
@@ -710,11 +729,11 @@
         alert("Identifiants Wi-Fi envoyés au boîtier !");
     }
 
-    // --- DETECTION AUTOMATIQUE CHAT ID TELEGRAM ---
+    // --- TELEGRAM ---
     async function detecterChatIdTelegram() {
         let token = document.getElementById('tele-token-input').value.trim();
         if(!token) { 
-            alert("Veuillez d'abord coller le Bot Token fourni par BotFather."); 
+            alert("Veuillez d'abord vérifier le Bot Token."); 
             return; 
         }
 
@@ -734,7 +753,6 @@
                     
                     document.getElementById('tele-chatid-input').value = chatId;
                     
-                    // On force l'écriture DIRECTE de ces clés à la racine de Firebase
                     if (ID_COFFRET) {
                         let url = `${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`;
                         await fetch(url, { 
@@ -743,10 +761,7 @@
                             body: JSON.stringify({ telegram_chat_id: chatId.toString(), telegram_token: token }) 
                         });
                     }
-
-                    // Et on informe l'ESP via la commande normale pour son propre process
                     sauvegarderTelegram();
-                    
                     alert(`✅ ID trouvé pour ${prenom} : ${chatId} !\nL'enregistrement dans le Cloud est automatique.`);
                 } else {
                     alert("⚠️ Format de message non reconnu.");
