@@ -231,24 +231,21 @@
             </div>
         </div>
 
-        <!-- CONFIGURATION TELEGRAM -->
+        <!-- CONFIGURATION TELEGRAM (SIMPLIFIÉE) -->
         <div id="telegram-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_tele">Alertes Telegram</h3>
-                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;" data-i18n="desc_tele">Recevez les alarmes directement sur votre smartphone.</p>
                 
-                <!-- TOKEN PRE-REMPLI -->
-                <input type="text" id="tele-token-input" class="auth-input" placeholder="Bot Token" data-i18n-ph="ph_token" value="8803564628:AAEntgbIiQ4ipAdTukiWDxsHMXKtkk8P_8k">
-                
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="text" id="tele-chatid-input" class="auth-input" style="margin-bottom: 0;" placeholder="Chat ID" data-i18n-ph="ph_chatid">
-                    <button id="btn-detect-telegram" class="auth-btn" style="width: 50px; background-color: #f59e0b;" onclick="detecterChatIdTelegram()" title="Détecter automatiquement">
-                        <i class="fa-solid fa-satellite-dish"></i>
-                    </button>
+                <div style="background:#1a2332; padding:15px; border-radius:10px; margin-bottom:20px; border:1px solid #334155; text-align: left;">
+                    <p style="font-size: 13px; color: var(--text-white); margin-top: 0; font-weight: bold;">Pour lier votre compte Telegram :</p>
+                    <ol style="font-size: 13px; color: var(--text-gray); padding-left: 15px; margin-bottom: 0;">
+                        <li>Ouvrez l'application Telegram.</li>
+                        <li>Cherchez votre Bot.</li>
+                        <li>Envoyez-lui le message suivant :<br> 
+                            <strong style="color:var(--accent-blue); font-size: 15px;" id="code-liaison">/start</strong>
+                        </li>
+                    </ol>
                 </div>
-                <p style="font-size: 11px; color: #f59e0b; margin-top: 5px; text-align: left;">
-                    * Envoyez un message à votre bot depuis l'app Telegram, puis cliquez sur le radar.
-                </p>
 
                 <div style="display:flex; align-items:center; justify-content:space-between; margin:15px 0;">
                     <span style="font-size:14px; font-weight:bold;" data-i18n="lbl_tele_actif">Activer les alarmes :</span>
@@ -570,10 +567,6 @@
                         text.innerText = "Boîtier Hors Ligne";
                     }
 
-                    if(data.telegram_chat_id && !document.getElementById('tele-chatid-input').value) {
-                        document.getElementById('tele-chatid-input').value = data.telegram_chat_id;
-                    }
-
                     // Affectation des variables (Effacées si hors ligne)
                     let temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi;
                     
@@ -655,6 +648,10 @@
                     if (parts.length >= 2) {
                         ID_COFFRET = parts[0].replace("ID:", "").trim();
                         localStorage.setItem("tambour_id", ID_COFFRET);
+                        
+                        // Met à jour la commande de liaison Telegram pour le client
+                        document.getElementById('code-liaison').innerText = "/start " + ID_COFFRET;
+                        
                         let d = parts[1].split(",");
                         let alCode = (d.length > 6) ? parseInt(d[6]) : 0;
                         let wStat = (d.length > 7) ? parseInt(d[7]) : 0;
@@ -729,65 +726,20 @@
         alert("Identifiants Wi-Fi envoyés au boîtier !");
     }
 
-    // --- TELEGRAM ---
-    async function detecterChatIdTelegram() {
-        let token = document.getElementById('tele-token-input').value.trim();
-        if(!token) { 
-            alert("Veuillez d'abord vérifier le Bot Token."); 
-            return; 
-        }
-
-        let icon = document.querySelector('#btn-detect-telegram i');
-        icon.className = "fa-solid fa-spinner fa-spin";
-
-        try {
-            let response = await fetch(`https://api.telegram.org/bot${token}/getUpdates`);
-            let data = await response.json();
-
-            if (data.ok && data.result.length > 0) {
-                let lastUpdate = data.result[data.result.length - 1];
-                
-                if (lastUpdate.message && lastUpdate.message.chat) {
-                    let chatId = lastUpdate.message.chat.id;
-                    let prenom = lastUpdate.message.chat.first_name || "Utilisateur";
-                    
-                    document.getElementById('tele-chatid-input').value = chatId;
-                    
-                    if (ID_COFFRET) {
-                        let url = `${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`;
-                        await fetch(url, { 
-                            method: 'PATCH', 
-                            headers: { 'Content-Type': 'application/json' }, 
-                            body: JSON.stringify({ telegram_chat_id: chatId.toString(), telegram_token: token }) 
-                        });
-                    }
-                    sauvegarderTelegram();
-                    alert(`✅ ID trouvé pour ${prenom} : ${chatId} !\nL'enregistrement dans le Cloud est automatique.`);
-                } else {
-                    alert("⚠️ Format de message non reconnu.");
-                }
-            } else {
-                alert("⚠️ Aucun message trouvé.\n\nAllez sur l'application Telegram, envoyez 'Bonjour' ou '/start' à votre bot, puis réessayez de cliquer sur le radar.");
-            }
-        } catch (error) {
-            console.error("Erreur Telegram API :", error);
-            alert("❌ Erreur de connexion aux serveurs Telegram.");
-        }
-        
-        icon.className = "fa-solid fa-satellite-dish";
-    }
-    
     function sauvegarderTelegram() { 
-        let token = document.getElementById('tele-token-input').value;
-        let chatId = document.getElementById('tele-chatid-input').value;
+        // On n'envoie plus de token/id à l'ESP, on sauvegarde juste si le client veut activer ou non
         let actif = document.getElementById('tele-active-check').checked ? "1":"0";
-        envoyerCommande("TELE", token + "|" + chatId + "|" + actif); 
+        envoyerCommande("TELE", actif); 
+        alert("Préférences Telegram enregistrées !");
     }
     
     function chargerMemos() {
         let memoPass = localStorage.getItem("wifi_pass");
         if(memoPass) document.getElementById('wifi-password-input').value = memoPass;
         document.getElementById('lbl-version-actuelle').innerText = currentFirmwareVersion;
+        
+        // Initialisation du texte de la commande Telegram avec le dernier ID connu
+        document.getElementById('code-liaison').innerText = "/start " + ID_COFFRET;
     }
 
     // --- GESTION OTA ---
