@@ -241,7 +241,7 @@
                 
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <input type="text" id="tele-chatid-input" class="auth-input" style="margin-bottom: 0;" placeholder="Chat ID" data-i18n-ph="ph_chatid">
-                    <button class="auth-btn" style="width: 50px; background-color: #f59e0b;" onclick="detecterChatIdTelegram()" title="Détecter automatiquement">
+                    <button id="btn-detect-telegram" class="auth-btn" style="width: 50px; background-color: #f59e0b;" onclick="detecterChatIdTelegram()" title="Détecter automatiquement">
                         <i class="fa-solid fa-satellite-dish"></i>
                     </button>
                 </div>
@@ -343,6 +343,11 @@
     const currentFirmwareVersion = "v1.0.0"; 
     let otaUrl = "";
 
+    // --- VARIABLES DE VERIFICATION DU PING ---
+    let dernierPing = -1;
+    let tempsDernierPing = Date.now();
+    let premierLecture = true;
+
     function setLang(lang) {
         currentLang = lang;
         localStorage.setItem('app_lang', lang);
@@ -430,7 +435,7 @@
         if (dot) dot.className = (status === 1 || status === true) ? "dot green" : "dot red";
     }
 
-    function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur, alarme_code = 0, wifi_stat = 0, wifi_rssi = 0, ping = 0) {
+    function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur, alarme_code = 0, wifi_stat = 0, wifi_rssi = 0) {
         try {
             ['val-temperature', 'val-temperature-man', 'val-temperature-al'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = temp.toFixed(1); });
             
@@ -505,27 +510,67 @@
         else { switchView("auto"); document.querySelector('.menu-toggle-btn').classList.remove('disabled'); }
     }
 
-    // --- LECTURE FIREBASE AVEC INDICATEUR TELEPHONE ---
+    // --- LECTURE FIREBASE AVEC CONTROLE PING ET ETAT CLOUD ---
     async function lireDonneesFirebase() {
         if (!ID_COFFRET) return;
         
         let dot = document.getElementById('app-conn-dot');
         let text = document.getElementById('app-conn-text');
         
-        dot.className = "fa-solid fa-circle pulsing";
-        dot.style.color = "#f59e0b";
-        text.innerText = "Sync Cloud...";
-
         try {
             let url = `${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`;
             let response = await fetch(url);
+            
             if (response.ok) {
                 let data = await response.json();
                 if (data) {
-                    dot.className = "fa-solid fa-circle";
-                    dot.style.color = "var(--dot-green)";
-                    text.innerText = "Cloud Actif";
+                    let pingActuel = data.ping !== undefined ? data.ping : 0;
+                    let espEnLigne = false;
 
+                    // VERIFICATION DU PING POUR SAVOIR SI L'ESP32 EST ALLUME
+                    if (premierLecture) {
+                        dernierPing = pingActuel;
+                        tempsDernierPing = Date.now();
+                        espEnLigne = true; // On donne le bénéfice du doute au chargement
+                        premierLecture = false;
+                    } else {
+                        if (pingActuel !== dernierPing) {
+                            dernierPing = pingActuel;
+                            tempsDernierPing = Date.now();
+                            espEnLigne = true;
+                        } else {
+                            // Si le ping n'a pas bougé depuis 25 secondes, l'ESP est mort.
+                            if (Date.now() - tempsDernierPing > 25000) {
+                                espEnLigne = false;
+                            } else {
+                                espEnLigne = true;
+                            }
+                        }
+                    }
+
+                    // AFFICHAGE HEADER EN HAUT A GAUCHE
+                    if (espEnLigne) {
+                        dot.className = "fa-solid fa-circle";
+                        dot.style.color = "var(--dot-green)";
+                        text.innerText = "Cloud Actif";
+                    } else {
+                        dot.className = "fa-solid fa-circle-exclamation";
+                        dot.style.color = "#f59e0b"; // Orange
+                        text.innerText = "Boîtier Hors Ligne";
+                    }
+
+                    // Pré-remplissage Telegram si présent dans Firebase
+                    if(data.telegram_token && !document.getElementById('tele-token-input').value) {
+                        document.getElementById('tele-token-input').value = data.telegram_token;
+                    }
+                    if(data.telegram_chat_id && !document.getElementById('tele-chatid-input').value) {
+                        document.getElementById('tele-chatid-input').value = data.telegram_chat_id;
+                    }
+
+                    // Si l'ESP est hors ligne, on force son Wifi Status à 0 pour effacer les barres
+                    let wStat = espEnLigne ? (data.wifi_stat !== undefined ? data.wifi_stat : 0) : 0;
+                    let wRssi = espEnLigne ? (data.wifi_rssi !== undefined ? data.wifi_rssi : 0) : -100;
+                    
                     let temp = data.temperature !== undefined ? data.temperature : 0;
                     let secu = data.niveau_securite !== undefined ? data.niveau_securite : 0;
                     let lav = data.niveau_lavage !== undefined ? data.niveau_lavage : 0;
@@ -533,11 +578,8 @@
                     let uv = data.pompe_uv !== undefined ? data.pompe_uv : 0;
                     let cpt = data.Nbre_lavage !== undefined ? data.Nbre_lavage : 0;
                     let alarme = data.code_alarme !== undefined ? data.code_alarme : 0;
-                    let wStat = data.wifi_stat !== undefined ? data.wifi_stat : 0;
-                    let wRssi = data.wifi_rssi !== undefined ? data.wifi_rssi : 0;
-                    let ping = data.ping !== undefined ? data.ping : 0;
 
-                    afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi, ping);
+                    afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi);
                 } else {
                     dot.className = "fa-solid fa-triangle-exclamation";
                     dot.style.color = "#f59e0b";
@@ -548,7 +590,7 @@
             console.error("Erreur Firebase", error); 
             dot.className = "fa-solid fa-circle-xmark";
             dot.style.color = "var(--dot-red)";
-            text.innerText = "Erreur Cloud";
+            text.innerText = "Erreur App<->Cloud";
         }
     }
 
@@ -597,7 +639,7 @@
                         let alCode = (d.length > 6) ? parseInt(d[6]) : 0;
                         let wStat = (d.length > 7) ? parseInt(d[7]) : 0;
                         let wRssi = (d.length > 8) ? parseInt(d[8]) : 0;
-                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], alCode, wStat, wRssi, 0);
+                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], alCode, wStat, wRssi);
                     }
                 } else if (text.startsWith("WNET:")) {
                     let reseau = text.substring(5);
@@ -665,7 +707,7 @@
         localStorage.setItem("wifi_pass", pass);
         
         envoyerCommande("WIFI", ssid + "|" + pass); 
-        alert("Identifiants Wi-Fi envoyés !");
+        alert("Identifiants Wi-Fi envoyés au boîtier !");
     }
 
     // --- DETECTION AUTOMATIQUE CHAT ID TELEGRAM ---
@@ -675,6 +717,9 @@
             alert("Veuillez d'abord coller le Bot Token fourni par BotFather."); 
             return; 
         }
+
+        let icon = document.querySelector('#btn-detect-telegram i');
+        icon.className = "fa-solid fa-spinner fa-spin";
 
         try {
             let response = await fetch(`https://api.telegram.org/bot${token}/getUpdates`);
@@ -688,7 +733,21 @@
                     let prenom = lastUpdate.message.chat.first_name || "Utilisateur";
                     
                     document.getElementById('tele-chatid-input').value = chatId;
-                    alert(`✅ ID trouvé pour ${prenom} : ${chatId} ! \nCliquez sur Enregistrer pour l'envoyer au boîtier.`);
+                    
+                    // On force l'écriture DIRECTE de ces clés à la racine de Firebase
+                    if (ID_COFFRET) {
+                        let url = `${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`;
+                        await fetch(url, { 
+                            method: 'PATCH', 
+                            headers: { 'Content-Type': 'application/json' }, 
+                            body: JSON.stringify({ telegram_chat_id: chatId.toString(), telegram_token: token }) 
+                        });
+                    }
+
+                    // Et on informe l'ESP via la commande normale pour son propre process
+                    sauvegarderTelegram();
+                    
+                    alert(`✅ ID trouvé pour ${prenom} : ${chatId} !\nL'enregistrement dans le Cloud est automatique.`);
                 } else {
                     alert("⚠️ Format de message non reconnu.");
                 }
@@ -699,6 +758,8 @@
             console.error("Erreur Telegram API :", error);
             alert("❌ Erreur de connexion aux serveurs Telegram.");
         }
+        
+        icon.className = "fa-solid fa-satellite-dish";
     }
     
     function sauvegarderTelegram() { 
@@ -706,7 +767,6 @@
         let chatId = document.getElementById('tele-chatid-input').value;
         let actif = document.getElementById('tele-active-check').checked ? "1":"0";
         envoyerCommande("TELE", token + "|" + chatId + "|" + actif); 
-        alert("Telegram enregistré !"); 
     }
     
     function chargerMemos() {
