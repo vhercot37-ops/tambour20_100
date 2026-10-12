@@ -107,7 +107,7 @@
         <div class="sidebar-item" id="tab-config" onclick="switchView('config')"><i class="fa-solid fa-gear"></i> <span data-i18n="menu_config">Config. Tambour</span></div>
         <div class="sidebar-item" id="tab-wifi" onclick="switchView('wifi')"><i class="fa-solid fa-wifi"></i> <span data-i18n="menu_wifi">Config. Wi-Fi</span></div>
         <div class="sidebar-item" id="tab-telegram" onclick="switchView('telegram')"><i class="fa-brands fa-telegram"></i> <span data-i18n="menu_telegram">Telegram</span></div>
-        <div class="sidebar-item" id="tab-ble" onclick="switchView('ble')"><i class="fa-solid fa-bluetooth"></i> <span data-i18n="menu_ble">Connexion BLE</span></div>
+        <div class="sidebar-item" id="tab-ble" onclick="switchView('ble')"><i class="fa-solid fa-bluetooth"></i> <span data-i18n="menu_ble">Connexion</span></div>
         <div class="sidebar-item" id="tab-history" onclick="switchView('history')"><i class="fa-solid fa-chart-line"></i> <span data-i18n="menu_history">Historique</span></div>
         <div class="sidebar-item" id="tab-ota" onclick="switchView('ota')"><i class="fa-solid fa-download"></i> <span data-i18n="menu_ota">Mise à jour</span></div>
         <div class="sidebar-item" id="tab-lang" onclick="switchView('lang')"><i class="fa-solid fa-language"></i> <span data-i18n="menu_lang">Langue / Taal</span></div>
@@ -231,7 +231,7 @@
             </div>
         </div>
 
-        <!-- CONFIGURATION TELEGRAM (SIMPLIFIÉE) -->
+        <!-- CONFIGURATION TELEGRAM (SIMPLIFIÉE WEBHOOK) -->
         <div id="telegram-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_tele">Alertes Telegram</h3>
@@ -255,12 +255,13 @@
             </div>
         </div>
 
-        <!-- ONGLET CONNEXION BLE & CLOUD -->
+        <!-- ONGLET CONNEXION (Ex-BLE) -->
         <div id="ble-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_conn">Choix de la Connexion</h3>
                 <div class="conn-bar">
-                    <button id="btn-mode-ble" class="mode-btn active" onclick="connecterBLE()"><i class="fa-solid fa-bluetooth"></i> <span data-i18n="btn_ble">Connexion BLE (Locale)</span></button>
+                    <!-- On a laissé l'icône Bluetooth et enlevé la mention BLE -->
+                    <button id="btn-mode-ble" class="mode-btn active" onclick="connecterBLE()"><i class="fa-solid fa-bluetooth"></i> <span data-i18n="btn_ble">Connexion (Locale)</span></button>
                     <button id="btn-mode-cloud" class="mode-btn" onclick="activerModeFirebase()"><i class="fa-solid fa-cloud"></i> <span data-i18n="btn_cloud">Mode Cloud (Distance)</span></button>
                 </div>
             </div>
@@ -305,15 +306,15 @@
     const dict = {
         fr: {
             status_wait: "Attente...", menu_auto: "Mode Auto", menu_manuel: "Mode Manuel", menu_config: "Config. Tambour",
-            menu_wifi: "Config. Wi-Fi", menu_telegram: "Telegram", menu_ble: "Connexion BLE", menu_history: "Historique", 
+            menu_wifi: "Config. Wi-Fi", menu_telegram: "Telegram", menu_ble: "Connexion", menu_history: "Historique", 
             menu_ota: "Mise à jour", menu_lang: "Langue / Taal",
             niv_secu: "Niveau Sécurité", niv_lav: "Niveau Lavage", couv: "Couvercle", pompe: "Pompe UV", nbre_lav: "Nombre de Lavages",
             btn_rot: "Rotation", btn_lav: "Lavage", titre_config: "Paramètres du Tambour", lbl_modele: "Modèle :", lbl_mode: "Mode :",
             opt_grav: "Gravitaire (G)", opt_pomp: "Pompage (P)", btn_save_tamb: "Enregistrer", titre_wifi: "Connexion Wi-Fi",
             btn_scan: "Scanner", lbl_sel_wifi: "Réseau :", ph_ssid: "Nom du Wi-Fi (SSID)", ph_pass: "Mot de passe",
-            btn_send_wifi: "Envoyer au Boîtier", titre_conn: "Type de Connexion", btn_ble: "Connexion BLE (Locale)", btn_cloud: "Mode Cloud (Distance)",
+            btn_send_wifi: "Envoyer au Boîtier", titre_conn: "Choix de la Connexion", btn_ble: "Connexion (Locale)", btn_cloud: "Mode Cloud (Distance)",
             titre_hist: "Historique (15 jours)", titre_lang: "Choisissez votre langue", lbl_boitier: "Boîtier:",
-            titre_tele: "Alertes Telegram", desc_tele: "Recevez les alarmes directement sur votre smartphone.", ph_token: "Bot Token", ph_chatid: "Chat ID", lbl_tele_actif: "Activer les alarmes :", btn_save_tele: "Enregistrer",
+            titre_tele: "Alertes Telegram", lbl_tele_actif: "Activer les alarmes :", btn_save_tele: "Enregistrer",
             titre_ota: "Mise à jour du système", desc_ota: "Vérifiez si une nouvelle version est disponible.", lbl_ver_act: "Version actuelle :", lbl_ver_dispo: "Version dispo. :", btn_check_ota: "Vérifier", btn_start_ota: "Installer",
             titre_alarme: "ÉTAT D'ALARME", btn_reset: "RESET ALARME",
             al_eau: "ALARME : NIVEAU D'EAU", al_couv: "ALARME : COUVERCLE OUVERT", al_15: "ALARME : 15 LAVAGES CONSÉCUTIFS", al_inc: "ALARME INCONNUE",
@@ -321,15 +322,15 @@
         },
         nl: {
             status_wait: "Wachten...", menu_auto: "Auto Modus", menu_manuel: "Handmatig", menu_config: "Trommel Config",
-            menu_wifi: "Wi-Fi Config", menu_telegram: "Telegram", menu_ble: "BLE Verbinding", menu_history: "Geschiedenis", 
+            menu_wifi: "Wi-Fi Config", menu_telegram: "Telegram", menu_ble: "Verbinding", menu_history: "Geschiedenis", 
             menu_ota: "Update", menu_lang: "Langue / Taal",
             niv_secu: "Beveiligingsniveau", niv_lav: "Spoelniveau", couv: "Deksel", pompe: "UV Pomp", nbre_lav: "Aantal Spoelingen",
             btn_rot: "Rotatie", btn_lav: "Spoelen", titre_config: "Trommel Instellingen", lbl_modele: "Model:", lbl_mode: "Modus:",
             opt_grav: "Zwaartekracht (G)", opt_pomp: "Pomp (P)", btn_save_tamb: "Opslaan", titre_wifi: "Wi-Fi Instellen",
             btn_scan: "Scannen", lbl_sel_wifi: "Netwerk:", ph_ssid: "Wi-Fi Naam (SSID)", ph_pass: "Wachtwoord",
-            btn_send_wifi: "Verzenden", titre_conn: "Verbindingstype", btn_ble: "BLE Verbinding (Lokaal)", btn_cloud: "Cloud Modus",
+            btn_send_wifi: "Verzenden", titre_conn: "Verbindingstype", btn_ble: "Verbinding (Lokaal)", btn_cloud: "Cloud Modus",
             titre_hist: "Geschiedenis", titre_lang: "Kies uw taal", lbl_boitier: "Controller:",
-            titre_tele: "Telegram Meldingen", desc_tele: "Ontvang alarmen op smartphone.", ph_token: "Bot Token", ph_chatid: "Chat ID", lbl_tele_actif: "Activeren:", btn_save_tele: "Opslaan",
+            titre_tele: "Telegram Meldingen", lbl_tele_actif: "Activeren:", btn_save_tele: "Opslaan",
             titre_ota: "Systeemupdate", desc_ota: "Controleer op updates.", lbl_ver_act: "Huidige versie:", lbl_ver_dispo: "Beschikbaar:", btn_check_ota: "Controleren", btn_start_ota: "Installeren",
             titre_alarme: "ALARM STATUS", btn_reset: "RESET ALARM",
             al_eau: "ALARM: WATERNIVEAU", al_couv: "ALARM: DEKSEL OPEN", al_15: "ALARM: 15 SPOELINGEN", al_inc: "ONBEKEND ALARM",
@@ -404,6 +405,14 @@
     }
 
     function switchView(target) {
+        let activeView = document.querySelector('.view.active');
+        
+        // --- GESTION DE LA FERMETURE DU WI-FI ---
+        // Si on quitte l'onglet Wi-Fi, on demande à l'ESP de couper son antenne
+        if (activeView && activeView.id === 'wifi-view' && target !== 'wifi') {
+            envoyerCommande("WIFI_STATE", "0"); 
+        }
+
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         document.getElementById(`${target}-view`).classList.add('active');
@@ -441,7 +450,6 @@
 
     function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur, alarme_code = 0, wifi_stat = 0, wifi_rssi = 0) {
         try {
-            // Affichage Température (Si hors-ligne, ce sera la chaîne "--.-")
             ['val-temperature', 'val-temperature-man', 'val-temperature-al'].forEach(id => { 
                 if(document.getElementById(id)) document.getElementById(id).innerText = (typeof temp === 'number') ? temp.toFixed(1) : temp; 
             });
@@ -672,11 +680,21 @@
     }
 
     function activerModeFirebase() {
+        // --- GESTION DE L'OUVERTURE DU WI-FI ---
+        if (modeActif === "BLE") {
+            // On prévient l'ESP qu'il doit allumer son Wi-Fi pour passer en mode Cloud
+            envoyerCommande("WIFI_STATE", "1");
+        }
+
         modeActif = "FIREBASE";
         adapterInterfaceSelonMode(); 
         document.getElementById('btn-mode-ble').className = "mode-btn";
         document.getElementById('btn-mode-cloud').className = "mode-btn active";
-        if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect();
+        
+        // On attend un petit délai pour être sûr que la commande "WIFI_STATE:1" soit bien partie avant de déconnecter le BLE
+        setTimeout(() => {
+            if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect();
+        }, 500);
         
         lireDonneesFirebase();
         if (timerFirebase) clearInterval(timerFirebase);
@@ -727,7 +745,7 @@
     }
 
     function sauvegarderTelegram() { 
-        // On n'envoie plus de token/id à l'ESP, on sauvegarde juste si le client veut activer ou non
+        // On n'envoie plus de token ni de chatID à l'ESP. On enregistre juste si l'alarme est active (1) ou non (0).
         let actif = document.getElementById('tele-active-check').checked ? "1":"0";
         envoyerCommande("TELE", actif); 
         alert("Préférences Telegram enregistrées !");
