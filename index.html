@@ -634,7 +634,7 @@
         let typ = document.getElementById('config-mode-select').value;
         localStorage.setItem("tambour_modele", mod);
         localStorage.setItem("tambour_mode", typ);
-        envoyerCommande("config_tambour", mod + "," + typ); // Modification pour correspondre au C++ "config_tambour"
+        envoyerCommande("CFG", mod + "," + typ); // Modification pour correspondre au C++ "config_tambour"
         rafraichirTitres(document.querySelector('.view.active').id.replace('-view', ''));
         alert("Modèle enregistré !");
     }
