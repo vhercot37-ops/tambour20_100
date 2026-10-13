@@ -89,6 +89,7 @@
                 <i class="fa-solid fa-circle" id="app-conn-dot" style="color: var(--text-gray); font-size: 16px;"></i>
                 <span id="app-conn-text" data-i18n="status_wait">Attente...</span>
             </div>
+            <!-- Bargraphe Wi-Fi du boîtier (affiché aussi bien en BLE qu'en Cloud) -->
             <div id="esp-wifi-status" style="display: none; align-items: center; gap: 5px; font-size: 12px; font-weight: bold; color: var(--text-gray);">
                 <span data-i18n="lbl_boitier">Boîtier:</span>
                 <span class="signal-bars" id="header-wifi-bars" style="margin-left: 2px;">
@@ -331,7 +332,7 @@
             titre_ota: "Systeemupdate", desc_ota: "Controleer op updates.", lbl_ver_act: "Huidige versie:", lbl_ver_dispo: "Beschikbaar:", btn_check_ota: "Controleren", btn_start_ota: "Installeren",
             titre_alarme: "ALARM STATUS", btn_reset: "RESET ALARM",
             al_eau: "ALARM: WATERNIVEAU", al_couv: "ALARM: DEKSEL OPEN", al_15: "ALARM: 15 SPOELINGEN", al_inc: "ONBEKEND ALARM",
-            lbl_wifi_etat: "Wi-Fi Status:", lbl_wifi_signal: "Signaal:", wifi_conn: "Verbonden", wifi_dec: "Niet verbonden", ota_no_update: "Up-to-date", ota_update_found: "Beschikbaar"
+            lbl_wifi_etat: "Wi-Fi Status:", lbl_wifi_signal: "Signal:", wifi_conn: "Verbonden", wifi_dec: "Niet verbonden", ota_no_update: "Up-to-date", ota_update_found: "Beschikbaar"
         }
     };
 
@@ -393,8 +394,6 @@
             try {
                 let enc = new TextEncoder();
                 let trame = valeur === "" ? action : `${action}:${valeur}`;
-                
-                // MODIFICATION : On utilise withResponse pour être sûr que la trame n'est pas tronquée/perdue
                 await rxCharacteristic.writeValueWithResponse(enc.encode(trame));
             } catch (e) { console.warn("Erreur BLE", e); }
         } else if (modeActif === "FIREBASE" && ID_COFFRET) {
@@ -404,12 +403,6 @@
     }
 
     function switchView(target) {
-        let activeView = document.querySelector('.view.active');
-        
-        if (activeView && activeView.id === 'wifi-view' && target !== 'wifi') {
-            envoyerCommande("WIFI_STATE", "0"); 
-        }
-
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         document.getElementById(`${target}-view`).classList.add('active');
@@ -466,11 +459,11 @@
             
             if(document.getElementById('val-Nbre_lavage')) document.getElementById('val-Nbre_lavage').innerText = compteur;
 
-            // --- GESTION BARRES WIFI HEADER ---
+            // --- GESTION BARRES WIFI HEADER (FONCTIONNE EN BLE ET EN CLOUD) ---
             let espWifiDiv = document.getElementById('esp-wifi-status');
             let headerBars = document.querySelectorAll('#header-wifi-bars .bar');
             
-            if (modeActif === "FIREBASE" && wifi_stat !== 0 && wifi_rssi !== -100) {
+            if (wifi_stat !== 0 && wifi_rssi !== -100) {
                 espWifiDiv.style.display = 'flex';
                 headerBars.forEach(b => b.style.backgroundColor = '#334155');
                 if (wifi_stat === 1) {
@@ -524,7 +517,6 @@
             envoyerCommande("RESET_ALARM", 1);
             switchView("manuel"); 
         } else { 
-            // MODIFICATION : Ecriture directe de la racine Firebase pour le Reset
             if (ID_COFFRET) {
                 try {
                     let url = `${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`;
@@ -634,7 +626,7 @@
         let typ = document.getElementById('config-mode-select').value;
         localStorage.setItem("tambour_modele", mod);
         localStorage.setItem("tambour_mode", typ);
-        envoyerCommande("CFG", mod + "," + typ); // Modification pour correspondre au C++ "config_tambour"
+        envoyerCommande("CFG", mod + "," + typ);
         rafraichirTitres(document.querySelector('.view.active').id.replace('-view', ''));
         alert("Modèle enregistré !");
     }
@@ -691,8 +683,6 @@
     }
 
     function activerModeFirebase() {
-        if (modeActif === "BLE") { envoyerCommande("WIFI_STATE", "1"); }
-
         modeActif = "FIREBASE";
         adapterInterfaceSelonMode(); 
         document.getElementById('btn-mode-ble').className = "mode-btn";
@@ -848,7 +838,7 @@
 
     function lancerMaj() {
         if(otaUrl === "") return;
-        envoyerCommande("UPDATE_OTA", otaUrl); // Modification pour correspondre au C++ "UPDATE_OTA"
+        envoyerCommande("UPDATE_OTA", otaUrl);
         document.getElementById('ota-progress-container').style.display = 'block';
         document.getElementById('btn-start-ota').disabled = true;
         
