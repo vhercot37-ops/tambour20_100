@@ -89,8 +89,8 @@
                 <i class="fa-solid fa-circle" id="app-conn-dot" style="color: var(--text-gray); font-size: 16px;"></i>
                 <span id="app-conn-text" data-i18n="status_wait">Attente...</span>
             </div>
-            <!-- Bargraphe Wi-Fi du boîtier (affiché aussi bien en BLE qu'en Cloud) -->
-            <div id="esp-wifi-status" style="display: none; align-items: center; gap: 5px; font-size: 12px; font-weight: bold; color: var(--text-gray);">
+            <!-- Bargraphe Wi-Fi du boîtier (Visible dès l'ouverture de l'application) -->
+            <div id="esp-wifi-status" style="display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: bold; color: var(--text-gray);">
                 <span data-i18n="lbl_boitier">Boîtier:</span>
                 <span class="signal-bars" id="header-wifi-bars" style="margin-left: 2px;">
                     <span class="bar bar-1"></span><span class="bar bar-2"></span><span class="bar bar-3"></span><span class="bar bar-4"></span>
@@ -232,7 +232,7 @@
             </div>
         </div>
 
-        <!-- CONFIGURATION TELEGRAM (FRONT-END COMPLET) -->
+        <!-- CONFIGURATION TELEGRAM -->
         <div id="telegram-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_tele">Alertes Telegram</h3>
@@ -332,7 +332,7 @@
             titre_ota: "Systeemupdate", desc_ota: "Controleer op updates.", lbl_ver_act: "Huidige versie:", lbl_ver_dispo: "Beschikbaar:", btn_check_ota: "Controleren", btn_start_ota: "Installeren",
             titre_alarme: "ALARM STATUS", btn_reset: "RESET ALARM",
             al_eau: "ALARM: WATERNIVEAU", al_couv: "ALARM: DEKSEL OPEN", al_15: "ALARM: 15 SPOELINGEN", al_inc: "ONBEKEND ALARM",
-            lbl_wifi_etat: "Wi-Fi Status:", lbl_wifi_signal: "Signal:", wifi_conn: "Verbonden", wifi_dec: "Niet verbonden", ota_no_update: "Up-to-date", ota_update_found: "Beschikbaar"
+            lbl_wifi_etat: "Wi-Fi Status:", lbl_wifi_signal: "Signaal:", wifi_conn: "Verbonden", wifi_dec: "Niet verbonden", ota_no_update: "Up-to-date", ota_update_found: "Beschikbaar"
         }
     };
 
@@ -459,19 +459,20 @@
             
             if(document.getElementById('val-Nbre_lavage')) document.getElementById('val-Nbre_lavage').innerText = compteur;
 
-            // --- GESTION BARRES WIFI HEADER (FONCTIONNE EN BLE ET EN CLOUD) ---
+            // --- GESTION BARRES WIFI HEADER (VISIBLE DES LE DEMARRAGE / BLE / CLOUD) ---
             let espWifiDiv = document.getElementById('esp-wifi-status');
             let headerBars = document.querySelectorAll('#header-wifi-bars .bar');
             
-            if (wifi_stat !== 0 && wifi_rssi !== -100) {
-                espWifiDiv.style.display = 'flex';
-                headerBars.forEach(b => b.style.backgroundColor = '#334155');
-                if (wifi_stat === 1) {
-                    let force = (wifi_rssi > -60) ? 4 : (wifi_rssi > -70) ? 3 : (wifi_rssi > -80) ? 2 : 1;
-                    let couleurBarre = (force > 2) ? "var(--dot-green)" : (force === 2) ? "#f59e0b" : "var(--dot-red)";
-                    for(let i=0; i<force; i++) { if(headerBars[i]) headerBars[i].style.backgroundColor = couleurBarre; }
+            espWifiDiv.style.display = 'flex';
+            headerBars.forEach(b => b.style.backgroundColor = '#334155'); // Barres grises neutres par défaut
+
+            if (wifi_stat === 1 && wifi_rssi !== -100) {
+                let force = (wifi_rssi > -60) ? 4 : (wifi_rssi > -70) ? 3 : (wifi_rssi > -80) ? 2 : 1;
+                let couleurBarre = (force > 2) ? "var(--dot-green)" : (force === 2) ? "#f59e0b" : "var(--dot-red)";
+                for(let i=0; i<force; i++) { 
+                    if(headerBars[i]) headerBars[i].style.backgroundColor = couleurBarre; 
                 }
-            } else { espWifiDiv.style.display = 'none'; }
+            }
             
             // --- GESTION BARRES WIFI ONGLET ---
             let elWifiStatus = document.getElementById('lbl-wifi-status');
