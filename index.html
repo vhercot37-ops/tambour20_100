@@ -376,13 +376,19 @@
     let timerFirebase = null;
     let reseauxTrouves = [];
 
-    function rafraichirTitres(vue) {
+  function rafraichirTitres(vue) {
         let modele = localStorage.getItem("tambour_modele") || "70";
         let mode = localStorage.getItem("tambour_mode") || "G";
         document.getElementById('config-modele-select').value = modele;
         document.getElementById('config-mode-select').value = mode;
 
         let titre = document.getElementById('val-Mode');
+        
+        // --- NOUVEAU : En mode Cloud, on laisse Firebase gérer le titre de la vue Auto ---
+        if (modeActif === "FIREBASE" && vue === 'auto') {
+            return; 
+        }
+
         if (vue === 'auto') titre.innerText = `Auto ${modele}${mode}`;
         else if (vue === 'manuel') titre.innerText = (currentLang==='fr') ? `Manu ${modele}${mode}` : `Hand ${modele}${mode}`;
         else if (vue === 'alarme') titre.innerText = dict[currentLang]['titre_alarme'];
@@ -544,6 +550,7 @@
 }
 
     // --- LECTURE FIREBASE AVEC TIMEOUT 15s ---
+   // --- LECTURE FIREBASE AVEC TIMEOUT 15s ---
     async function lireDonneesFirebase() {
         if (!ID_COFFRET) return;
         
@@ -592,6 +599,16 @@
                     let temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi;
                     
                     if (espEnLigne) {
+                        // --- NOUVEAU : Lecture du Mode depuis Firebase ---
+                        if (data.Mode !== undefined) {
+                            let vueActive = document.querySelector('.view.active').id;
+                            // On met à jour le titre uniquement si on regarde l'écran Auto
+                            if (vueActive === 'auto-view') {
+                                document.getElementById('val-Mode').innerText = data.Mode;
+                            }
+                        }
+                        // -------------------------------------------------
+
                         temp = data.temperature !== undefined ? data.temperature : 0;
                         secu = data.niveau_securite !== undefined ? data.niveau_securite : 0;
                         lav = data.niveau_lavage !== undefined ? data.niveau_lavage : 0;
