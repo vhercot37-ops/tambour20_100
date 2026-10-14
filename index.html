@@ -389,29 +389,36 @@
         else titre.innerText = dict[currentLang]['menu_' + vue] || "Dashboard";
     }
 
-    async function envoyerCommande(action, valeur) {
-        if (modeActif === "BLE" && rxCharacteristic) {
-            try {
-                let enc = new TextEncoder();
-                let trame = valeur === "" ? action : `${action}:${valeur}`;
-                await rxCharacteristic.writeValueWithResponse(enc.encode(trame));
-            } catch (e) { console.warn("Erreur BLE", e); }
-        } else if (modeActif === "FIREBASE" && ID_COFFRET) {
-            let url = `${FIREBASE_HOST}clients/${ID_COFFRET}/commandes.json?auth=${FIREBASE_AUTH}`;
-            await fetch(url, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ [action]: valeur, timestamp: Date.now() }) });
+   async function envoyerCommande(action, valeur) {
+    // Envoi UNIQUEMENT en mode local (Bluetooth)
+    if (modeActif === "BLE" && rxCharacteristic) {
+        try {
+            let enc = new TextEncoder();
+            let trame = valeur === "" ? action : `${action}:${valeur}`;
+            await rxCharacteristic.writeValueWithResponse(enc.encode(trame));
+        } catch (e) { 
+            console.warn("Erreur BLE", e); 
         }
     }
+    // En mode FIREBASE (Cloud), on ne fait RIEN, on ne pollue pas la base de données.
+}
 
-    function switchView(target) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-        document.getElementById(`${target}-view`).classList.add('active');
-        let tabObj = document.getElementById(`tab-${target}`);
-        if(tabObj) tabObj.classList.add('active');
-        rafraichirTitres(target); 
-        document.getElementById('sidebarMenu').classList.remove('open');
-        if(target !== 'alarme') envoyerCommande("PAGE", target.toUpperCase());
+   function switchView(target) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    document.getElementById(`${target}-view`).classList.add('active');
+    
+    let tabObj = document.getElementById(`tab-${target}`);
+    if(tabObj) tabObj.classList.add('active');
+    
+    rafraichirTitres(target); 
+    document.getElementById('sidebarMenu').classList.remove('open');
+    
+    // On n'envoie le changement de page à l'ESP32 QUE si on est en Bluetooth
+    if (target !== 'alarme' && modeActif === "BLE") {
+        envoyerCommande("PAGE", target.toUpperCase());
     }
+}
 
     function adapterInterfaceSelonMode() {
         let styleDisplay = (modeActif === "FIREBASE") ? "none" : "flex";
@@ -513,25 +520,28 @@
         } catch (e) { console.error("Erreur affichage", e); }
     }
 
-    async function resetAlarme() {
-        if (modeActif === "BLE") { 
-            envoyerCommande("RESET_ALARM", 1);
-            switchView("manuel"); 
-        } else { 
-            if (ID_COFFRET) {
-                try {
-                    let url = `${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`;
-                    await fetch(url, { 
-                        method: 'PATCH', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({ Reset: 1, code_alarme: 0, Alarme: "" }) 
-                    });
-                } catch(e) { console.error("Erreur Reset Firebase", e); }
+ async function resetAlarme() {
+    if (modeActif === "BLE") { 
+        envoyerCommande("RESET_ALARM", 1);
+        switchView("manuel"); 
+    } else { 
+        // Seule et unique écriture vers Firebase autorisée dans l'application web :
+        if (ID_COFFRET) {
+            try {
+                let url = `${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`;
+                await fetch(url, { 
+                    method: 'PATCH', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ Reset: 1 }) // Juste le flag Reset
+                });
+            } catch(e) { 
+                console.error("Erreur Reset Firebase", e); 
             }
-            switchView("auto"); 
-            document.querySelector('.menu-toggle-btn').classList.remove('disabled'); 
         }
+        switchView("auto"); 
+        document.querySelector('.menu-toggle-btn').classList.remove('disabled'); 
     }
+}
 
     // --- LECTURE FIREBASE AVEC TIMEOUT 15s ---
     async function lireDonneesFirebase() {
