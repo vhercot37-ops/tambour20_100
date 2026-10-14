@@ -89,7 +89,7 @@
                 <i class="fa-solid fa-circle" id="app-conn-dot" style="color: var(--text-gray); font-size: 16px;"></i>
                 <span id="app-conn-text" data-i18n="status_wait">Attente...</span>
             </div>
-            <!-- Bargraphe Wi-Fi du boîtier (Visible dès l'ouverture de l'application) -->
+            <!-- Bargraphe Wi-Fi du boîtier -->
             <div id="esp-wifi-status" style="display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: bold; color: var(--text-gray);">
                 <span data-i18n="lbl_boitier">Boîtier:</span>
                 <span class="signal-bars" id="header-wifi-bars" style="margin-left: 2px;">
@@ -376,7 +376,7 @@
     let timerFirebase = null;
     let reseauxTrouves = [];
 
-function rafraichirTitres(vue) {
+    function rafraichirTitres(vue) {
         let modele = localStorage.getItem("tambour_modele") || "70";
         let mode = localStorage.getItem("tambour_mode") || "G";
         document.getElementById('config-modele-select').value = modele;
@@ -384,7 +384,7 @@ function rafraichirTitres(vue) {
 
         let titre = document.getElementById('val-Mode');
         
-        // --- MODIFIÉ : En mode Cloud, on laisse Firebase gérer le titre pour Auto ET Alarme ---
+        // En mode Cloud, on laisse Firebase gérer le titre pour Auto ET Alarme
         if (modeActif === "FIREBASE" && (vue === 'auto' || vue === 'alarme')) {
             return; 
         }
@@ -395,36 +395,35 @@ function rafraichirTitres(vue) {
         else titre.innerText = dict[currentLang]['menu_' + vue] || "Dashboard";
     }
 
-   async function envoyerCommande(action, valeur) {
-    // Envoi UNIQUEMENT en mode local (Bluetooth)
-    if (modeActif === "BLE" && rxCharacteristic) {
-        try {
-            let enc = new TextEncoder();
-            let trame = valeur === "" ? action : `${action}:${valeur}`;
-            await rxCharacteristic.writeValueWithResponse(enc.encode(trame));
-        } catch (e) { 
-            console.warn("Erreur BLE", e); 
+    async function envoyerCommande(action, valeur) {
+        // Envoi UNIQUEMENT en mode local (Bluetooth)
+        if (modeActif === "BLE" && rxCharacteristic) {
+            try {
+                let enc = new TextEncoder();
+                let trame = valeur === "" ? action : `${action}:${valeur}`;
+                await rxCharacteristic.writeValueWithResponse(enc.encode(trame));
+            } catch (e) { 
+                console.warn("Erreur BLE", e); 
+            }
         }
     }
-    // En mode FIREBASE (Cloud), on ne fait RIEN, on ne pollue pas la base de données.
-}
 
-   function switchView(target) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-    document.getElementById(`${target}-view`).classList.add('active');
-    
-    let tabObj = document.getElementById(`tab-${target}`);
-    if(tabObj) tabObj.classList.add('active');
-    
-    rafraichirTitres(target); 
-    document.getElementById('sidebarMenu').classList.remove('open');
-    
-    // On n'envoie le changement de page à l'ESP32 QUE si on est en Bluetooth
-    if (target !== 'alarme' && modeActif === "BLE") {
-        envoyerCommande("PAGE", target.toUpperCase());
+    function switchView(target) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        document.getElementById(`${target}-view`).classList.add('active');
+        
+        let tabObj = document.getElementById(`tab-${target}`);
+        if(tabObj) tabObj.classList.add('active');
+        
+        rafraichirTitres(target); 
+        document.getElementById('sidebarMenu').classList.remove('open');
+        
+        // On n'envoie le changement de page à l'ESP32 QUE si on est en Bluetooth
+        if (target !== 'alarme' && modeActif === "BLE") {
+            envoyerCommande("PAGE", target.toUpperCase());
+        }
     }
-}
 
     function adapterInterfaceSelonMode() {
         let styleDisplay = (modeActif === "FIREBASE") ? "none" : "flex";
@@ -526,30 +525,30 @@ function rafraichirTitres(vue) {
         } catch (e) { console.error("Erreur affichage", e); }
     }
 
- async function resetAlarme() {
-    if (modeActif === "BLE") { 
-        envoyerCommande("RESET_ALARM", 1);
-        switchView("manuel"); 
-    } else { 
-        // Seule et unique écriture vers Firebase autorisée dans l'application web :
-        if (ID_COFFRET) {
-            try {
-                let url = `${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`;
-                await fetch(url, { 
-                    method: 'PATCH', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ Reset: 1 }) // Juste le flag Reset
-                });
-            } catch(e) { 
-                console.error("Erreur Reset Firebase", e); 
+    async function resetAlarme() {
+        if (modeActif === "BLE") { 
+            envoyerCommande("RESET_ALARM", 1);
+            switchView("manuel"); 
+        } else { 
+            // Seule et unique écriture vers Firebase autorisée dans l'application web :
+            if (ID_COFFRET) {
+                try {
+                    let url = `${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`;
+                    await fetch(url, { 
+                        method: 'PATCH', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ Reset: 1 }) // Juste le flag Reset
+                    });
+                } catch(e) { 
+                    console.error("Erreur Reset Firebase", e); 
+                }
             }
+            switchView("auto"); 
+            document.querySelector('.menu-toggle-btn').classList.remove('disabled'); 
         }
-        switchView("auto"); 
-        document.querySelector('.menu-toggle-btn').classList.remove('disabled'); 
     }
-}
     
-  // --- LECTURE FIREBASE AVEC TIMEOUT 15s ---
+    // --- LECTURE FIREBASE AVEC TIMEOUT 15s ---
     async function lireDonneesFirebase() {
         if (!ID_COFFRET) return;
         
@@ -632,21 +631,6 @@ function rafraichirTitres(vue) {
                         wStat = 0;
                         wRssi = -100; 
                     }
-
-                    afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi);
-                } else {
-                    dot.className = "fa-solid fa-triangle-exclamation";
-                    dot.style.color = "#f59e0b";
-                    text.innerText = "Pas de données";
-                }
-            } else { throw new Error("HTTP"); }
-        } catch (error) { 
-            console.error("Erreur Firebase", error); 
-            dot.className = "fa-solid fa-circle-xmark";
-            dot.style.color = "var(--dot-red)";
-            text.innerText = "Erreur App<->Cloud";
-        }
-    }
 
                     afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi);
                 } else {
