@@ -376,7 +376,7 @@
     let timerFirebase = null;
     let reseauxTrouves = [];
 
-  function rafraichirTitres(vue) {
+function rafraichirTitres(vue) {
         let modele = localStorage.getItem("tambour_modele") || "70";
         let mode = localStorage.getItem("tambour_mode") || "G";
         document.getElementById('config-modele-select').value = modele;
@@ -384,8 +384,8 @@
 
         let titre = document.getElementById('val-Mode');
         
-        // --- NOUVEAU : En mode Cloud, on laisse Firebase gérer le titre de la vue Auto ---
-        if (modeActif === "FIREBASE" && vue === 'auto') {
+        // --- MODIFIÉ : En mode Cloud, on laisse Firebase gérer le titre pour Auto ET Alarme ---
+        if (modeActif === "FIREBASE" && (vue === 'auto' || vue === 'alarme')) {
             return; 
         }
 
@@ -548,8 +548,7 @@
         document.querySelector('.menu-toggle-btn').classList.remove('disabled'); 
     }
 }
-
-    // --- LECTURE FIREBASE AVEC TIMEOUT 15s ---
+    
    // --- LECTURE FIREBASE AVEC TIMEOUT 15s ---
     async function lireDonneesFirebase() {
         if (!ID_COFFRET) return;
@@ -599,15 +598,15 @@
                     let temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi;
                     
                     if (espEnLigne) {
-                        // --- NOUVEAU : Lecture du Mode depuis Firebase ---
+                       // --- NOUVEAU : Lecture du Mode depuis Firebase ---
                         if (data.Mode !== undefined) {
                             let vueActive = document.querySelector('.view.active').id;
-                            // On met à jour le titre uniquement si on regarde l'écran Auto
-                            if (vueActive === 'auto-view') {
+                            // On met à jour le titre si on regarde l'écran Auto OU l'écran Alarme
+                            if (vueActive === 'auto-view' || vueActive === 'alarme-view') {
                                 document.getElementById('val-Mode').innerText = data.Mode;
                             }
                         }
-                        // -------------------------------------------------
+                        }
 
                         temp = data.temperature !== undefined ? data.temperature : 0;
                         secu = data.niveau_securite !== undefined ? data.niveau_securite : 0;
