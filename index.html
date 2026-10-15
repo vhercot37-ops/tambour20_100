@@ -314,7 +314,7 @@
             titre_hist: "Historique (15 jours)", titre_lang: "Choisissez votre langue", lbl_boitier: "Boîtier:",
             titre_tele: "Alertes Telegram", lbl_tele_actif: "Activer les alarmes :", btn_save_tele: "Enregistrer",
             titre_ota: "Mise à jour du système", desc_ota: "Vérifiez si une nouvelle version est disponible.", lbl_ver_act: "Version actuelle :", lbl_ver_dispo: "Version dispo. :", btn_check_ota: "Vérifier", btn_start_ota: "Installer",
-            titre_alarme: "ÉTAT D'ALARME", btn_reset: "RESET ALARME",
+            titre_alarme: "Arrêt Tambour", btn_reset: "RESET ALARME",
             al_eau: "ALARME : NIVEAU D'EAU", al_couv: "ALARME : COUVERCLE OUVERT", al_15: "ALARME : 15 LAVAGES CONSÉCUTIFS", al_inc: "ALARME INCONNUE",
             lbl_wifi_etat: "État Wi-Fi :", lbl_wifi_signal: "Signal :", wifi_conn: "Connecté", wifi_dec: "Déconnecté", ota_no_update: "À jour", ota_update_found: "Disponible"
         },
@@ -330,7 +330,7 @@
             titre_hist: "Geschiedenis", titre_lang: "Kies uw taal", lbl_boitier: "Controller:",
             titre_tele: "Telegram Meldingen", lbl_tele_actif: "Activeren:", btn_save_tele: "Opslaan",
             titre_ota: "Systeemupdate", desc_ota: "Controleer op updates.", lbl_ver_act: "Huidige versie:", lbl_ver_dispo: "Beschikbaar:", btn_check_ota: "Controleren", btn_start_ota: "Installeren",
-            titre_alarme: "ALARM STATUS", btn_reset: "RESET ALARM",
+            titre_alarme: "Trommel Stop", btn_reset: "RESET ALARM",
             al_eau: "ALARM: WATERNIVEAU", al_couv: "ALARM: DEKSEL OPEN", al_15: "ALARM: 15 SPOELINGEN", al_inc: "ONBEKEND ALARM",
             lbl_wifi_etat: "Wi-Fi Status:", lbl_wifi_signal: "Signaal:", wifi_conn: "Verbonden", wifi_dec: "Niet verbonden", ota_no_update: "Up-to-date", ota_update_found: "Beschikbaar"
         }
@@ -384,14 +384,21 @@
 
         let titre = document.getElementById('val-Mode');
         
-        // En mode Cloud, on laisse Firebase gérer le titre pour Auto ET Alarme
+        // --- NOUVEAU : Réduction de la police uniquement pour l'écran Alarme ---
+        if (vue === 'alarme') {
+            titre.style.fontSize = "26px"; // Plus petit pour tenir sur une ligne
+        } else {
+            titre.style.fontSize = "38px"; // Taille normale pour les autres écrans
+        }
+        
+        // En mode Cloud, on laisse Firebase gérer le texte pour Auto ET Alarme
         if (modeActif === "FIREBASE" && (vue === 'auto' || vue === 'alarme')) {
             return; 
         }
 
         if (vue === 'auto') titre.innerText = `Auto ${modele}${mode}`;
         else if (vue === 'manuel') titre.innerText = (currentLang==='fr') ? `Manu ${modele}${mode}` : `Hand ${modele}${mode}`;
-        else if (vue === 'alarme') titre.innerText = dict[currentLang]['titre_alarme'];
+        else if (vue === 'alarme') titre.innerText = dict[currentLang]['titre_alarme']; // Va lire "Arrêt Tambour" en mode BLE
         else titre.innerText = dict[currentLang]['menu_' + vue] || "Dashboard";
     }
 
