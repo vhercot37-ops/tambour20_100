@@ -233,25 +233,29 @@
             </div>
         </div>
 
-        <!-- CONFIGURATION TELEGRAM -->
+      <!-- CONFIGURATION TELEGRAM -->
         <div id="telegram-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_tele">Alertes Telegram</h3>
-                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;">Pour recevoir les alarmes, envoyez 'Bonjour' à votre bot Telegram, puis cliquez sur le bouton ci-dessous.</p>
+                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 20px;">
+                    Pour recevoir les alarmes :<br><br>
+                    1. Cliquez sur le bouton bleu ci-dessous et appuyez sur <b>Démarrer</b> dans Telegram.<br>
+                    2. Revenez ici et cliquez sur le bouton orange.
+                </p>
                 
-                <input type="text" id="tele-token-input" class="auth-input" placeholder="Bot Token" value="8803564628:AAEntgbIiQ4ipAdTukiWDxsHMXKtkk8P_8k" style="display:none;">
+                <input type="hidden" id="tele-token-input" value="8803564628:AAEntgbIiQ4ipAdTukiWDxsHMXKtkk8P_8k">
                 
-                <button id="btn-detect-telegram" class="auth-btn" style="background-color: #f59e0b; margin-bottom: 15px; padding: 15px;" onclick="detecterChatIdTelegram()">
-                    <i class="fa-brands fa-telegram"></i> Lier Telegram Automatiquement
+                <!-- REMPLACE "NOM_DE_TON_BOT" par le nom de ton bot Telegram sans le @ -->
+                <button class="auth-btn" style="background-color: #0ea5e9; margin-bottom: 15px; padding: 15px;" onclick="window.open('https://t.me/NOM_DE_TON_BOT', '_blank')">
+                    <i class="fa-brands fa-telegram"></i> 1. Ouvrir Telegram
                 </button>
 
-                <input type="text" id="tele-chatid-input" class="auth-input" placeholder="Chat ID (Rempli auto)" readonly style="background-color: #121824; border-color: #334155;">
+                <button id="btn-detect-telegram" class="auth-btn" style="background-color: #f59e0b; margin-bottom: 15px; padding: 15px;" onclick="detecterChatIdTelegram()">
+                    <i class="fa-solid fa-link"></i> 2. Valider la liaison
+                </button>
 
-                <div style="display:flex; align-items:center; justify-content:space-between; margin:15px 0;">
-                    <span style="font-size:14px; font-weight:bold;" data-i18n="lbl_tele_actif">Activer les alarmes :</span>
-                    <input type="checkbox" id="tele-active-check" style="transform: scale(1.5);">
-                </div>
-                <button class="auth-btn" onclick="sauvegarderTelegram()"><i class="fa-solid fa-save"></i> <span data-i18n="btn_save_tele">Enregistrer</span></button>
+                <!-- Champs masqués pour conserver la logique JavaScript sans polluer l'écran -->
+                <input type="hidden" id="tele-chatid-input">
             </div>
         </div>
 
@@ -962,12 +966,13 @@ function rafraichirTitres(vue) {
         alert("Identifiants Wi-Fi envoyés au boîtier !");
     }
 
-    async function detecterChatIdTelegram() {
+  async function detecterChatIdTelegram() {
         let token = document.getElementById('tele-token-input').value.trim();
         let icon = document.querySelector('#btn-detect-telegram i');
         icon.className = "fa-solid fa-spinner fa-spin";
 
         try {
+            // 1. On interroge Telegram pour voir si le client a appuyé sur "Démarrer"
             let response = await fetch(`https://api.telegram.org/bot${token}/getUpdates`);
             let data = await response.json();
 
@@ -976,10 +981,11 @@ function rafraichirTitres(vue) {
                 
                 if (lastUpdate.message && lastUpdate.message.chat) {
                     let chatId = lastUpdate.message.chat.id;
-                    let prenom = lastUpdate.message.chat.first_name || "Utilisateur";
+                    let prenom = lastUpdate.message.chat.first_name || "Client";
                     
                     document.getElementById('tele-chatid-input').value = chatId;
                     
+                    // 2. Sauvegarde automatique dans le Cloud (Firebase)
                     if (ID_COFFRET) {
                         let url = `${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`;
                         await fetch(url, { 
@@ -988,16 +994,33 @@ function rafraichirTitres(vue) {
                             body: JSON.stringify({ telegram_chat_id: chatId.toString(), telegram_token: token }) 
                         });
                     }
-                    alert(`✅ ID trouvé pour ${prenom} : ${chatId} !\nL'enregistrement dans le Cloud est automatique.`);
+
+                    // 3. Activation automatique sur l'ESP32 (remplace la case à cocher)
+                    envoyerCommande("TELE", "1");
+                    
+                    // 4. Envoi automatique d'un message de bienvenue depuis l'application Web vers Telegram !
+                    try {
+                        let msgUrl = `https://api.telegram.org/bot${token}/sendMessage`;
+                        await fetch(msgUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                chat_id: chatId,
+                                text: `✅ Bonjour ${prenom} !\nVotre téléphone est maintenant bien lié au boîtier de filtration.\nVous recevrez les futures alarmes ici.`
+                            })
+                        });
+                    } catch(e) { console.warn("Erreur envoi message bienvenue", e); }
+
+                    alert(`✅ Liaison réussie pour ${prenom} !\nUn message de confirmation vient de vous être envoyé sur Telegram.`);
                 } else { alert("⚠️ Format de message non reconnu."); }
             } else {
-                alert("⚠️ Aucun message trouvé.\n\nAllez sur l'application Telegram, envoyez 'Bonjour' à votre bot, puis réessayez de cliquer sur le bouton.");
+                alert("⚠️ Aucun message détecté.\n\nAvez-vous bien cliqué sur le bouton bleu '1. Ouvrir Telegram' et appuyé sur 'Démarrer' ?");
             }
         } catch (error) {
             console.error("Erreur Telegram API :", error);
             alert("❌ Erreur de connexion aux serveurs Telegram.");
         }
-        icon.className = "fa-brands fa-telegram";
+        icon.className = "fa-solid fa-link";
     }
 
     function sauvegarderTelegram() { 
