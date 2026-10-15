@@ -629,15 +629,33 @@
         });
     }
 
-    function adapterInterfaceSelonMode() {
-        let styleDisplay = (modeActif === "FIREBASE") ? "none" : "flex";
+   function adapterInterfaceSelonMode() {
+        // En mode Firebase, on cache les configurations locales. En BLE, on les affiche.
+        let styleConfigs = (modeActif === "FIREBASE") ? "none" : "flex";
         ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-telegram', 'tab-ota'].forEach(id => {
             let el = document.getElementById(id);
-            if(el) el.style.display = styleDisplay;
+            if(el) el.style.display = styleConfigs;
         });
+
+        // --- NOUVEAU : On cache l'Historique en BLE, on l'affiche en Firebase ---
+        let styleHistorique = (modeActif === "BLE") ? "none" : "flex";
+        let tabHistory = document.getElementById('tab-history');
+        if (tabHistory) {
+            tabHistory.style.display = styleHistorique;
+        }
+
+        // Si on est en Cloud et qu'on regarde un écran "interdit", on force le retour sur Auto
         if (modeActif === "FIREBASE") {
             let activeView = document.querySelector('.view.active').id;
             if (['manuel-view', 'config-view', 'wifi-view', 'telegram-view', 'ota-view'].includes(activeView)) {
+                switchView('auto');
+            }
+        }
+        
+        // Si on est en BLE et qu'on regarde l'Historique, on force le retour sur Auto
+        if (modeActif === "BLE") {
+            let activeView = document.querySelector('.view.active').id;
+            if (activeView === 'history-view') {
                 switchView('auto');
             }
         }
