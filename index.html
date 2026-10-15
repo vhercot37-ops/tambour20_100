@@ -630,7 +630,7 @@ function rafraichirTitres(vue) {
         });
     }
 
-   function adapterInterfaceSelonMode() {
+  function adapterInterfaceSelonMode() {
         // En mode Firebase, on cache les configurations locales. En BLE, on les affiche.
         let styleConfigs = (modeActif === "FIREBASE") ? "none" : "flex";
         ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-telegram', 'tab-ota'].forEach(id => {
@@ -638,11 +638,20 @@ function rafraichirTitres(vue) {
             if(el) el.style.display = styleConfigs;
         });
 
-        // --- NOUVEAU : On cache l'Historique en BLE, on l'affiche en Firebase ---
+        // On cache l'Historique en BLE, on l'affiche en Firebase
         let styleHistorique = (modeActif === "BLE") ? "none" : "flex";
         let tabHistory = document.getElementById('tab-history');
         if (tabHistory) {
             tabHistory.style.display = styleHistorique;
+        }
+
+        // --- NOUVEAU : Éteindre le voyant Telegram en mode BLE ---
+        let teleIcon = document.getElementById('telegram-status-icon');
+        if (teleIcon) {
+            if (modeActif === "BLE") {
+                teleIcon.style.color = "#334155"; // Forcé à gris en mode local
+            }
+            // Note: En mode Cloud, c'est la fonction lireDonneesFirebase qui l'allumera en bleu si nécessaire
         }
 
         // Si on est en Cloud et qu'on regarde un écran "interdit", on force le retour sur Auto
