@@ -89,12 +89,13 @@
                 <i class="fa-solid fa-circle" id="app-conn-dot" style="color: var(--text-gray); font-size: 16px;"></i>
                 <span id="app-conn-text" data-i18n="status_wait">Attente...</span>
             </div>
-            <!-- Bargraphe Wi-Fi du boîtier -->
             <div id="esp-wifi-status" style="display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: bold; color: var(--text-gray);">
                 <span data-i18n="lbl_boitier">Boîtier:</span>
                 <span class="signal-bars" id="header-wifi-bars" style="margin-left: 2px;">
                     <span class="bar bar-1"></span><span class="bar bar-2"></span><span class="bar bar-3"></span><span class="bar bar-4"></span>
                 </span>
+                <!-- NOUVEAU : Voyant Telegram -->
+                <i class="fa-brands fa-telegram" id="telegram-status-icon" style="color: #334155; font-size: 15px; margin-left: 5px; transition: 0.3s;"></i>
             </div>
         </div>
         
@@ -558,7 +559,7 @@
         }
     }
     
-    // --- LECTURE FIREBASE AVEC TIMEOUT 15s ---
+   // --- LECTURE FIREBASE AVEC TIMEOUT 15s ET VOYANT TELEGRAM ---
     async function lireDonneesFirebase() {
         if (!ID_COFFRET) return;
         
@@ -607,15 +608,13 @@
                     let temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi;
                     
                     if (espEnLigne) {
-                        // --- NOUVEAU : Lecture du Mode depuis Firebase ---
+                        // --- Lecture dynamique du titre Mode (Auto & Alarme) ---
                         if (data.Mode !== undefined) {
                             let vueActive = document.querySelector('.view.active').id;
-                            // On met à jour le titre si on regarde l'écran Auto OU l'écran Alarme
                             if (vueActive === 'auto-view' || vueActive === 'alarme-view') {
                                 document.getElementById('val-Mode').innerText = data.Mode;
                             }
                         }
-                        // -------------------------------------------------
 
                         temp = data.temperature !== undefined ? data.temperature : 0;
                         secu = data.niveau_securite !== undefined ? data.niveau_securite : 0;
@@ -627,8 +626,19 @@
                         wStat = data.wifi_stat !== undefined ? data.wifi_stat : 0;
                         wRssi = data.wifi_rssi !== undefined ? data.wifi_rssi : 0;
                         
-                        if(data.telegram_chat_id && !document.getElementById('tele-chatid-input').value) {
+                        // Remplissage automatique du champ Telegram dans l'onglet
+                        if (data.telegram_chat_id && !document.getElementById('tele-chatid-input').value) {
                             document.getElementById('tele-chatid-input').value = data.telegram_chat_id;
+                        }
+
+                        // --- Gestion du voyant Telegram en haut de l'écran ---
+                        let teleIcon = document.getElementById('telegram-status-icon');
+                        if (teleIcon) {
+                            if (data.telegram_chat_id && String(data.telegram_chat_id).length > 4) {
+                                teleIcon.style.color = "#0ea5e9"; // Bleu lumineux si configuré
+                            } else {
+                                teleIcon.style.color = "#334155"; // Gris si absent
+                            }
                         }
                     } else {
                         temp = "--.-";
@@ -640,6 +650,10 @@
                         alarme = 0;
                         wStat = 0;
                         wRssi = -100; 
+                        
+                        // Éteindre le voyant Telegram si l'ESP32 est hors ligne
+                        let teleIcon = document.getElementById('telegram-status-icon');
+                        if (teleIcon) teleIcon.style.color = "#334155";
                     }
 
                     afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi);
@@ -656,7 +670,6 @@
             text.innerText = "Erreur App<->Cloud";
         }
     }
-
     function sauvegarderTambour() {
         let mod = document.getElementById('config-modele-select').value;
         let typ = document.getElementById('config-mode-select').value;
