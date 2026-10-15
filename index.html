@@ -439,7 +439,8 @@
             lireHistoriqueFirebase();
         }
     }
-    // --- LECTURE DE L'HISTORIQUE DEPUIS FIREBASE ---
+    
+  // --- LECTURE DE L'HISTORIQUE DEPUIS FIREBASE ---
     async function lireHistoriqueFirebase() {
         if (!ID_COFFRET) return;
         
@@ -449,27 +450,126 @@
         titre.innerText = "Connexion...";
         
         try {
-            // On ne télécharge QUE le nœud "historique" pour que ce soit instantané
+            // On ne télécharge QUE le nœud "historique"
             let url = `${FIREBASE_HOST}clients/${ID_COFFRET}/historique.json?auth=${FIREBASE_AUTH}`;
             let response = await fetch(url);
             
             if (response.ok) {
                 let data = await response.json();
+                
                 // On vérifie que les 3 tableaux existent bien
                 if (data && data.jours && data.temperatures && data.lavages) {
                     genererGraphiques(data.jours, data.temperatures, data.lavages);
                 } else {
-                    console.log("Les données d'historique ne sont pas encore présentes sur Firebase.");
+                    afficherMessageAucuneDonnee();
                 }
+            } else {
+                afficherMessageAucuneDonnee();
             }
         } catch (error) { 
             console.error("Erreur de lecture de l'historique", error); 
+            afficherMessageAucuneDonnee();
         }
         
-        // 2. On remet le titre normal une fois les graphiques générés
+        // 2. On remet le titre normal une fois terminé
         titre.innerText = dict[currentLang]['menu_history'] || "Historique";
     }
 
+    // --- FONCTION POUR AFFICHER LE MESSAGE SI PAS DE DONNÉES ---
+    function afficherMessageAucuneDonnee() {
+        let textFr = "Pas encore de données";
+        let textNl = "Nog geen gegevens";
+        let msg = (currentLang === 'fr') ? textFr : textNl;
+
+        // Pour chaque conteneur de graphique, on masque le canvas et on injecte le texte
+        let containers = document.querySelectorAll('.chart-container');
+        containers.forEach(container => {
+            // On cache le canvas existant
+            let canvas = container.querySelector('canvas');
+            if (canvas) canvas.style.display = 'none';
+
+            // On vérifie s'il y a déjà un message, sinon on le crée
+            let msgDiv = container.querySelector('.no-data-msg');
+            if (!msgDiv) {
+                msgDiv = document.createElement('div');
+                msgDiv.className = 'no-data-msg';
+                msgDiv.style.textAlign = 'center';
+                msgDiv.style.color = 'var(--text-gray)';
+                msgDiv.style.padding = '40px 0';
+                msgDiv.style.fontSize = '16px';
+                msgDiv.style.fontWeight = 'bold';
+                container.appendChild(msgDiv);
+            }
+            msgDiv.innerText = msg;
+            msgDiv.style.display = 'block';
+        });
+    }
+
+    // --- GÉNÉRATION DES GRAPHIQUES AVEC CHART.JS ---
+    function genererGraphiques(labels, temps, lavages) {
+        // Détruire les anciens graphiques s'ils existent déjà
+        if (chartTempInstance) chartTempInstance.destroy();
+        if (chartWashInstance) chartWashInstance.destroy();
+
+        // On s'assure que les canvas sont visibles et que les messages d'erreur sont masqués
+        document.querySelectorAll('.chart-container').forEach(container => {
+            let canvas = container.querySelector('canvas');
+            if (canvas) canvas.style.display = 'block';
+            let msgDiv = container.querySelector('.no-data-msg');
+            if (msgDiv) msgDiv.style.display = 'none';
+        });
+
+        // Options communes pour le style "Sombre" de l'application
+        const commonOptions = {
+            responsive: true,
+            plugins: { legend: { labels: { color: '#ffffff' } } },
+            scales: {
+                x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+                y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+            }
+        };
+
+        const ctxTemp = document.getElementById('chartTemp').getContext('2d');
+        chartTempInstance = new Chart(ctxTemp, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Température (°C)',
+                    data: temps,
+                    borderColor: '#ef4444', 
+                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 3
+                }]
+            },
+            options: commonOptions
+        });
+
+        const ctxWash = document.getElementById('chartWash').getContext('2d');
+        chartWashInstance = new Chart(ctxWash, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Nombre de lavages',
+                    data: lavages,
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    ...commonOptions.scales,
+                    y: { ...commonOptions.scales.y, beginAtZero: true }
+                }
+            }
+        });
+    }
+    
     // --- GÉNÉRATION DES GRAPHIQUES AVEC CHART.JS ---
     function genererGraphiques(labels, temps, lavages) {
         // Détruire les anciens graphiques s'ils existent déjà (évite les bugs de superposition)
