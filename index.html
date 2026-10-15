@@ -376,6 +376,8 @@
     let modeActif = "BLE";
     let timerFirebase = null;
     let reseauxTrouves = [];
+    let chartTempInstance = null;
+    let chartWashInstance = null;
 
     function rafraichirTitres(vue) {
         let modele = localStorage.getItem("tambour_modele") || "70";
@@ -416,7 +418,7 @@
         }
     }
 
-    function switchView(target) {
+   function switchView(target) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         document.getElementById(`${target}-view`).classList.add('active');
@@ -431,6 +433,100 @@
         if (target !== 'alarme' && modeActif === "BLE") {
             envoyerCommande("PAGE", target.toUpperCase());
         }
+
+        // --- NOUVEAU : Chargement des graphiques en mode Cloud ---
+        if (target === 'history' && modeActif === "FIREBASE") {
+            lireHistoriqueFirebase();
+        }
+    }
+    // --- LECTURE DE L'HISTORIQUE DEPUIS FIREBASE ---
+    async function lireHistoriqueFirebase() {
+        if (!ID_COFFRET) return;
+        
+        let titre = document.getElementById('val-Mode');
+        
+        // 1. On affiche temporairement "Connexion..."
+        titre.innerText = "Connexion...";
+        
+        try {
+            // On ne télécharge QUE le nœud "historique" pour que ce soit instantané
+            let url = `${FIREBASE_HOST}clients/${ID_COFFRET}/historique.json?auth=${FIREBASE_AUTH}`;
+            let response = await fetch(url);
+            
+            if (response.ok) {
+                let data = await response.json();
+                // On vérifie que les 3 tableaux existent bien
+                if (data && data.jours && data.temperatures && data.lavages) {
+                    genererGraphiques(data.jours, data.temperatures, data.lavages);
+                } else {
+                    console.log("Les données d'historique ne sont pas encore présentes sur Firebase.");
+                }
+            }
+        } catch (error) { 
+            console.error("Erreur de lecture de l'historique", error); 
+        }
+        
+        // 2. On remet le titre normal une fois les graphiques générés
+        titre.innerText = dict[currentLang]['menu_history'] || "Historique";
+    }
+
+    // --- GÉNÉRATION DES GRAPHIQUES AVEC CHART.JS ---
+    function genererGraphiques(labels, temps, lavages) {
+        // Détruire les anciens graphiques s'ils existent déjà (évite les bugs de superposition)
+        if (chartTempInstance) chartTempInstance.destroy();
+        if (chartWashInstance) chartWashInstance.destroy();
+
+        // Options communes pour le style "Sombre" de l'application
+        const commonOptions = {
+            responsive: true,
+            plugins: { legend: { labels: { color: '#ffffff' } } },
+            scales: {
+                x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+                y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+            }
+        };
+
+        // Graphique Températures (Ligne rouge avec remplissage)
+        const ctxTemp = document.getElementById('chartTemp').getContext('2d');
+        chartTempInstance = new Chart(ctxTemp, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Température (°C)',
+                    data: temps,
+                    borderColor: '#ef4444', 
+                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3, // Courbe adoucie
+                    pointRadius: 3
+                }]
+            },
+            options: commonOptions
+        });
+
+        // Graphique Lavages (Barres bleues)
+        const ctxWash = document.getElementById('chartWash').getContext('2d');
+        chartWashInstance = new Chart(ctxWash, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Nombre de lavages',
+                    data: lavages,
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 4 // Bords des barres arrondis
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    ...commonOptions.scales,
+                    y: { ...commonOptions.scales.y, beginAtZero: true } // Toujours démarrer à 0
+                }
+            }
+        });
     }
 
     function adapterInterfaceSelonMode() {
