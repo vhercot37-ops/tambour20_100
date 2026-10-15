@@ -14,7 +14,7 @@
         .phone-container { width: 100%; max-width: 410px; background-color: var(--bg-main); border-radius: 25px; padding: 25px 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); box-sizing: border-box; display: flex; flex-direction: column; position: relative; overflow: hidden; min-height: 800px; }
         
         header { text-align: center; margin-bottom: 20px; position: relative; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 0 45px 0 15px; }
-        .main-title { font-size: 38px; font-weight: 900; margin: 0; width: 100%; text-align: center; color: var(--accent-blue); text-shadow: 0 2px 4px rgba(0,0,0,0.5); letter-spacing: 1px;}
+        .main-title { font-size: 38px; font-weight: 900; margin: 15px 0 0 0; width: 100%; text-align: center; color: var(--accent-blue); text-shadow: 0 2px 4px rgba(0,0,0,0.5); letter-spacing: 1px;}
         
         .menu-toggle-btn { position: absolute; right: 0px; top: 50%; transform: translateY(-50%); background: #243145; border: 1px solid #334155; color: var(--text-white); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; transition: 0.3s;}
         .menu-toggle-btn.disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
@@ -94,7 +94,7 @@
                 <span class="signal-bars" id="header-wifi-bars" style="margin-left: 2px;">
                     <span class="bar bar-1"></span><span class="bar bar-2"></span><span class="bar bar-3"></span><span class="bar bar-4"></span>
                 </span>
-                <!-- NOUVEAU : Voyant Telegram -->
+                <!-- Voyant Telegram -->
                 <i class="fa-brands fa-telegram" id="telegram-status-icon" style="color: #334155; font-size: 15px; margin-left: 5px; transition: 0.3s;"></i>
             </div>
         </div>
@@ -106,7 +106,7 @@
     <div class="sidebar-menu" id="sidebarMenu">
         <div class="sidebar-item active" id="tab-auto" onclick="switchView('auto')"><i class="fa-solid fa-gauge"></i> <span data-i18n="menu_auto">Mode Auto</span></div>
         <div class="sidebar-item" id="tab-manuel" onclick="switchView('manuel')"><i class="fa-solid fa-hand-pointer"></i> <span data-i18n="menu_manuel">Mode Manuel</span></div>
-        <div class="sidebar-item" id="tab-config" onclick="switchView('config')"><i class="fa-solid fa-gear"></i> <span data-i18n="menu_config">Config. Tambour</span></div>
+        <div class="sidebar-item" id="tab-config" onclick="switchView('config')"><i class="fa-solid fa-gear"></i> <span data-i18n="menu_config">Configuration</span></div>
         <div class="sidebar-item" id="tab-wifi" onclick="switchView('wifi')"><i class="fa-solid fa-wifi"></i> <span data-i18n="menu_wifi">Config. Wi-Fi</span></div>
         <div class="sidebar-item" id="tab-telegram" onclick="switchView('telegram')"><i class="fa-brands fa-telegram"></i> <span data-i18n="menu_telegram">Telegram</span></div>
         <div class="sidebar-item" id="tab-ble" onclick="switchView('ble')"><i class="fa-solid fa-bluetooth"></i> <span data-i18n="menu_ble">Connexion</span></div>
@@ -304,7 +304,7 @@
 <script>
     const dict = {
         fr: {
-            status_wait: "Attente...", menu_auto: "Mode Auto", menu_manuel: "Mode Manuel", menu_config: "Config. Tambour",
+            status_wait: "Attente...", menu_auto: "Mode Auto", menu_manuel: "Mode Manuel", menu_config: "Configuration",
             menu_wifi: "Config. Wi-Fi", menu_telegram: "Telegram", menu_ble: "Connexion", menu_history: "Historique", 
             menu_ota: "Mise à jour", menu_lang: "Langue / Taal",
             niv_secu: "Niveau Sécurité", niv_lav: "Niveau Lavage", couv: "Couvercle", pompe: "Pompe UV", nbre_lav: "Nombre de Lavages",
@@ -320,7 +320,7 @@
             lbl_wifi_etat: "État Wi-Fi :", lbl_wifi_signal: "Signal :", wifi_conn: "Connecté", wifi_dec: "Déconnecté", ota_no_update: "À jour", ota_update_found: "Disponible"
         },
         nl: {
-            status_wait: "Wachten...", menu_auto: "Auto Modus", menu_manuel: "Handmatig", menu_config: "Trommel Config",
+            status_wait: "Wachten...", menu_auto: "Auto Modus", menu_manuel: "Handmatig", menu_config: "Configuration",
             menu_wifi: "Wi-Fi Config", menu_telegram: "Telegram", menu_ble: "Verbinding", menu_history: "Geschiedenis", 
             menu_ota: "Update", menu_lang: "Langue / Taal",
             niv_secu: "Beveiligingsniveau", niv_lav: "Spoelniveau", couv: "Deksel", pompe: "UV Pomp", nbre_lav: "Aantal Spoelingen",
@@ -394,7 +394,7 @@ function rafraichirTitres(vue) {
             titre.style.fontSize = "38px"; 
         }
         
-        // --- MODIFIÉ : En mode Cloud, on affiche "Connexion..." en attendant la lecture Firebase ---
+        // --- En mode Cloud, on affiche "Connexion..." en attendant la lecture Firebase ---
         if (modeActif === "FIREBASE" && (vue === 'auto' || vue === 'alarme')) {
             titre.innerText = "Connexion..."; 
             return; 
@@ -435,7 +435,7 @@ function rafraichirTitres(vue) {
             envoyerCommande("PAGE", target.toUpperCase());
         }
 
-        // --- NOUVEAU : Chargement des graphiques en mode Cloud ---
+        // --- Chargement des graphiques en mode Cloud ---
         if (target === 'history' && modeActif === "FIREBASE") {
             lireHistoriqueFirebase();
         }
@@ -570,65 +570,6 @@ function rafraichirTitres(vue) {
             }
         });
     }
-    
-    // --- GÉNÉRATION DES GRAPHIQUES AVEC CHART.JS ---
-    function genererGraphiques(labels, temps, lavages) {
-        // Détruire les anciens graphiques s'ils existent déjà (évite les bugs de superposition)
-        if (chartTempInstance) chartTempInstance.destroy();
-        if (chartWashInstance) chartWashInstance.destroy();
-
-        // Options communes pour le style "Sombre" de l'application
-        const commonOptions = {
-            responsive: true,
-            plugins: { legend: { labels: { color: '#ffffff' } } },
-            scales: {
-                x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
-                y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
-            }
-        };
-
-        // Graphique Températures (Ligne rouge avec remplissage)
-        const ctxTemp = document.getElementById('chartTemp').getContext('2d');
-        chartTempInstance = new Chart(ctxTemp, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Température (°C)',
-                    data: temps,
-                    borderColor: '#ef4444', 
-                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.3, // Courbe adoucie
-                    pointRadius: 3
-                }]
-            },
-            options: commonOptions
-        });
-
-        // Graphique Lavages (Barres bleues)
-        const ctxWash = document.getElementById('chartWash').getContext('2d');
-        chartWashInstance = new Chart(ctxWash, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Nombre de lavages',
-                    data: lavages,
-                    backgroundColor: '#3b82f6',
-                    borderRadius: 4 // Bords des barres arrondis
-                }]
-            },
-            options: {
-                ...commonOptions,
-                scales: {
-                    ...commonOptions.scales,
-                    y: { ...commonOptions.scales.y, beginAtZero: true } // Toujours démarrer à 0
-                }
-            }
-        });
-    }
 
   function adapterInterfaceSelonMode() {
         // En mode Firebase, on cache les configurations locales. En BLE, on les affiche.
@@ -645,7 +586,7 @@ function rafraichirTitres(vue) {
             tabHistory.style.display = styleHistorique;
         }
 
-        // --- NOUVEAU : Éteindre le voyant Telegram en mode BLE ---
+        // --- Éteindre le voyant Telegram en mode BLE ---
         let teleIcon = document.getElementById('telegram-status-icon');
         if (teleIcon) {
             if (modeActif === "BLE") {
@@ -762,7 +703,7 @@ function rafraichirTitres(vue) {
             envoyerCommande("RESET_ALARM", 1);
             switchView("manuel"); 
         } else { 
-            // --- NOUVEAU : On affiche "Connexion..." en attendant la réponse de Firebase ---
+            // On affiche "Connexion..." en attendant la réponse de Firebase
             document.getElementById('val-Mode').innerText = "Connexion...";
             
             // Seule et unique écriture vers Firebase autorisée dans l'application web :
@@ -914,7 +855,8 @@ function rafraichirTitres(vue) {
             
             document.getElementById('app-conn-dot').className = "fa-brands fa-bluetooth pulsing";
             document.getElementById('app-conn-dot').style.color = "#f59e0b";
-            document.getElementById('app-conn-text').innerText = "Connexion BLE...";
+            // MODIFICATION: Masquer le texte "Connexion BLE..."
+            document.getElementById('app-conn-text').innerText = "";
 
             bleDevice = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'Tambour_' }], optionalServices: [SERVICE_UUID] });
             bleDevice.addEventListener('gattserverdisconnected', () => { setTimeout(activerModeFirebase, 2000); });
@@ -925,7 +867,8 @@ function rafraichirTitres(vue) {
 
             document.getElementById('app-conn-dot').className = "fa-brands fa-bluetooth"; 
             document.getElementById('app-conn-dot').style.color = "var(--accent-blue)";
-            document.getElementById('app-conn-text').innerText = "BLE Connecté";
+            // MODIFICATION: Masquer le texte "BLE Connecté"
+            document.getElementById('app-conn-text').innerText = "";
 
             await txCharacteristic.startNotifications();
             txCharacteristic.addEventListener('characteristicvaluechanged', (e) => {
