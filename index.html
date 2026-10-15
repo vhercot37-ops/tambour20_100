@@ -532,11 +532,14 @@
         } catch (e) { console.error("Erreur affichage", e); }
     }
 
-    async function resetAlarme() {
+ async function resetAlarme() {
         if (modeActif === "BLE") { 
             envoyerCommande("RESET_ALARM", 1);
             switchView("manuel"); 
         } else { 
+            // --- NOUVEAU : On affiche "Connexion..." en attendant la réponse de Firebase ---
+            document.getElementById('val-Mode').innerText = "Connexion...";
+            
             // Seule et unique écriture vers Firebase autorisée dans l'application web :
             if (ID_COFFRET) {
                 try {
