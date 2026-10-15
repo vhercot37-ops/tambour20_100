@@ -575,42 +575,42 @@ function rafraichirTitres(vue) {
         });
     }
 
-  function adapterInterfaceSelonMode() {
-        // En mode Firebase, on cache les configurations locales. En BLE, on les affiche.
+ function adapterInterfaceSelonMode() {
+        // 1. Configurations locales : Visibles en BLE, cachées en Firebase
         let styleConfigs = (modeActif === "FIREBASE") ? "none" : "flex";
-        ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-telegram', 'tab-ota'].forEach(id => {
+        ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-ota'].forEach(id => {
             let el = document.getElementById(id);
             if(el) el.style.display = styleConfigs;
         });
 
-        // On cache l'Historique en BLE, on l'affiche en Firebase
-        let styleHistorique = (modeActif === "BLE") ? "none" : "flex";
-        let tabHistory = document.getElementById('tab-history');
-        if (tabHistory) {
-            tabHistory.style.display = styleHistorique;
-        }
+        // 2. Fonctionnalités Cloud : Visibles en Firebase, cachées en BLE
+        let styleCloudOnly = (modeActif === "BLE") ? "none" : "flex";
+        ['tab-history', 'tab-telegram'].forEach(id => {
+            let el = document.getElementById(id);
+            if (el) el.style.display = styleCloudOnly;
+        });
 
-        // --- Éteindre le voyant Telegram en mode BLE ---
+        // 3. Éteindre le voyant Telegram en mode BLE
         let teleIcon = document.getElementById('telegram-status-icon');
         if (teleIcon) {
             if (modeActif === "BLE") {
                 teleIcon.style.color = "#334155"; // Forcé à gris en mode local
             }
-            // Note: En mode Cloud, c'est la fonction lireDonneesFirebase qui l'allumera en bleu si nécessaire
         }
 
-        // Si on est en Cloud et qu'on regarde un écran "interdit", on force le retour sur Auto
+        // 4. Sécurité : Forcer le retour sur "Auto" si on se trouve sur un onglet désactivé
+        let activeView = document.querySelector('.view.active').id;
+        
         if (modeActif === "FIREBASE") {
-            let activeView = document.querySelector('.view.active').id;
-            if (['manuel-view', 'config-view', 'wifi-view', 'telegram-view', 'ota-view'].includes(activeView)) {
+            // Si on est en Cloud, on interdit le Manuel, la Config, le Wifi et l'OTA
+            if (['manuel-view', 'config-view', 'wifi-view', 'ota-view'].includes(activeView)) {
                 switchView('auto');
             }
         }
         
-        // Si on est en BLE et qu'on regarde l'Historique, on force le retour sur Auto
         if (modeActif === "BLE") {
-            let activeView = document.querySelector('.view.active').id;
-            if (activeView === 'history-view') {
+            // Si on est en BLE, on interdit l'Historique et Telegram
+            if (['history-view', 'telegram-view'].includes(activeView)) {
                 switchView('auto');
             }
         }
