@@ -634,9 +634,45 @@ function adapterInterfaceSelonMode() {
             });
             
             let pct = 0;
-            if (typeof temp === 'number') { pct = Math.min(Math.max((temp - 6.0) / 24.0, 0), 1); }
+            let couleurDynamique = "rgb(0, 200, 255)"; // Bleu ciel par défaut
+            let dotX = 46.97;
+            let dotY = 153.03;
+
+            if (typeof temp === 'number') { 
+                // Pourcentage calculé entre 10°C (0%) et 24°C (100%)
+                pct = Math.min(Math.max((temp - 10.0) / 14.0, 0), 1); 
+                
+                // Dégradé : Bleu Ciel -> Rouge Vif
+                let r = Math.round(255 * pct);
+                let g = Math.round(200 * (1 - pct) + 30 * pct);
+                let b = Math.round(255 * (1 - pct) + 30 * pct);
+                couleurDynamique = `rgb(${r}, ${g}, ${b})`;
+
+                // Calcul géométrique de la position du point lumineux
+                let angleDeBase = 135 + (pct * 270);
+                let angleRad = angleDeBase * (Math.PI / 180);
+                dotX = 100 + 75 * Math.cos(angleRad);
+                dotY = 100 + 75 * Math.sin(angleRad);
+            }
+
+            // Mise à jour de la couleur et de la longueur du bargraphe
             ['gaugeCircle', 'gaugeCircle-man', 'gaugeCircle-al'].forEach(id => { 
-                if(document.getElementById(id)) document.getElementById(id).style.strokeDashoffset = 353.4 - (pct * 353.4); 
+                let el = document.getElementById(id);
+                if (el) {
+                    el.style.strokeDashoffset = 353.4 - (pct * 353.4); 
+                    el.style.stroke = couleurDynamique;
+                }
+            });
+
+            // Mise à jour de la position et de la couleur du point lumineux
+            ['gaugeDot', 'gaugeDot-man', 'gaugeDot-al'].forEach(id => {
+                let el = document.getElementById(id);
+                if (el) {
+                    el.setAttribute('cx', dotX.toFixed(2));
+                    el.setAttribute('cy', dotY.toFixed(2));
+                    el.style.fill = "#ffffff";
+                    el.style.stroke = couleurDynamique;
+                }
             });
             
             let couvLogique = (couv === null) ? null : !(couv === 1 || couv === true);
