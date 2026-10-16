@@ -233,29 +233,18 @@
             </div>
         </div>
 
-      <!-- CONFIGURATION TELEGRAM -->
+     <!-- CONFIGURATION TELEGRAM -->
         <div id="telegram-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_tele">Alertes Telegram</h3>
                 <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 20px;">
-                    Pour recevoir les alarmes :<br><br>
-                    1. Cliquez sur le bouton bleu ci-dessous et appuyez sur <b>Démarrer</b> dans Telegram.<br>
-                    2. Revenez ici et cliquez sur le bouton orange.
+                    Liez automatiquement votre compte Telegram pour recevoir les alertes de votre coffret.<br><br>
+                    Cliquez sur le bouton ci-dessous, puis appuyez sur <b>Démarrer</b> dans l'application Telegram.
                 </p>
                 
-                <input type="hidden" id="tele-token-input" value="8803564628:AAEntgbIiQ4ipAdTukiWDxsHMXKtkk8P_8k">
-                
-                <!-- REMPLACE "NOM_DE_TON_BOT" par le nom de ton bot Telegram sans le @ -->
-                <button class="auth-btn" style="background-color: #0ea5e9; margin-bottom: 15px; padding: 15px;" onclick="window.open('https://t.me/Vincent2010Bot', '_blank')">
-                    <i class="fa-brands fa-telegram"></i> 1. Ouvrir Telegram
+                <button class="auth-btn" style="background-color: #0ea5e9; padding: 15px; margin-bottom: 15px;" onclick="lierTelegram()">
+                    <i class="fa-brands fa-telegram"></i> Lier Telegram Automatiquement
                 </button>
-
-                <button id="btn-detect-telegram" class="auth-btn" style="background-color: #f59e0b; margin-bottom: 15px; padding: 15px;" onclick="detecterChatIdTelegram()">
-                    <i class="fa-solid fa-link"></i> 2. Valider la liaison
-                </button>
-
-                <!-- Champs masqués pour conserver la logique JavaScript sans polluer l'écran -->
-                <input type="hidden" id="tele-chatid-input">
             </div>
         </div>
 
@@ -443,6 +432,15 @@ function rafraichirTitres(vue) {
         if (target === 'history' && modeActif === "FIREBASE") {
             lireHistoriqueFirebase();
         }
+    }
+
+   function lierTelegram() {
+        if (!ID_COFFRET) {
+            alert("Erreur : Identifiant du coffret introuvable.");
+            return;
+        }
+        // Ouvre Telegram en transmettant automatiquement l'ID du coffret (ex: /start Coffret_01)
+        window.open(`https://t.me/Vincent2010Bot?start=${encodeURIComponent(ID_COFFRET)}`, '_blank');
     }
     
   // --- LECTURE DE L'HISTORIQUE DEPUIS FIREBASE ---
