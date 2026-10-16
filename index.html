@@ -698,6 +698,11 @@ function adapterInterfaceSelonMode() {
                 if (!document.getElementById('alarme-view').classList.contains('active')) { switchView('alarme'); }
             } else {
                 if(btnMenu) btnMenu.classList.remove('disabled');
+                
+                // CORRECTION DU BUG : Si l'alarme est à 0 mais qu'on est resté bloqué sur la vue Alarme, on sort automatiquement !
+                if (document.getElementById('alarme-view').classList.contains('active')) {
+                    switchView('auto'); 
+                }
             }
 
             // --- GESTION DYNAMIQUE DE L'ONGLET MISE À JOUR (OTA) ---
