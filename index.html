@@ -573,10 +573,10 @@ function rafraichirTitres(vue) {
         });
     }
 
- function adapterInterfaceSelonMode() {
+function adapterInterfaceSelonMode() {
         // 1. Configurations locales : Visibles en BLE, cachées en Firebase
         let styleConfigs = (modeActif === "FIREBASE") ? "none" : "flex";
-        ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-ota'].forEach(id => {
+        ['tab-manuel', 'tab-config', 'tab-wifi'].forEach(id => {
             let el = document.getElementById(id);
             if(el) el.style.display = styleConfigs;
         });
@@ -588,26 +588,28 @@ function rafraichirTitres(vue) {
             if (el) el.style.display = styleCloudOnly;
         });
 
-        // 3. Éteindre le voyant Telegram en mode BLE
+        // 3. Masquer l'OTA par défaut en basculant en mode Cloud
+        let tabOta = document.getElementById('tab-ota');
+        if (tabOta && modeActif === "FIREBASE") {
+            tabOta.style.display = "none";
+        }
+
+        // 4. Éteindre le voyant Telegram en mode BLE
         let teleIcon = document.getElementById('telegram-status-icon');
         if (teleIcon) {
             if (modeActif === "BLE") {
-                teleIcon.style.color = "#334155"; // Forcé à gris en mode local
+                teleIcon.style.color = "#334155";
             }
         }
 
-        // 4. Sécurité : Forcer le retour sur "Auto" si on se trouve sur un onglet désactivé
+        // 5. Sécurité : Forcer le retour sur "Auto" si on se trouve sur un onglet désactivé
         let activeView = document.querySelector('.view.active').id;
-        
         if (modeActif === "FIREBASE") {
-            // Si on est en Cloud, on interdit le Manuel, la Config, le Wifi et l'OTA
             if (['manuel-view', 'config-view', 'wifi-view', 'ota-view'].includes(activeView)) {
                 switchView('auto');
             }
         }
-        
         if (modeActif === "BLE") {
-            // Si on est en BLE, on interdit l'Historique et Telegram
             if (['history-view', 'telegram-view'].includes(activeView)) {
                 switchView('auto');
             }
@@ -625,7 +627,7 @@ function rafraichirTitres(vue) {
         }
     }
 
-    function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur, alarme_code = 0, wifi_stat = 0, wifi_rssi = 0) {
+   function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur, alarme_code = 0, wifi_stat = 0, wifi_rssi = 0) {
         try {
             ['val-temperature', 'val-temperature-man', 'val-temperature-al'].forEach(id => { 
                 if(document.getElementById(id)) document.getElementById(id).innerText = (typeof temp === 'number') ? temp.toFixed(1) : temp; 
@@ -697,6 +699,22 @@ function rafraichirTitres(vue) {
             } else {
                 if(btnMenu) btnMenu.classList.remove('disabled');
             }
+
+            // --- GESTION DYNAMIQUE DE L'ONGLET MISE À JOUR (OTA) ---
+            let tabOta = document.getElementById('tab-ota');
+            if (tabOta) {
+                // On affiche l'onglet OTA UNIQUEMENT en mode BLE ET si le Wi-Fi de l'ESP32 est connecté (wifi_stat === 1)
+                if (modeActif === "BLE" && wifi_stat === 1) {
+                    tabOta.style.display = "flex";
+                } else {
+                    tabOta.style.display = "none";
+                    // Si on était sur l'écran OTA et que le Wi-Fi coupe, on éjecte le client vers l'accueil
+                    if (document.querySelector('.view.active').id === 'ota-view') {
+                        switchView('auto');
+                    }
+                }
+            }
+
         } catch (e) { console.error("Erreur affichage", e); }
     }
 
