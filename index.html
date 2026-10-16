@@ -794,9 +794,9 @@ function rafraichirTitres(vue) {
                         wRssi = data.wifi_rssi !== undefined ? data.wifi_rssi : 0;
                         
                         // Remplissage automatique du champ Telegram dans l'onglet
-                        if (data.telegram_chat_id && !document.getElementById('tele-chatid-input').value) {
-                            document.getElementById('tele-chatid-input').value = data.telegram_chat_id;
-                        }
+                        //if (data.telegram_chat_id && !document.getElementById('tele-chatid-input').value) {
+                        //    document.getElementById('tele-chatid-input').value = data.telegram_chat_id;
+                        //}
 
                         // --- Gestion du voyant Telegram en haut de l'écran ---
                         let teleIcon = document.getElementById('telegram-status-icon');
