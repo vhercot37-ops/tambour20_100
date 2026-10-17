@@ -349,6 +349,7 @@
     let reseauxTrouves = [];
     let chartTempInstance = null;
     let chartWashInstance = null;
+    let systemeEnManuel = false; // <-- AJOUTE CETTE LIGNE ICI
 
     function rafraichirTitres(vue) {
         let modele = localStorage.getItem("tambour_modele") || "70";
@@ -385,23 +386,27 @@
     }
 
     function switchView(target) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-        let targetView = document.getElementById(`${target}-view`);
-        if(targetView) targetView.classList.add('active');
-        
-        let tabObj = document.getElementById(`tab-${target}`);
-        if(tabObj) tabObj.classList.add('active');
-        
-        rafraichirTitres(target); 
-        let menu = document.getElementById('sidebarMenu');
-        if(menu) menu.classList.remove('open');
-        
-        adapterInterfaceSelonMode();
-        
-        if (target !== 'alarme' && modeActif === "BLE") { envoyerCommande("PAGE", target.toUpperCase()); }
-        if (target === 'history' && modeActif === "FIREBASE") { lireHistoriqueFirebase(); }
-    }
+    // Mémorisation du mode global
+    if (target === 'manuel') systemeEnManuel = true;
+    if (target === 'auto') systemeEnManuel = false;
+    
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    let targetView = document.getElementById(`${target}-view`);
+    if(targetView) targetView.classList.add('active');
+    
+    let tabObj = document.getElementById(`tab-${target}`);
+    if(tabObj) tabObj.classList.add('active');
+    
+    rafraichirTitres(target); 
+    let menu = document.getElementById('sidebarMenu');
+    if(menu) menu.classList.remove('open');
+    
+    adapterInterfaceSelonMode();
+    
+    if (target !== 'alarme' && modeActif === "BLE") { envoyerCommande("PAGE", target.toUpperCase()); }
+    if (target === 'history' && modeActif === "FIREBASE") { lireHistoriqueFirebase(); }
+}
 
     function lierTelegram() {
         if (!ID_COFFRET) { alert("Erreur : Identifiant introuvable."); return; }
@@ -468,35 +473,37 @@
     }
 
     function adapterInterfaceSelonMode() {
-        let activeEl = document.querySelector('.view.active');
-        if(!activeEl) return;
-        let activeView = activeEl.id;
-        let isManuel = (activeView === 'manuel-view');
+    let activeEl = document.querySelector('.view.active');
+    if(!activeEl) return;
+    let activeView = activeEl.id;
+    
+    // CORRECTION : On utilise la mémoire globale, pas l'écran affiché
+    let isManuel = systemeEnManuel; 
 
-        if (modeActif === "FIREBASE") {
-            ['tab-history', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "flex"; });
-            ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-ota'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
+    if (modeActif === "FIREBASE") {
+        ['tab-history', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "flex"; });
+        ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-ota'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
 
-            if (['manuel-view', 'config-view', 'wifi-view', 'ota-view'].includes(activeView)) {
-                setTimeout(() => switchView('auto'), 10);
-            }
-        } else if (modeActif === "BLE") {
-            ['tab-history', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
-            let elMan = document.getElementById('tab-manuel'); if (elMan) elMan.style.display = "flex";
-
-            let styleConfig = isManuel ? "flex" : "none";
-            ['tab-config', 'tab-wifi'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = styleConfig; });
-
-            if (!isManuel) { let ota = document.getElementById('tab-ota'); if (ota) ota.style.display = "none"; }
-
-            if (['history-view', 'telegram-view'].includes(activeView) || (!isManuel && ['config-view', 'wifi-view', 'ota-view'].includes(activeView))) {
-                if (activeView !== 'auto-view') { setTimeout(() => switchView('auto'), 10); }
-            }
+        if (['manuel-view', 'config-view', 'wifi-view', 'ota-view'].includes(activeView)) {
+            setTimeout(() => switchView('auto'), 10);
         }
+    } else if (modeActif === "BLE") {
+        ['tab-history', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
+        let elMan = document.getElementById('tab-manuel'); if (elMan) elMan.style.display = "flex";
 
-        let teleIcon = document.getElementById('telegram-status-icon');
-        if (teleIcon && modeActif === "BLE") { teleIcon.style.color = "#374151"; }
+        let styleConfig = isManuel ? "flex" : "none";
+        ['tab-config', 'tab-wifi'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = styleConfig; });
+
+        if (!isManuel) { let ota = document.getElementById('tab-ota'); if (ota) ota.style.display = "none"; }
+
+        if (['history-view', 'telegram-view'].includes(activeView) || (!isManuel && ['config-view', 'wifi-view', 'ota-view'].includes(activeView))) {
+            if (activeView !== 'auto-view') { setTimeout(() => switchView('auto'), 10); }
+        }
     }
+
+    let teleIcon = document.getElementById('telegram-status-icon');
+    if (teleIcon && modeActif === "BLE") { teleIcon.style.color = "#374151"; }
+}
 
     function gererBadgeDot(id, status) {
         const dot = document.getElementById(id);
