@@ -6,13 +6,15 @@
     <title>Dashboard Tambour</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { 
-            --bg-main: #000000; /* Noir absolu OLED */
-            --bg-card: #111827; /* Tuiles gris très sombre */
-            --border-card: #1f2937; /* Bordures ultra-fines */
+            --bg-main: #000000;
+            --bg-card: #111827; 
+            --border-card: #1f2937;
             --text-white: #ffffff; 
             --text-gray: #94a3b8; 
             --dot-green: #10b981; 
@@ -21,9 +23,7 @@
             --accent-blue: #3b82f6; 
         }
         
-        /* Optimisation 100% écran (Native App Feel) */
         body { background-color: var(--bg-main); color: var(--text-white); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; overflow-x: hidden; }
-        
         .phone-container { width: 100%; max-width: 500px; background-color: var(--bg-main); padding: max(env(safe-area-inset-top, 20px), 20px) 20px 30px 20px; box-sizing: border-box; display: flex; flex-direction: column; position: relative; min-height: 100vh; }
         
         header { text-align: center; margin-bottom: 25px; position: relative; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 0 45px 0 0; }
@@ -41,30 +41,23 @@
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* --- STYLE BENTO BOX --- */
         .bento-card { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 24px; padding: 22px; margin-bottom: 15px; position: relative; overflow: hidden; }
-        
-        /* Grille 2x2 pour les capteurs */
         .bento-grid-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
-        
         .status-tile { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1 / 1; }
         .status-tile-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .status-tile-icon { font-size: 26px; color: var(--text-gray); opacity: 0.7; }
         .status-tile-title { font-size: 14px; font-weight: 600; color: var(--text-gray); margin-top: auto; line-height: 1.2; }
         
-        /* Points lumineux Modernisés */
         .dot { width: 14px; height: 14px; border-radius: 50%; background-color: #374151; flex-shrink: 0; transition: all 0.3s ease; }
         .dot.green { background-color: var(--dot-green); box-shadow: 0 0 12px rgba(16, 185, 129, 0.6); }
         .dot.red { background-color: var(--dot-red); box-shadow: 0 0 12px rgba(239, 68, 68, 0.8); }
         
-        /* --- TEMPÉRATURE NÉON DANS BENTO --- */
         .temp-header { color: var(--text-gray); font-size: 13px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
         .temp-value-large { font-size: 52px; font-weight: 800; color: #ffffff; letter-spacing: -2px; margin-bottom: 15px; }
         .temp-value-large span { font-size: 22px; color: var(--text-gray); font-weight: 600; margin-left: 4px; letter-spacing: 0; }
         .temp-track { width: 100%; height: 14px; background: #000000; border-radius: 12px; overflow: hidden; border: 1px solid #1f2937; }
         .temp-fill { height: 100%; width: 0%; border-radius: 10px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.8s ease, box-shadow 0.8s ease; }
         
-        /* Boutons Actions Manuelles */
         .btn-action-manuel { flex: 1; background-color: var(--bg-card); border: 1px solid var(--border-card); color: white; padding: 22px 15px; border-radius: 20px; font-weight: 700; font-size: 15px; text-transform: uppercase; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; transition: all 0.1s ease; user-select: none; -webkit-user-select: none; }
         .btn-action-manuel i { font-size: 28px; color: var(--text-gray); transition: 0.2s; }
         .btn-action-manuel.active { background-color: rgba(59, 130, 246, 0.1); border-color: var(--accent-blue); }
@@ -74,7 +67,6 @@
         
         .alarm-banner { background-color: rgba(220, 38, 38, 0.1); color: #f87171; padding: 18px; border-radius: 20px; font-weight: 800; text-align: center; margin-bottom: 15px; font-size: 16px; border: 1px solid #ef4444; box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.1); }
         
-        /* Formulaires & Configurations */
         .telegram-config-block { background-color: var(--bg-card); border-radius: 24px; padding: 25px; text-align: center; margin-top: 10px; border: 1px solid var(--border-card); }
         .auth-input { width: 100%; padding: 16px; margin-top: 5px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #374151; background-color: #000000; color: white; font-size: 16px; box-sizing: border-box; }
         .auth-btn { width: 100%; background-color: var(--accent-blue); color: white; border: none; padding: 18px; border-radius: 16px; font-weight: 700; cursor: pointer; font-size: 15px; transition: transform 0.1s; display: flex; justify-content: center; align-items: center; gap: 10px; }
@@ -91,7 +83,6 @@
         .progress-container { width: 100%; background-color: #000000; border-radius: 8px; margin-top: 15px; overflow: hidden; display: none; border: 1px solid #374151;}
         .progress-bar { height: 20px; background-color: var(--dot-green); width: 0%; transition: width 0.3s; }
         
-        /* HEADER BARS */
         .signal-bars { display: inline-flex; align-items: flex-end; gap: 3px; height: 14px; }
         .bar { width: 4px; background-color: #374151; border-radius: 2px; transition: 0.3s; }
         .bar-1 { height: 4px; } .bar-2 { height: 7px; } .bar-3 { height: 10px; } .bar-4 { height: 14px; }
@@ -106,9 +97,7 @@
 <body>
 
 <div class="phone-container">
-    
     <header>
-        <!-- INDICATEURS DE CONNEXION -->
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 5px;">
             <div id="app-conn-status" style="font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-circle" id="app-conn-dot" style="color: var(--text-gray); font-size: 16px;"></i>
@@ -119,7 +108,6 @@
                 <span class="signal-bars" id="header-wifi-bars" style="margin-left: 2px;">
                     <span class="bar bar-1"></span><span class="bar bar-2"></span><span class="bar bar-3"></span><span class="bar bar-4"></span>
                 </span>
-                <!-- Voyant Telegram -->
                 <i class="fa-brands fa-telegram" id="telegram-status-icon" style="color: #374151; font-size: 15px; margin-left: 5px; transition: 0.3s;"></i>
             </div>
         </div>
@@ -141,36 +129,20 @@
     </div>
 
     <div id="dashboard-content">
-        <!-- VUE AUTO -->
         <div id="auto-view" class="view active">
-            <!-- Bloc 1 : Température pleine largeur -->
             <div class="bento-card">
                 <div class="temp-header"><span data-i18n="temp_eau">Température Eau</span> <i class="fa-solid fa-temperature-half"></i></div>
                 <div class="temp-value-large" id="val-temperature">--.-<span>°C</span></div>
                 <div class="temp-track"><div class="temp-fill" id="temp-bar-fill"></div></div>
             </div>
             
-            <!-- Bloc 2 : Grille Capteurs 2x2 -->
             <div class="bento-grid-2x2">
-                <div class="status-tile">
-                    <div class="status-tile-header"><i class="fa-solid fa-shield-halved status-tile-icon"></i><div class="dot" id="dot-niveau_securite"></div></div>
-                    <div class="status-tile-title" data-i18n="niv_secu">Niveau<br>Sécurité</div>
-                </div>
-                <div class="status-tile">
-                    <div class="status-tile-header"><i class="fa-solid fa-water status-tile-icon"></i><div class="dot" id="dot-niveau_lavage"></div></div>
-                    <div class="status-tile-title" data-i18n="niv_lav">Niveau<br>Lavage</div>
-                </div>
-                <div class="status-tile">
-                    <div class="status-tile-header"><i class="fa-solid fa-box-open status-tile-icon"></i><div class="dot" id="dot-couvercle"></div></div>
-                    <div class="status-tile-title" data-i18n="couv">Couvercle<br>Fermé</div>
-                </div>
-                <div class="status-tile">
-                    <div class="status-tile-header"><i class="fa-solid fa-lightbulb status-tile-icon"></i><div class="dot" id="dot-pompe_uv"></div></div>
-                    <div class="status-tile-title" data-i18n="pompe">Pompe<br>UV</div>
-                </div>
+                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-shield-halved status-tile-icon"></i><div class="dot" id="dot-niveau_securite"></div></div><div class="status-tile-title" data-i18n="niv_secu">Niveau<br>Sécurité</div></div>
+                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-water status-tile-icon"></i><div class="dot" id="dot-niveau_lavage"></div></div><div class="status-tile-title" data-i18n="niv_lav">Niveau<br>Lavage</div></div>
+                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-box-open status-tile-icon"></i><div class="dot" id="dot-couvercle"></div></div><div class="status-tile-title" data-i18n="couv">Couvercle<br>Fermé</div></div>
+                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-lightbulb status-tile-icon"></i><div class="dot" id="dot-pompe_uv"></div></div><div class="status-tile-title" data-i18n="pompe">Pompe<br>UV</div></div>
             </div>
 
-            <!-- Bloc 3 : Compteur de lavages en ligne -->
             <div class="bento-card" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 20px 25px;">
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <i class="fa-solid fa-rotate-right" style="font-size: 24px; color: var(--accent-blue);"></i>
@@ -180,7 +152,6 @@
             </div>
         </div>
 
-        <!-- VUE MANUEL -->
         <div id="manuel-view" class="view">
             <div class="bento-card">
                 <div class="temp-header"><span data-i18n="temp_eau">Température Eau</span> <i class="fa-solid fa-temperature-half"></i></div>
@@ -189,36 +160,18 @@
             </div>
             
             <div class="bento-grid-2x2">
-                <div class="status-tile">
-                    <div class="status-tile-header"><i class="fa-solid fa-shield-halved status-tile-icon"></i><div class="dot" id="dot-niveau_securite-man"></div></div>
-                    <div class="status-tile-title" data-i18n="niv_secu">Niveau<br>Sécurité</div>
-                </div>
-                <div class="status-tile">
-                    <div class="status-tile-header"><i class="fa-solid fa-water status-tile-icon"></i><div class="dot" id="dot-niveau_lavage-man"></div></div>
-                    <div class="status-tile-title" data-i18n="niv_lav">Niveau<br>Lavage</div>
-                </div>
-                <div class="status-tile">
-                    <div class="status-tile-header"><i class="fa-solid fa-box-open status-tile-icon"></i><div class="dot" id="dot-couvercle-man"></div></div>
-                    <div class="status-tile-title" data-i18n="couv">Couvercle<br>Fermé</div>
-                </div>
-                <div class="status-tile">
-                    <div class="status-tile-header"><i class="fa-solid fa-lightbulb status-tile-icon"></i><div class="dot" id="dot-pompe_uv-man"></div></div>
-                    <div class="status-tile-title" data-i18n="pompe">Pompe<br>UV</div>
-                </div>
+                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-shield-halved status-tile-icon"></i><div class="dot" id="dot-niveau_securite-man"></div></div><div class="status-tile-title" data-i18n="niv_secu">Niveau<br>Sécurité</div></div>
+                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-water status-tile-icon"></i><div class="dot" id="dot-niveau_lavage-man"></div></div><div class="status-tile-title" data-i18n="niv_lav">Niveau<br>Lavage</div></div>
+                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-box-open status-tile-icon"></i><div class="dot" id="dot-couvercle-man"></div></div><div class="status-tile-title" data-i18n="couv">Couvercle<br>Fermé</div></div>
+                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-lightbulb status-tile-icon"></i><div class="dot" id="dot-pompe_uv-man"></div></div><div class="status-tile-title" data-i18n="pompe">Pompe<br>UV</div></div>
             </div>
             
-            <!-- Actions Manuelles re-stylisées -->
             <div style="display: flex; gap: 15px;">
-                <button id="btn-man-rotation" class="btn-action-manuel">
-                    <i class="fa-solid fa-gear"></i> <span data-i18n="btn_rot">Rotation</span>
-                </button>
-                <button id="btn-man-lavage" class="btn-action-manuel">
-                    <i class="fa-solid fa-shower"></i> <span data-i18n="btn_lav">Lavage</span>
-                </button>
+                <button id="btn-man-rotation" class="btn-action-manuel"><i class="fa-solid fa-gear"></i> <span data-i18n="btn_rot">Rotation</span></button>
+                <button id="btn-man-lavage" class="btn-action-manuel"><i class="fa-solid fa-shower"></i> <span data-i18n="btn_lav">Lavage</span></button>
             </div>
         </div>
 
-        <!-- VUE ALARME -->
         <div id="alarme-view" class="view">
             <div class="alarm-banner"><i class="fa-solid fa-triangle-exclamation" style="margin-right:8px;"></i> <span id="alarm-banner-text">ALARME</span></div>
             
@@ -229,79 +182,41 @@
             </div>
             
             <div class="bento-grid-2x2">
-                <div class="status-tile">
-                    <div class="status-tile-header"><i class="fa-solid fa-shield-halved status-tile-icon"></i><div class="dot" id="dot-niveau_securite-al"></div></div>
-                    <div class="status-tile-title" data-i18n="niv_secu">Sécurité</div>
-                </div>
-                <div class="status-tile">
-                    <div class="status-tile-header"><i class="fa-solid fa-water status-tile-icon"></i><div class="dot" id="dot-niveau_lavage-al"></div></div>
-                    <div class="status-tile-title" data-i18n="niv_lav">Lavage</div>
-                </div>
-                <div class="status-tile">
-                    <div class="status-tile-header"><i class="fa-solid fa-box-open status-tile-icon"></i><div class="dot" id="dot-couvercle-al"></div></div>
-                    <div class="status-tile-title" data-i18n="couv">Couvercle</div>
-                </div>
-                <div class="status-tile">
-                    <div class="status-tile-header"><i class="fa-solid fa-lightbulb status-tile-icon"></i><div class="dot" id="dot-pompe_uv-al"></div></div>
-                    <div class="status-tile-title" data-i18n="pompe">UV</div>
-                </div>
+                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-shield-halved status-tile-icon"></i><div class="dot" id="dot-niveau_securite-al"></div></div><div class="status-tile-title" data-i18n="niv_secu">Sécurité</div></div>
+                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-water status-tile-icon"></i><div class="dot" id="dot-niveau_lavage-al"></div></div><div class="status-tile-title" data-i18n="niv_lav">Lavage</div></div>
+                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-box-open status-tile-icon"></i><div class="dot" id="dot-couvercle-al"></div></div><div class="status-tile-title" data-i18n="couv">Couvercle</div></div>
+                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-lightbulb status-tile-icon"></i><div class="dot" id="dot-pompe_uv-al"></div></div><div class="status-tile-title" data-i18n="pompe">UV</div></div>
             </div>
-            <button class="auth-btn" style="background-color: #dc2626; margin-top: 10px;" onclick="resetAlarme()">
-                <i class="fa-solid fa-power-off"></i> <span data-i18n="btn_reset">Réarmer le système</span>
-            </button>
+            <button class="auth-btn" style="background-color: #dc2626; margin-top: 10px;" onclick="resetAlarme()"><i class="fa-solid fa-power-off"></i> <span data-i18n="btn_reset">Réarmer le système</span></button>
         </div>
 
-        <!-- CONFIGURATION TAMBOUR -->
         <div id="config-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_config">Paramètres du Tambour</h3>
                 <div style="text-align: left; margin-bottom: 15px;">
                     <label class="auth-input" style="border:none; padding:0;" data-i18n="lbl_modele">Modèle :</label>
-                    <select id="config-modele-select" class="auth-input">
-                        <option value="30">30</option><option value="50">50</option>
-                        <option value="70">70</option><option value="90">90</option><option value="120">120</option>
-                    </select>
+                    <select id="config-modele-select" class="auth-input"><option value="30">30</option><option value="50">50</option><option value="70">70</option><option value="90">90</option><option value="120">120</option></select>
                 </div>
                 <div style="text-align: left; margin-bottom: 15px;">
                     <label class="auth-input" style="border:none; padding:0;" data-i18n="lbl_mode">Mode :</label>
-                    <select id="config-mode-select" class="auth-input">
-                        <option value="G" data-i18n="opt_grav">Gravitaire (G)</option>
-                        <option value="P" data-i18n="opt_pomp">Pompage (P)</option>
-                    </select>
+                    <select id="config-mode-select" class="auth-input"><option value="G" data-i18n="opt_grav">Gravitaire (G)</option><option value="P" data-i18n="opt_pomp">Pompage (P)</option></select>
                 </div>
                 <button class="auth-btn" onclick="sauvegarderTambour()"><i class="fa-solid fa-save"></i> <span data-i18n="btn_save_tamb">Enregistrer</span></button>
             </div>
         </div>
 
-        <!-- CONFIGURATION WI-FI -->
         <div id="wifi-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_wifi">Connexion Wi-Fi</h3>
                 <div style="background:#000000; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #374151;">
-                    <p style="margin:0 0 5px 0; font-size:14px; text-align: left;">
-                        <span data-i18n="lbl_wifi_etat">État Wi-Fi :</span> 
-                        <strong id="lbl-wifi-status" style="color:var(--dot-red);">Déconnecté</strong>
-                    </p>
-                    <p style="margin:0; font-size:14px; text-align: left; display: flex; align-items: center;">
-                        <span data-i18n="lbl_wifi_signal">Signal :</span> 
-                        <span class="signal-bars" id="wifi-bars" style="margin-left:10px;">
-                            <span class="bar bar-1"></span><span class="bar bar-2"></span><span class="bar bar-3"></span><span class="bar bar-4"></span>
-                        </span>
-                        <span id="lbl-wifi-rssi" style="color:var(--text-gray); font-size: 11px; margin-left: 8px;">-- dBm</span>
-                    </p>
+                    <p style="margin:0 0 5px 0; font-size:14px; text-align: left;"><span data-i18n="lbl_wifi_etat">État Wi-Fi :</span> <strong id="lbl-wifi-status" style="color:var(--dot-red);">Déconnecté</strong></p>
+                    <p style="margin:0; font-size:14px; text-align: left; display: flex; align-items: center;"><span data-i18n="lbl_wifi_signal">Signal :</span> <span class="signal-bars" id="wifi-bars" style="margin-left:10px;"><span class="bar bar-1"></span><span class="bar bar-2"></span><span class="bar bar-3"></span><span class="bar bar-4"></span></span><span id="lbl-wifi-rssi" style="color:var(--text-gray); font-size: 11px; margin-left: 8px;">-- dBm</span></p>
                 </div>
-
-                <button class="auth-btn" id="btn-scanner" style="background-color: #0ea5e9; margin-bottom: 15px;" onclick="scannerWifi()">
-                    <i class="fa-solid fa-magnifying-glass" id="icon-scanner"></i> <span data-i18n="btn_scan">Scanner</span>
-                </button>
-                
+                <button class="auth-btn" id="btn-scanner" style="background-color: #0ea5e9; margin-bottom: 15px;" onclick="scannerWifi()"><i class="fa-solid fa-magnifying-glass" id="icon-scanner"></i> <span data-i18n="btn_scan">Scanner</span></button>
                 <div id="zoneWifiSelect" style="display:block; text-align: left;">
                     <label class="auth-input" style="border:none; padding:0;" data-i18n="lbl_sel_wifi">Réseau :</label>
-                    <select id="wifi-ssid-select" class="auth-input">
-                        <option value="">-- Sélectionnez --</option>
-                    </select>
+                    <select id="wifi-ssid-select" class="auth-input"><option value="">-- Sélectionnez --</option></select>
                 </div>
-                
                 <div class="pwd-container">
                     <input type="password" id="wifi-password-input" class="auth-input" placeholder="Mot de passe" data-i18n-ph="ph_pass">
                     <i class="fa-solid fa-eye pwd-icon" id="togglePasswordIcon" onclick="togglePasswordVis()"></i>
@@ -310,22 +225,14 @@
             </div>
         </div>
 
-     <!-- CONFIGURATION TELEGRAM -->
         <div id="telegram-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_tele">Alertes Telegram</h3>
-                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 20px;">
-                    Liez automatiquement votre compte Telegram pour recevoir les alertes de votre coffret.<br><br>
-                    Cliquez sur le bouton ci-dessous, puis appuyez sur <b>Démarrer</b> dans l'application Telegram.
-                </p>
-                
-                <button class="auth-btn" style="background-color: #0ea5e9; padding: 15px; margin-bottom: 15px;" onclick="lierTelegram()">
-                    <i class="fa-brands fa-telegram"></i> Lier Telegram Auto
-                </button>
+                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 20px;">Liez automatiquement votre compte Telegram pour recevoir les alertes de votre coffret.<br><br>Cliquez sur le bouton ci-dessous, puis appuyez sur <b>Démarrer</b> dans l'application Telegram.</p>
+                <button class="auth-btn" style="background-color: #0ea5e9; padding: 15px; margin-bottom: 15px;" onclick="lierTelegram()"><i class="fa-brands fa-telegram"></i> Lier Telegram Auto</button>
             </div>
         </div>
 
-        <!-- ONGLET CONNEXION -->
         <div id="ble-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_conn">Choix de la Connexion</h3>
@@ -336,7 +243,6 @@
             </div>
         </div>
 
-        <!-- ONGLET MISE A JOUR (OTA) -->
         <div id="ota-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_ota">Mise à jour du système</h3>
@@ -351,14 +257,12 @@
             </div>
         </div>
 
-        <!-- ONGLET HISTORIQUE -->
         <div id="history-view" class="view">
             <h3 style="text-align: center;" data-i18n="titre_hist">Historique (15 jours)</h3>
             <div class="chart-container"><canvas id="chartTemp"></canvas></div>
             <div class="chart-container"><canvas id="chartWash"></canvas></div>
         </div>
 
-        <!-- ONGLET LANGUE -->
         <div id="lang-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_lang">Choisissez votre langue</h3>
@@ -410,8 +314,6 @@
     let currentLang = localStorage.getItem('app_lang') || 'fr';
     const currentFirmwareVersion = "v1.0.0"; 
     let otaUrl = "";
-
-    // --- VARIABLES PING ---
     let dernierPing = -1;
     let tempsDernierPing = Date.now();
     let premierLecture = true;
@@ -421,7 +323,7 @@
         localStorage.setItem('app_lang', lang);
         document.querySelectorAll('[data-i18n]').forEach(el => {
             let key = el.getAttribute('data-i18n');
-            if(dict[lang][key]) el.innerHTML = dict[lang][key]; // innerHTML pour conserver les <br>
+            if(dict[lang][key]) el.innerHTML = dict[lang][key]; 
         });
         document.querySelectorAll('[data-i18n-ph]').forEach(el => {
             let key = el.getAttribute('data-i18n-ph');
@@ -435,7 +337,6 @@
     const SERVICE_UUID           = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
     const CHARACTERISTIC_UUID_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
     const CHARACTERISTIC_UUID_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
-    
     const FIREBASE_HOST = "https://tambour20100-29236-default-rtdb.firebaseio.com/";
     const FIREBASE_AUTH = "rsihDyLcNkHwThAEuCIbkjFm8bwPbnmKxHIr6mkT";
     
@@ -452,16 +353,15 @@
     function rafraichirTitres(vue) {
         let modele = localStorage.getItem("tambour_modele") || "70";
         let mode = localStorage.getItem("tambour_mode") || "G";
-        document.getElementById('config-modele-select').value = modele;
-        document.getElementById('config-mode-select').value = mode;
+        let configMod = document.getElementById('config-modele-select');
+        let configTyp = document.getElementById('config-mode-select');
+        if(configMod) configMod.value = modele;
+        if(configTyp) configTyp.value = mode;
 
         let titre = document.getElementById('val-Mode');
+        if(!titre) return;
         
-        if (vue === 'alarme') {
-            titre.style.fontSize = "26px"; 
-        } else {
-            titre.style.fontSize = "38px"; 
-        }
+        if (vue === 'alarme') { titre.style.fontSize = "26px"; } else { titre.style.fontSize = "38px"; }
         
         if (modeActif === "FIREBASE" && (vue === 'auto' || vue === 'alarme')) {
             titre.innerText = "Connexion..."; 
@@ -480,80 +380,57 @@
                 let enc = new TextEncoder();
                 let trame = valeur === "" ? action : `${action}:${valeur}`;
                 await rxCharacteristic.writeValueWithResponse(enc.encode(trame));
-            } catch (e) { 
-                console.warn("Erreur BLE", e); 
-            }
+            } catch (e) { console.warn("Erreur BLE", e); }
         }
     }
 
-   function switchView(target) {
+    function switchView(target) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-        document.getElementById(`${target}-view`).classList.add('active');
+        let targetView = document.getElementById(`${target}-view`);
+        if(targetView) targetView.classList.add('active');
         
         let tabObj = document.getElementById(`tab-${target}`);
         if(tabObj) tabObj.classList.add('active');
         
         rafraichirTitres(target); 
-        document.getElementById('sidebarMenu').classList.remove('open');
+        let menu = document.getElementById('sidebarMenu');
+        if(menu) menu.classList.remove('open');
         
         adapterInterfaceSelonMode();
         
-        if (target !== 'alarme' && modeActif === "BLE") {
-            envoyerCommande("PAGE", target.toUpperCase());
-        }
-
-        if (target === 'history' && modeActif === "FIREBASE") {
-            lireHistoriqueFirebase();
-        }
+        if (target !== 'alarme' && modeActif === "BLE") { envoyerCommande("PAGE", target.toUpperCase()); }
+        if (target === 'history' && modeActif === "FIREBASE") { lireHistoriqueFirebase(); }
     }
 
-   function lierTelegram() {
-        if (!ID_COFFRET) {
-            alert("Erreur : Identifiant du coffret introuvable.");
-            return;
-        }
+    function lierTelegram() {
+        if (!ID_COFFRET) { alert("Erreur : Identifiant introuvable."); return; }
         window.open(`https://t.me/Vincent2010Bot?start=${encodeURIComponent(ID_COFFRET)}`, '_blank');
     }
     
     async function lireHistoriqueFirebase() {
         if (!ID_COFFRET) return;
-        
         let titre = document.getElementById('val-Mode');
-        titre.innerText = "Connexion...";
+        if(titre) titre.innerText = "Connexion...";
         
         try {
-            let url = `${FIREBASE_HOST}clients/${ID_COFFRET}/historique.json?auth=${FIREBASE_AUTH}`;
-            let response = await fetch(url);
-            
+            let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/historique.json?auth=${FIREBASE_AUTH}`);
             if (response.ok) {
                 let data = await response.json();
                 if (data && data.jours && data.temperatures && data.lavages) {
                     genererGraphiques(data.jours, data.temperatures, data.lavages);
-                } else {
-                    afficherMessageAucuneDonnee();
-                }
-            } else {
-                afficherMessageAucuneDonnee();
-            }
-        } catch (error) { 
-            console.error("Erreur de lecture de l'historique", error); 
-            afficherMessageAucuneDonnee();
-        }
+                } else { afficherMessageAucuneDonnee(); }
+            } else { afficherMessageAucuneDonnee(); }
+        } catch (error) { console.error(error); afficherMessageAucuneDonnee(); }
         
-        titre.innerText = dict[currentLang]['menu_history'] || "Historique";
+        if(titre) titre.innerText = dict[currentLang]['menu_history'] || "Historique";
     }
 
     function afficherMessageAucuneDonnee() {
-        let textFr = "Pas encore de données";
-        let textNl = "Nog geen gegevens";
-        let msg = (currentLang === 'fr') ? textFr : textNl;
-
-        let containers = document.querySelectorAll('.chart-container');
-        containers.forEach(container => {
+        let msg = (currentLang === 'fr') ? "Pas encore de données" : "Nog geen gegevens";
+        document.querySelectorAll('.chart-container').forEach(container => {
             let canvas = container.querySelector('canvas');
             if (canvas) canvas.style.display = 'none';
-
             let msgDiv = container.querySelector('.no-data-msg');
             if (!msgDiv) {
                 msgDiv = document.createElement('div');
@@ -581,58 +458,19 @@
             if (msgDiv) msgDiv.style.display = 'none';
         });
 
-        const commonOptions = {
-            responsive: true,
-            plugins: { legend: { labels: { color: '#ffffff' } } },
-            scales: {
-                x: { ticks: { color: '#94a3b8' }, grid: { color: '#1f2937' } },
-                y: { ticks: { color: '#94a3b8' }, grid: { color: '#1f2937' } }
-            }
-        };
+        const commonOptions = { responsive: true, plugins: { legend: { labels: { color: '#ffffff' } } }, scales: { x: { ticks: { color: '#94a3b8' }, grid: { color: '#1f2937' } }, y: { ticks: { color: '#94a3b8' }, grid: { color: '#1f2937' } } } };
 
         const ctxTemp = document.getElementById('chartTemp').getContext('2d');
-        chartTempInstance = new Chart(ctxTemp, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Température (°C)',
-                    data: temps,
-                    borderColor: '#ef4444', 
-                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.3,
-                    pointRadius: 3
-                }]
-            },
-            options: commonOptions
-        });
+        chartTempInstance = new Chart(ctxTemp, { type: 'line', data: { labels: labels, datasets: [{ label: 'Température (°C)', data: temps, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.2)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 3 }] }, options: commonOptions });
 
         const ctxWash = document.getElementById('chartWash').getContext('2d');
-        chartWashInstance = new Chart(ctxWash, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Nombre de lavages',
-                    data: lavages,
-                    backgroundColor: '#3b82f6',
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                ...commonOptions,
-                scales: {
-                    ...commonOptions.scales,
-                    y: { ...commonOptions.scales.y, beginAtZero: true }
-                }
-            }
-        });
+        chartWashInstance = new Chart(ctxWash, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Nombre de lavages', data: lavages, backgroundColor: '#3b82f6', borderRadius: 4 }] }, options: { ...commonOptions, scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, beginAtZero: true } } } });
     }
 
     function adapterInterfaceSelonMode() {
-        let activeView = document.querySelector('.view.active').id;
+        let activeEl = document.querySelector('.view.active');
+        if(!activeEl) return;
+        let activeView = activeEl.id;
         let isManuel = (activeView === 'manuel-view');
 
         if (modeActif === "FIREBASE") {
@@ -647,48 +485,32 @@
             let elMan = document.getElementById('tab-manuel'); if (elMan) elMan.style.display = "flex";
 
             let styleConfig = isManuel ? "flex" : "none";
-            ['tab-config', 'tab-wifi'].forEach(id => { 
-                let el = document.getElementById(id); 
-                if(el) el.style.display = styleConfig; 
-            });
+            ['tab-config', 'tab-wifi'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = styleConfig; });
 
-            if (!isManuel) {
-                let ota = document.getElementById('tab-ota');
-                if (ota) ota.style.display = "none";
-            }
+            if (!isManuel) { let ota = document.getElementById('tab-ota'); if (ota) ota.style.display = "none"; }
 
             if (['history-view', 'telegram-view'].includes(activeView) || (!isManuel && ['config-view', 'wifi-view', 'ota-view'].includes(activeView))) {
-                if (activeView !== 'auto-view') {
-                    setTimeout(() => switchView('auto'), 10);
-                }
+                if (activeView !== 'auto-view') { setTimeout(() => switchView('auto'), 10); }
             }
         }
 
         let teleIcon = document.getElementById('telegram-status-icon');
-        if (teleIcon && modeActif === "BLE") {
-            teleIcon.style.color = "#374151";
-        }
+        if (teleIcon && modeActif === "BLE") { teleIcon.style.color = "#374151"; }
     }
 
     function gererBadgeDot(id, status) {
         const dot = document.getElementById(id);
         if (dot) {
-            if (status === null || status === undefined || status === "") {
-                dot.className = "dot"; 
-            } else {
-                dot.className = (status === 1 || status === true) ? "dot green" : "dot red";
-            }
+            if (status === null || status === undefined || status === "") { dot.className = "dot"; } 
+            else { dot.className = (status === 1 || status === true) ? "dot green" : "dot red"; }
         }
     }
 
-   function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur, alarme_code = 0, wifi_stat = 0, wifi_rssi = 0) {
+    function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur, alarme_code = 0, wifi_stat = 0, wifi_rssi = 0) {
         try {
             ['val-temperature', 'val-temperature-man', 'val-temperature-al'].forEach(id => { 
                 let el = document.getElementById(id);
-                if (el) {
-                    let tempText = (typeof temp === 'number') ? temp.toFixed(1) : temp;
-                    el.innerHTML = tempText + '<span>°C</span>'; 
-                }
+                if (el) { el.innerHTML = ((typeof temp === 'number') ? temp.toFixed(1) : temp) + '<span>°C</span>'; }
             });
             
             let pct = 0;
@@ -704,11 +526,7 @@
 
             ['temp-bar-fill', 'temp-bar-fill-man', 'temp-bar-fill-al'].forEach(id => { 
                 let el = document.getElementById(id);
-                if (el) {
-                    el.style.width = (pct * 100) + '%';
-                    el.style.background = couleurDynamique;
-                    el.style.boxShadow = ombreLumineuse;
-                }
+                if (el) { el.style.width = (pct * 100) + '%'; el.style.background = couleurDynamique; el.style.boxShadow = ombreLumineuse; }
             });
 
             let couvLogique = (couv === null) ? null : !(couv === 1 || couv === true);
@@ -718,20 +536,18 @@
             gererBadgeDot('dot-couvercle', couvLogique); gererBadgeDot('dot-couvercle-man', couvLogique); gererBadgeDot('dot-couvercle-al', couvLogique);
             gererBadgeDot('dot-pompe_uv', uv); gererBadgeDot('dot-pompe_uv-man', uv); gererBadgeDot('dot-pompe_uv-al', uv);
             
-            if(document.getElementById('val-Nbre_lavage')) document.getElementById('val-Nbre_lavage').innerText = compteur;
+            let nbreLavage = document.getElementById('val-Nbre_lavage');
+            if(nbreLavage) nbreLavage.innerText = compteur;
 
             let espWifiDiv = document.getElementById('esp-wifi-status');
             let headerBars = document.querySelectorAll('#header-wifi-bars .bar');
-            
-            espWifiDiv.style.display = 'flex';
+            if(espWifiDiv) espWifiDiv.style.display = 'flex';
             headerBars.forEach(b => b.style.backgroundColor = '#374151'); 
 
             if (wifi_stat === 1 && wifi_rssi !== -100) {
                 let force = (wifi_rssi > -60) ? 4 : (wifi_rssi > -70) ? 3 : (wifi_rssi > -80) ? 2 : 1;
                 let couleurBarre = (force > 2) ? "var(--dot-green)" : (force === 2) ? "#f59e0b" : "var(--dot-red)";
-                for(let i=0; i<force; i++) { 
-                    if(headerBars[i]) headerBars[i].style.backgroundColor = couleurBarre; 
-                }
+                for(let i=0; i<force; i++) { if(headerBars[i]) headerBars[i].style.backgroundColor = couleurBarre; }
             }
             
             let elWifiStatus = document.getElementById('lbl-wifi-status');
@@ -746,7 +562,7 @@
                     elWifiRssi.innerText = wifi_rssi + " dBm";
                     let force = (wifi_rssi > -60) ? 4 : (wifi_rssi > -70) ? 3 : (wifi_rssi > -80) ? 2 : 1;
                     let couleurBarre = (force > 2) ? "var(--dot-green)" : (force === 2) ? "#f59e0b" : "var(--dot-red)";
-                    for(let i=0; i<force; i++) { bars[i].style.backgroundColor = couleurBarre; }
+                    for(let i=0; i<force; i++) { if(bars[i]) bars[i].style.backgroundColor = couleurBarre; }
                 } else {
                     elWifiStatus.innerText = dict[currentLang]['wifi_dec'] || "Déconnecté";
                     elWifiStatus.style.color = "var(--dot-red)";
@@ -761,28 +577,30 @@
                 else if(alarme_code === 2) textAlarme = dict[currentLang]['al_couv'];
                 else if(alarme_code === 3) textAlarme = dict[currentLang]['al_15'];
                 
-                document.getElementById('alarm-banner-text').innerText = textAlarme;
+                let bnrText = document.getElementById('alarm-banner-text');
+                if(bnrText) bnrText.innerText = textAlarme;
                 if(btnMenu) btnMenu.classList.add('disabled');
-                document.getElementById('sidebarMenu').classList.remove('open');
+                let sideMenu = document.getElementById('sidebarMenu');
+                if(sideMenu) sideMenu.classList.remove('open');
                 
-                if (!document.getElementById('alarme-view').classList.contains('active')) { switchView('alarme'); }
+                let alarmeView = document.getElementById('alarme-view');
+                if (alarmeView && !alarmeView.classList.contains('active')) { switchView('alarme'); }
             } else {
                 if(btnMenu) btnMenu.classList.remove('disabled');
-                if (document.getElementById('alarme-view').classList.contains('active')) {
-                    switchView('auto'); 
-                }
+                let alarmeView = document.getElementById('alarme-view');
+                if (alarmeView && alarmeView.classList.contains('active')) { switchView('auto'); }
             }
 
             let tabOta = document.getElementById('tab-ota');
-            if (tabOta) {
-                let isManuel = document.getElementById('manuel-view').classList.contains('active');
+            let manView = document.getElementById('manuel-view');
+            if (tabOta && manView) {
+                let isManuel = manView.classList.contains('active');
                 if (modeActif === "BLE" && wifi_stat === 1 && isManuel) {
                     tabOta.style.display = "flex";
                 } else {
                     tabOta.style.display = "none";
-                    if (document.querySelector('.view.active').id === 'ota-view') {
-                        switchView('auto');
-                    }
+                    let activeEl = document.querySelector('.view.active');
+                    if (activeEl && activeEl.id === 'ota-view') { switchView('auto'); }
                 }
             }
 
@@ -794,34 +612,28 @@
             envoyerCommande("RESET_ALARM", 1);
             switchView("manuel"); 
         } else { 
-            document.getElementById('val-Mode').innerText = "Connexion...";
+            let titre = document.getElementById('val-Mode');
+            if(titre) titre.innerText = "Connexion...";
             if (ID_COFFRET) {
                 try {
-                    let url = `${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`;
-                    await fetch(url, { 
-                        method: 'PATCH', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({ Reset: 1 })
+                    await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
+                        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ Reset: 1 })
                     });
-                } catch(e) { 
-                    console.error("Erreur Reset Firebase", e); 
-                }
+                } catch(e) { console.error("Erreur Reset Firebase", e); }
             }
             switchView("auto"); 
-            document.querySelector('.menu-toggle-btn').classList.remove('disabled'); 
+            let btnMenu = document.querySelector('.menu-toggle-btn');
+            if(btnMenu) btnMenu.classList.remove('disabled'); 
         }
     }
     
     async function lireDonneesFirebase() {
         if (!ID_COFFRET) return;
-        
         let dot = document.getElementById('app-conn-dot');
         let text = document.getElementById('app-conn-text');
         
         try {
-            let url = `${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`;
-            let response = await fetch(url);
-            
+            let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`);
             if (response.ok) {
                 let data = await response.json();
                 if (data) {
@@ -829,41 +641,28 @@
                     let espEnLigne = false;
 
                     if (premierLecture) {
-                        dernierPing = pingActuel;
-                        tempsDernierPing = Date.now();
-                        espEnLigne = true;
-                        premierLecture = false;
+                        dernierPing = pingActuel; tempsDernierPing = Date.now();
+                        espEnLigne = true; premierLecture = false;
                     } else {
-                        if (pingActuel !== dernierPing) {
-                            dernierPing = pingActuel;
-                            tempsDernierPing = Date.now();
-                            espEnLigne = true;
-                        } else {
-                            if (Date.now() - tempsDernierPing > 15000) {
-                                espEnLigne = false;
-                            } else {
-                                espEnLigne = true;
-                            }
-                        }
+                        if (pingActuel !== dernierPing) { dernierPing = pingActuel; tempsDernierPing = Date.now(); espEnLigne = true; } 
+                        else { espEnLigne = (Date.now() - tempsDernierPing <= 15000); }
                     }
 
                     if (espEnLigne) {
-                        dot.className = "fa-solid fa-cloud"; 
-                        dot.style.color = "var(--dot-green)";
-                        text.innerText = "Cloud Actif";
+                        if(dot) { dot.className = "fa-solid fa-cloud"; dot.style.color = "var(--dot-green)"; }
+                        if(text) text.innerText = "Cloud Actif";
                     } else {
-                        dot.className = "fa-solid fa-cloud";
-                        dot.style.color = "#f59e0b";
-                        text.innerText = "Boîtier Hors Ligne";
+                        if(dot) { dot.className = "fa-solid fa-cloud"; dot.style.color = "#f59e0b"; }
+                        if(text) text.innerText = "Boîtier Hors Ligne";
                     }
 
                     let temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi;
-                    
                     if (espEnLigne) {
                         if (data.Mode !== undefined) {
-                            let vueActive = document.querySelector('.view.active').id;
-                            if (vueActive === 'auto-view' || vueActive === 'alarme-view') {
-                                document.getElementById('val-Mode').innerText = data.Mode;
+                            let activeEl = document.querySelector('.view.active');
+                            if (activeEl && (activeEl.id === 'auto-view' || activeEl.id === 'alarme-view')) {
+                                let titre = document.getElementById('val-Mode');
+                                if(titre) titre.innerText = data.Mode;
                             }
                         }
 
@@ -879,32 +678,26 @@
                         
                         let teleIcon = document.getElementById('telegram-status-icon');
                         if (teleIcon) {
-                            if (data.telegram_chat_id && String(data.telegram_chat_id).length > 4) {
-                                teleIcon.style.color = "#0ea5e9";
-                            } else {
-                                teleIcon.style.color = "#374151";
-                            }
+                            if (data.telegram_chat_id && String(data.telegram_chat_id).length > 4) { teleIcon.style.color = "#0ea5e9"; } 
+                            else { teleIcon.style.color = "#374151"; }
                         }
                     } else {
                         temp = "--.-"; secu = null; lav = null; couv = null; uv = null;
                         cpt = "--"; alarme = 0; wStat = 0; wRssi = -100; 
-                        
                         let teleIcon = document.getElementById('telegram-status-icon');
                         if (teleIcon) teleIcon.style.color = "#374151";
                     }
 
                     afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi);
                 } else {
-                    dot.className = "fa-solid fa-triangle-exclamation";
-                    dot.style.color = "#f59e0b";
-                    text.innerText = "Pas de données";
+                    if(dot) { dot.className = "fa-solid fa-triangle-exclamation"; dot.style.color = "#f59e0b"; }
+                    if(text) text.innerText = "Pas de données";
                 }
             } else { throw new Error("HTTP"); }
         } catch (error) { 
             console.error("Erreur Firebase", error); 
-            dot.className = "fa-solid fa-circle-xmark";
-            dot.style.color = "var(--dot-red)";
-            text.innerText = "Erreur App<->Cloud";
+            if(dot) { dot.className = "fa-solid fa-circle-xmark"; dot.style.color = "var(--dot-red)"; }
+            if(text) text.innerText = "Erreur App<->Cloud";
         }
     }
 
@@ -914,36 +707,48 @@
         localStorage.setItem("tambour_modele", mod);
         localStorage.setItem("tambour_mode", typ);
         envoyerCommande("CFG", mod + "," + typ);
-        rafraichirTitres(document.querySelector('.view.active').id.replace('-view', ''));
+        let activeEl = document.querySelector('.view.active');
+        if(activeEl) rafraichirTitres(activeEl.id.replace('-view', ''));
         alert("Modèle enregistré !");
     }
 
- async function connecterBLE() {
+    // --- LA FONCTION BLE SÉCURISÉE ---
+    async function connecterBLE() {
         try {
             modeActif = "BLE";
             adapterInterfaceSelonMode(); 
             if (timerFirebase) clearInterval(timerFirebase);
-            document.getElementById('btn-mode-ble').className = "mode-btn active";
-            document.getElementById('btn-mode-cloud').className = "mode-btn";
             
-            // --- CORRECTION DU TEXTE "ATTENTE..." ---
+            let btnBle = document.getElementById('btn-mode-ble');
+            let btnCloud = document.getElementById('btn-mode-cloud');
+            if(btnBle) btnBle.className = "mode-btn active";
+            if(btnCloud) btnCloud.className = "mode-btn";
+            
             let textStatus = document.getElementById('app-conn-text');
-            textStatus.removeAttribute('data-i18n'); // Empêche la traduction de forcer "Attente..."
+            if(textStatus) {
+                textStatus.removeAttribute('data-i18n'); // On empêche la traduction d'écraser notre texte
+                textStatus.innerText = "Recherche coffret...";
+            }
             
-            document.getElementById('app-conn-dot').className = "fa-brands fa-bluetooth pulsing";
-            document.getElementById('app-conn-dot').style.color = "#f59e0b";
-            textStatus.innerText = "Recherche coffret...";
+            let dotStatus = document.getElementById('app-conn-dot');
+            if(dotStatus) {
+                dotStatus.className = "fa-brands fa-bluetooth pulsing";
+                dotStatus.style.color = "#f59e0b";
+            }
 
-            // --- RECONNEXION AUTO INVISIBLE (SI DISPONIBLE) ---
-            if (navigator.bluetooth.getDevices) {
-                let devices = await navigator.bluetooth.getDevices();
-                let appareilConnu = devices.find(d => d.name && d.name.startsWith("Tambour_"));
-                if (appareilConnu) {
-                    bleDevice = appareilConnu; 
+            let appareilConnu = null;
+            if (navigator.bluetooth && navigator.bluetooth.getDevices) {
+                try {
+                    let devices = await navigator.bluetooth.getDevices();
+                    appareilConnu = devices.find(d => d.name && d.name.startsWith("Tambour_"));
+                } catch(err) {
+                    console.warn("getDevices bloqué par la sécurité du navigateur", err);
                 }
             }
             
-            if (!bleDevice) {
+            if (appareilConnu) {
+                bleDevice = appareilConnu; 
+            } else {
                 bleDevice = await navigator.bluetooth.requestDevice({ 
                     filters: [{ namePrefix: 'Tambour_' }], 
                     optionalServices: [SERVICE_UUID] 
@@ -956,18 +761,49 @@
             rxCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_RX);
             txCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_TX);
 
-            document.getElementById('app-conn-dot').className = "fa-brands fa-bluetooth"; 
-            document.getElementById('app-conn-dot').style.color = "var(--accent-blue)";
-            // --- MISE À JOUR DU TEXTE UNE FOIS CONNECTÉ ---
-            textStatus.innerText = "Local Actif (BLE)";
+            if(dotStatus) {
+                dotStatus.className = "fa-brands fa-bluetooth"; 
+                dotStatus.style.color = "var(--accent-blue)";
+            }
+            if(textStatus) textStatus.innerText = "Local Actif (BLE)";
 
             await txCharacteristic.startNotifications();
+            txCharacteristic.addEventListener('characteristicvaluechanged', (e) => {
+                let text = new TextDecoder("utf-8").decode(e.target.value);
+                if (text.startsWith("ID:")) {
+                    let parts = text.split(",D:");
+                    if (parts.length >= 2) {
+                        ID_COFFRET = parts[0].replace("ID:", "").trim();
+                        localStorage.setItem("tambour_id", ID_COFFRET);
+                        
+                        let d = parts[1].split(",");
+                        let alCode = (d.length > 6) ? parseInt(d[6]) : 0;
+                        let wStat = (d.length > 7) ? parseInt(d[7]) : 0;
+                        let wRssi = (d.length > 8) ? parseInt(d[8]) : 0;
+                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], alCode, wStat, wRssi);
+                    }
+                } else if (text.startsWith("WNET:")) {
+                    let reseau = text.substring(5);
+                    if (reseau === "END") afficherListeWifi();
+                    else if (reseau !== "NONE") reseauxTrouves.push(reseau);
+                }
+            });
+            
+            let activeEl = document.querySelector('.sidebar-item.active');
+            if(activeEl) envoyerCommande("PAGE", activeEl.id.replace('tab-', '').toUpperCase());
+        } catch (error) { 
+            console.warn("Erreur globale BLE:", error); 
+            activerModeFirebase(); 
+        }
+    }
 
     function activerModeFirebase() {
         modeActif = "FIREBASE";
         adapterInterfaceSelonMode(); 
-        document.getElementById('btn-mode-ble').className = "mode-btn";
-        document.getElementById('btn-mode-cloud').className = "mode-btn active";
+        let btnBle = document.getElementById('btn-mode-ble');
+        let btnCloud = document.getElementById('btn-mode-cloud');
+        if(btnBle) btnBle.className = "mode-btn";
+        if(btnCloud) btnCloud.className = "mode-btn active";
         
         setTimeout(() => { if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect(); }, 500);
         
@@ -977,17 +813,22 @@
     }
 
     function scannerWifi() { 
-        document.getElementById('btn-scanner').disabled = true;
-        document.getElementById('icon-scanner').className = "fa-solid fa-spinner fa-spin";
+        let btn = document.getElementById('btn-scanner');
+        let icon = document.getElementById('icon-scanner');
+        if(btn) btn.disabled = true;
+        if(icon) icon.className = "fa-solid fa-spinner fa-spin";
         reseauxTrouves = []; 
         envoyerCommande("SCAN", ""); 
     }
     
     function afficherListeWifi() {
-        document.getElementById('btn-scanner').disabled = false;
-        document.getElementById('icon-scanner').className = "fa-solid fa-magnifying-glass";
+        let btn = document.getElementById('btn-scanner');
+        let icon = document.getElementById('icon-scanner');
+        if(btn) btn.disabled = false;
+        if(icon) icon.className = "fa-solid fa-magnifying-glass";
         
         let select = document.getElementById('wifi-ssid-select');
+        if(!select) return;
         select.innerHTML = '<option value="">-- Sélectionnez --</option>'; 
         
         let memoSSID = localStorage.getItem("wifi_ssid") || "";
@@ -1011,13 +852,19 @@
     function togglePasswordVis() {
         let input = document.getElementById("wifi-password-input");
         let icon = document.getElementById("togglePasswordIcon");
-        input.type = (input.type === "password") ? "text" : "password";
-        icon.className = (input.type === "password") ? "fa-solid fa-eye pwd-icon" : "fa-solid fa-eye-slash pwd-icon";
+        if(input && icon) {
+            input.type = (input.type === "password") ? "text" : "password";
+            icon.className = (input.type === "password") ? "fa-solid fa-eye pwd-icon" : "fa-solid fa-eye-slash pwd-icon";
+        }
     }
     
     function sauvegarderWifiClient() { 
-        let ssid = document.getElementById('wifi-ssid-select').value;
-        let pass = document.getElementById('wifi-password-input').value;
+        let ssidEl = document.getElementById('wifi-ssid-select');
+        let passEl = document.getElementById('wifi-password-input');
+        if(!ssidEl || !passEl) return;
+        
+        let ssid = ssidEl.value;
+        let pass = passEl.value;
         if(ssid === "") { alert("Veuillez sélectionner un réseau."); return; }
         
         localStorage.setItem("wifi_ssid", ssid);
@@ -1029,66 +876,72 @@
 
     function chargerMemos() {
         let memoPass = localStorage.getItem("wifi_pass");
-        if(memoPass) document.getElementById('wifi-password-input').value = memoPass;
+        let passInput = document.getElementById('wifi-password-input');
+        if(memoPass && passInput) passInput.value = memoPass;
         
         let memoSSID = localStorage.getItem("wifi_ssid");
-        if(memoSSID) {
-            let select = document.getElementById('wifi-ssid-select');
+        let select = document.getElementById('wifi-ssid-select');
+        if(memoSSID && select) {
             select.innerHTML = '<option value="' + memoSSID + '">' + memoSSID + '</option>';
             select.value = memoSSID;
         }
 
-        document.getElementById('lbl-version-actuelle').innerText = currentFirmwareVersion;
+        let lblVer = document.getElementById('lbl-version-actuelle');
+        if(lblVer) lblVer.innerText = currentFirmwareVersion;
     }
 
     async function verifierMaj() {
         let icon = document.querySelector('#btn-check-ota i');
-        icon.className = "fa-solid fa-spinner fa-spin";
+        if(icon) icon.className = "fa-solid fa-spinner fa-spin";
         let lblDispo = document.getElementById('lbl-version-dispo');
-        lblDispo.innerText = "Recherche...";
+        if(lblDispo) lblDispo.innerText = "Recherche...";
 
         try {
-            let url = `${FIREBASE_HOST}firmware.json?auth=${FIREBASE_AUTH}`;
-            let response = await fetch(url);
+            let response = await fetch(`${FIREBASE_HOST}firmware.json?auth=${FIREBASE_AUTH}`);
             if(response.ok) {
                 let data = await response.json();
                 if(data && data.version && data.url) {
-                    lblDispo.innerText = data.version;
+                    if(lblDispo) lblDispo.innerText = data.version;
                     otaUrl = data.url;
                     
+                    let btnStart = document.getElementById('btn-start-ota');
                     if(data.version !== currentFirmwareVersion) {
-                        lblDispo.style.color = "var(--dot-green)";
-                        document.getElementById('btn-start-ota').style.display = "inline-block";
+                        if(lblDispo) lblDispo.style.color = "var(--dot-green)";
+                        if(btnStart) btnStart.style.display = "inline-block";
                     } else {
-                        lblDispo.style.color = "var(--text-gray)";
-                        lblDispo.innerText += " (" + (dict[currentLang]['ota_no_update'] || "À jour") + ")";
-                        document.getElementById('btn-start-ota').style.display = "none";
+                        if(lblDispo) {
+                            lblDispo.style.color = "var(--text-gray)";
+                            lblDispo.innerText += " (" + (dict[currentLang]['ota_no_update'] || "À jour") + ")";
+                        }
+                        if(btnStart) btnStart.style.display = "none";
                     }
-                } else { lblDispo.innerText = "Erreur lecture FB"; }
-            } else { lblDispo.innerText = "Erreur réseau"; }
+                } else { if(lblDispo) lblDispo.innerText = "Erreur lecture FB"; }
+            } else { if(lblDispo) lblDispo.innerText = "Erreur réseau"; }
         } catch(e) {
-            lblDispo.innerText = "Erreur";
+            if(lblDispo) lblDispo.innerText = "Erreur";
             console.error(e);
         }
-        icon.className = "fa-solid fa-arrows-rotate";
+        if(icon) icon.className = "fa-solid fa-arrows-rotate";
     }
 
     function lancerMaj() {
         if(otaUrl === "") return;
         envoyerCommande("UPDATE_OTA", otaUrl);
-        document.getElementById('ota-progress-container').style.display = 'block';
-        document.getElementById('btn-start-ota').disabled = true;
+        let container = document.getElementById('ota-progress-container');
+        let btn = document.getElementById('btn-start-ota');
+        if(container) container.style.display = 'block';
+        if(btn) btn.disabled = true;
         
         let bar = document.getElementById('ota-progress-bar');
         let width = 0;
         let int = setInterval(() => {
             if(width >= 100) {
                 clearInterval(int);
-                bar.style.backgroundColor = "var(--dot-green)";
+                if(bar) bar.style.backgroundColor = "var(--dot-green)";
                 alert("Mise à jour envoyée au boîtier. Veuillez patienter 1 minute pendant son redémarrage.");
             } else {
                 width += 5;
-                bar.style.width = width + '%';
+                if(bar) bar.style.width = width + '%';
             }
         }, 500);
     }
@@ -1106,8 +959,10 @@
     }
 
     function toggleSidebarMenu() { 
-        if(document.querySelector('.menu-toggle-btn').classList.contains('disabled')) return;
-        document.getElementById('sidebarMenu').classList.toggle('open'); 
+        let btn = document.querySelector('.menu-toggle-btn');
+        if(btn && btn.classList.contains('disabled')) return;
+        let menu = document.getElementById('sidebarMenu');
+        if(menu) menu.classList.toggle('open'); 
     }
     
     window.addEventListener('load', () => { 
