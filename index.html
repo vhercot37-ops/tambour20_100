@@ -911,7 +911,24 @@ function adapterInterfaceSelonMode() {
             document.getElementById('app-conn-dot').style.color = "#f59e0b";
             document.getElementById('app-conn-text').innerText = "";
 
-            bleDevice = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'Tambour_' }], optionalServices: [SERVICE_UUID] });
+            // --- NOUVEAU SYSTÈME DE RECONNEXION AUTO SANS POPUP ---
+            if (navigator.bluetooth.getDevices) {
+                let devices = await navigator.bluetooth.getDevices();
+                let appareilConnu = devices.find(d => d.name && d.name.startsWith("Tambour_"));
+                if (appareilConnu) {
+                    bleDevice = appareilConnu; // Reconnexion transparente !
+                }
+            }
+            
+            // Si c'est la toute première fois (ou sur iPhone), on affiche la liste
+            if (!bleDevice) {
+                bleDevice = await navigator.bluetooth.requestDevice({ 
+                    filters: [{ namePrefix: 'Tambour_' }], 
+                    optionalServices: [SERVICE_UUID] 
+                });
+            }
+            // ------------------------------------------------------
+            
             bleDevice.addEventListener('gattserverdisconnected', () => { setTimeout(activerModeFirebase, 2000); });
             const server = await bleDevice.gatt.connect();
             const service = await server.getPrimaryService(SERVICE_UUID);
