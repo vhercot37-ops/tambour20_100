@@ -238,6 +238,9 @@
                 <h3 data-i18n="titre_conn">Choix de la Connexion</h3>
                 <div class="conn-bar">
                     <button id="btn-mode-ble" class="mode-btn active" onclick="connecterBLE()"><i class="fa-brands fa-bluetooth"></i> <span data-i18n="btn_ble">Connexion (Locale)</span></button>
+                    <!-- NOUVEAU BOUTON : CHANGER DE COFFRET -->
+                    <button id="btn-force-scan" class="mode-btn" onclick="forcerScannerBLE()" style="background-color: var(--bg-card); color: var(--text-gray); border-color: var(--border-card); font-size: 13px; padding: 12px;"><i class="fa-solid fa-magnifying-glass"></i> Changer de coffret</button>
+                    
                     <button id="btn-mode-cloud" class="mode-btn" onclick="activerModeFirebase()"><i class="fa-solid fa-cloud"></i> <span data-i18n="btn_cloud">Mode Cloud (Distance)</span></button>
                 </div>
             </div>
@@ -719,8 +722,16 @@
         alert("Modèle enregistré !");
     }
 
-    // --- LA FONCTION BLE SÉCURISÉE ---
-    async function connecterBLE() {
+// --- NOUVELLE FONCTION POUR FORCER LE CHOIX DU COFFRET ---
+    function forcerScannerBLE() {
+        if (bleDevice && bleDevice.gatt.connected) {
+            bleDevice.gatt.disconnect();
+        }
+        connecterBLE(true); // Le 'true' force l'ouverture de la fenêtre de scan
+    }
+
+    // --- LA FONCTION BLE SÉCURISÉE MULTI-COFFRETS ---
+    async function connecterBLE(forceScan = false) {
         try {
             modeActif = "BLE";
             adapterInterfaceSelonMode(); 
@@ -733,7 +744,7 @@
             
             let textStatus = document.getElementById('app-conn-text');
             if(textStatus) {
-                textStatus.removeAttribute('data-i18n'); // On empêche la traduction d'écraser notre texte
+                textStatus.removeAttribute('data-i18n'); 
                 textStatus.innerText = "Recherche coffret...";
             }
             
@@ -744,24 +755,40 @@
             }
 
             let appareilConnu = null;
-            if (navigator.bluetooth && navigator.bluetooth.getDevices) {
+            
+            // Si on ne force pas le scan, on cherche le dernier coffret utilisé
+            if (!forceScan && navigator.bluetooth && navigator.bluetooth.getDevices) {
                 try {
                     let devices = await navigator.bluetooth.getDevices();
-                    appareilConnu = devices.find(d => d.name && d.name.startsWith("Tambour_"));
+                    let savedId = localStorage.getItem("ble_device_id"); // On lit l'ID en mémoire
+                    
+                    if (devices.length > 0) {
+                        if (savedId) {
+                            // On cherche exactement le coffret mémorisé
+                            appareilConnu = devices.find(d => d.id === savedId);
+                        }
+                        if (!appareilConnu && devices.length === 1) {
+                            // S'il n'y a pas de mémoire mais un seul coffret autorisé, on le prend
+                            appareilConnu = devices[0];
+                        }
+                    }
                 } catch(err) {
-                    console.warn("getDevices bloqué par la sécurité du navigateur", err);
+                    console.warn("getDevices bloqué", err);
                 }
             }
             
-            if (appareilConnu) {
-                bleDevice = appareilConnu; 
-            } else {
-                bleDevice = await navigator.bluetooth.requestDevice({ 
+            // Si c'est un nouveau scan (ou si la mémoire est vide)
+            if (!appareilConnu || forceScan) {
+                appareilConnu = await navigator.bluetooth.requestDevice({ 
                     filters: [{ namePrefix: 'Tambour_' }], 
                     optionalServices: [SERVICE_UUID] 
                 });
             }
             
+            // On sauvegarde l'ID unique de ce coffret pour la prochaine fois
+            localStorage.setItem("ble_device_id", appareilConnu.id);
+            bleDevice = appareilConnu; 
+
             bleDevice.addEventListener('gattserverdisconnected', () => { setTimeout(activerModeFirebase, 2000); });
             const server = await bleDevice.gatt.connect();
             const service = await server.getPrimaryService(SERVICE_UUID);
