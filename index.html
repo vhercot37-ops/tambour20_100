@@ -918,7 +918,7 @@
         alert("Modèle enregistré !");
     }
 
-    async function connecterBLE() {
+ async function connecterBLE() {
         try {
             modeActif = "BLE";
             adapterInterfaceSelonMode(); 
@@ -926,9 +926,13 @@
             document.getElementById('btn-mode-ble').className = "mode-btn active";
             document.getElementById('btn-mode-cloud').className = "mode-btn";
             
+            // --- CORRECTION DU TEXTE "ATTENTE..." ---
+            let textStatus = document.getElementById('app-conn-text');
+            textStatus.removeAttribute('data-i18n'); // Empêche la traduction de forcer "Attente..."
+            
             document.getElementById('app-conn-dot').className = "fa-brands fa-bluetooth pulsing";
             document.getElementById('app-conn-dot').style.color = "#f59e0b";
-            document.getElementById('app-conn-text').innerText = "";
+            textStatus.innerText = "Recherche coffret...";
 
             // --- RECONNEXION AUTO INVISIBLE (SI DISPONIBLE) ---
             if (navigator.bluetooth.getDevices) {
@@ -939,7 +943,6 @@
                 }
             }
             
-            // Si c'est la 1ère fois (ou navigateur incompatible), on affiche le popup
             if (!bleDevice) {
                 bleDevice = await navigator.bluetooth.requestDevice({ 
                     filters: [{ namePrefix: 'Tambour_' }], 
@@ -955,35 +958,10 @@
 
             document.getElementById('app-conn-dot').className = "fa-brands fa-bluetooth"; 
             document.getElementById('app-conn-dot').style.color = "var(--accent-blue)";
-            document.getElementById('app-conn-text').innerText = "";
+            // --- MISE À JOUR DU TEXTE UNE FOIS CONNECTÉ ---
+            textStatus.innerText = "Local Actif (BLE)";
 
             await txCharacteristic.startNotifications();
-            txCharacteristic.addEventListener('characteristicvaluechanged', (e) => {
-                let text = new TextDecoder("utf-8").decode(e.target.value);
-                if (text.startsWith("ID:")) {
-                    let parts = text.split(",D:");
-                    if (parts.length >= 2) {
-                        ID_COFFRET = parts[0].replace("ID:", "").trim();
-                        localStorage.setItem("tambour_id", ID_COFFRET);
-                        
-                        let d = parts[1].split(",");
-                        let alCode = (d.length > 6) ? parseInt(d[6]) : 0;
-                        let wStat = (d.length > 7) ? parseInt(d[7]) : 0;
-                        let wRssi = (d.length > 8) ? parseInt(d[8]) : 0;
-                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], alCode, wStat, wRssi);
-                    }
-                } else if (text.startsWith("WNET:")) {
-                    let reseau = text.substring(5);
-                    if (reseau === "END") afficherListeWifi();
-                    else if (reseau !== "NONE") reseauxTrouves.push(reseau);
-                }
-            });
-            envoyerCommande("PAGE", document.querySelector('.sidebar-item.active').id.replace('tab-', '').toUpperCase());
-        } catch (error) { 
-            console.warn(error); 
-            activerModeFirebase(); 
-        }
-    }
 
     function activerModeFirebase() {
         modeActif = "FIREBASE";
