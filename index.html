@@ -756,24 +756,28 @@
 
             let appareilConnu = null;
             
-            // Si on ne force pas le scan, on cherche le dernier coffret utilisé
+            // Si on ne force pas le scan, on cherche dans la mémoire de Chrome
             if (!forceScan && navigator.bluetooth && navigator.bluetooth.getDevices) {
                 try {
                     let devices = await navigator.bluetooth.getDevices();
-                    let savedId = localStorage.getItem("ble_device_id"); // On lit l'ID en mémoire
+                    let savedId = localStorage.getItem("ble_device_id"); 
                     
                     if (devices.length > 0) {
+                        // 1. Cherche par l'ID exact sauvegardé
                         if (savedId) {
-                            // On cherche exactement le coffret mémorisé
                             appareilConnu = devices.find(d => d.id === savedId);
                         }
-                        if (!appareilConnu && devices.length === 1) {
-                            // S'il n'y a pas de mémoire mais un seul coffret autorisé, on le prend
+                        // 2. Si l'ID a changé mais que le nom correspond
+                        if (!appareilConnu) {
+                            appareilConnu = devices.find(d => d.name && d.name.startsWith("Tambour_"));
+                        }
+                        // 3. En désespoir de cause, s'il y a un appareil en mémoire, on le prend
+                        if (!appareilConnu) {
                             appareilConnu = devices[0];
                         }
                     }
                 } catch(err) {
-                    console.warn("getDevices bloqué", err);
+                    console.warn("Mémoire BLE bloquée", err);
                 }
             }
             
