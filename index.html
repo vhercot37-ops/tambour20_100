@@ -609,82 +609,100 @@
         }
     }
 
-    function afficherMaitresDonnees(temp, secu, lav, couv, uv, modeStr, alCode, wStat, wRssi) {
-    // 1. Mise à jour des valeurs textuelles principales
-    let elTemp = document.getElementById('val-temperature');
-    if (elTemp) elTemp.innerText = (temp !== null && temp !== undefined) ? temp.toFixed(1) + "°C" : "--.-°C";
+function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi) {
+        // 1. Mise à jour des valeurs textuelles principales
+        let elTemp = document.getElementById('val-temperature');
+        if (elTemp) elTemp.innerText = (temp !== null && temp !== undefined && !isNaN(temp)) ? Number(temp).toFixed(1) + "°C" : "--.-°C";
 
-    let elMode = document.getElementById('val-Mode');
-    if (elMode) elMode.innerText = modeStr || "--";
+        let elTempMan = document.getElementById('val-temperature-man');
+        if (elTempMan) elTempMan.innerText = elTemp.innerText;
 
-    let elLavages = document.getElementById('val-Nbre_lavage');
-    if (elLavages) elLavages.innerText = (lavages !== null && lavages !== undefined) ? lavages : "--"; // Note: remplace par ton ID exact si besoin pour le compteur
+        let elTempAl = document.getElementById('val-temperature-al');
+        if (elTempAl) elTempAl.innerText = elTemp.innerText;
 
-    // 2. Gestion des états (Points verts / rouges)
-    let dotSecu = document.getElementById('dot-niveau_securite');
-    if (dotSecu) dotSecu.className = (secu === 1) ? "dot active" : "dot";
+        let elMode = document.getElementById('val-Mode');
+        if (elMode && modeStr && modeStr !== "--") elMode.innerText = modeStr;
 
-    let dotLav = document.getElementById('dot-niveau_lavage');
-    if (dotLav) dotLav.className = (lav === 1) ? "dot active" : "dot";
+        let elLavages = document.getElementById('val-Nbre_lavage');
+        if (elLavages) elLavages.innerText = (cpt !== null && cpt !== undefined) ? cpt : "--";
 
-    let dotCouv = document.getElementById('dot-couvercle');
-    if (dotCouv) dotCouv.className = (couv === 1) ? "dot active" : "dot";
+        // 2. Gestion des états (Points verts / rouges) sur les différents écrans
+        ['', '-man', '-al'].suffix = '';
+        ['', '-man', '-al'].forEach(suf => {
+            gererBadgeDot('dot-niveau_securite' + suf, secu);
+            gererBadgeDot('dot-niveau_lavage' + suf, lav);
+            gererBadgeDot('dot-couvercle' + suf, couv);
+            gererBadgeDot('dot-pompe_uv' + suf, uv);
+        });
 
-    let dotUv = document.getElementById('dot-pompe_uv');
-    if (dotUv) dotUv.className = (uv === 1) ? "dot active" : "dot";
+        // Mise à jour de la barre de température
+        let tempVal = Number(temp);
+        if (!isNaN(tempVal)) {
+            let pourcentage = Math.min(Math.max((tempVal / 40) * 100, 0), 100);
+            document.querySelectorAll('.temp-fill').forEach(bar => {
+                bar.style.width = pourcentage + '%';
+                bar.style.backgroundColor = tempVal > 26 ? '#ef4444' : (tempVal < 10 ? '#3b82f6' : '#10b981');
+            });
+        }
 
-    // 3. --- ANIMATION DU CYCLE DE LAVAGE (Seulement en BLE) ---
-    if (lav === 1 && !animationLavageEnCours && modeActif === "BLE") {
-        animationLavageEnCours = true;
-        
-        let modal = document.getElementById('wash-modal');
-        let drum = document.getElementById('drum-cylinder-anim');
-        let jet = document.getElementById('jet-stream-anim');
-        let timerEl = document.getElementById('wash-timer-anim');
-        let showerIcon = document.getElementById('shower-icon-anim');
-        let statusTxt = document.getElementById('wash-status-text');
-        
-        if (modal && drum && jet && timerEl) {
-            modal.classList.add('active');
+        // Sidebar ID Box
+        let sideBox = document.getElementById('sidebar-box-id');
+        if (sideBox && ID_COFFRET) sideBox.innerText = ID_COFFRET;
+
+        // 3. --- ANIMATION DU CYCLE DE LAVAGE (Seulement en BLE) ---
+        if (lav === 1 && !animationLavageEnCours && modeActif === "BLE") {
+            animationLavageEnCours = true;
             
-            drum.style.transition = 'none';
-            drum.style.transform = 'rotate(0deg)';
-            jet.classList.add('spraying');
-            showerIcon.style.color = "var(--accent-blue)";
-            timerEl.style.color = "var(--accent-blue)";
-            statusTxt.innerText = "Rotation & Lavage...";
+            let modal = document.getElementById('wash-modal');
+            let drum = document.getElementById('drum-cylinder-anim');
+            let jet = document.getElementById('jet-stream-anim');
+            let timerEl = document.getElementById('wash-timer-anim');
+            let showerIcon = document.getElementById('shower-icon-anim');
+            let statusTxt = document.getElementById('wash-status-text');
             
-            void drum.offsetWidth;
-            
-            drum.style.transition = 'transform 16s linear';
-            drum.style.transform = 'rotate(360deg)';
-            
-            let timeLeft = 20;
-            timerEl.innerText = timeLeft + "s";
-            
-            if (chronoAnimInterval) clearInterval(chronoAnimInterval);
-            chronoAnimInterval = setInterval(() => {
-                timeLeft--;
+            if (modal && drum && jet && timerEl) {
+                modal.classList.add('active');
+                
+                drum.style.transition = 'none';
+                drum.style.transform = 'rotate(0deg)';
+                jet.classList.add('spraying');
+                showerIcon.style.color = "var(--accent-blue)";
+                timerEl.style.color = "var(--accent-blue)";
+                statusTxt.innerText = "Rotation & Lavage...";
+                
+                void drum.offsetWidth;
+                
+                drum.style.transition = 'transform 16s linear';
+                drum.style.transform = 'rotate(360deg)';
+                
+                let timeLeft = 20;
                 timerEl.innerText = timeLeft + "s";
                 
-                if (timeLeft === 4) { 
-                    jet.classList.remove('spraying');
-                    showerIcon.style.color = "#1f2937";
-                    timerEl.style.color = "var(--text-gray)";
-                    statusTxt.innerText = "Stabilisation...";
-                }
+                if (chronoAnimInterval) clearInterval(chronoAnimInterval);
+                chronoAnimInterval = setInterval(() => {
+                    timeLeft--;
+                    timerEl.innerText = timeLeft + "s";
+                    
+                    if (timeLeft === 4) { 
+                        jet.classList.remove('spraying');
+                        showerIcon.style.color = "#1f2937";
+                        timerEl.style.color = "var(--text-gray)";
+                        statusTxt.innerText = "Stabilisation...";
+                    }
+                    
+                    if (timeLeft <= 0) clearInterval(chronoAnimInterval);
+                }, 1000);
                 
-                if (timeLeft <= 0) clearInterval(chronoAnimInterval);
-            }, 1000);
-            
-            if (timerFinLavage) clearTimeout(timerFinLavage);
-            timerFinLavage = setTimeout(() => {
-                modal.classList.remove('active');
-                setTimeout(() => { animationLavageEnCours = false; }, 1000);
-            }, 20000);
+                if (timerFinLavage) clearTimeout(timerFinLavage);
+                timerFinLavage = setTimeout(() => {
+                    modal.classList.remove('active');
+                    setTimeout(() => { animationLavageEnCours = false; }, 1000);
+                }, 20000);
+            }
         }
     }
-}
+
+    
 async function connecterBLE() {
         try {
             modeActif = "BLE";
