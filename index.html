@@ -369,11 +369,12 @@
         
         if (vue === 'alarme') { titre.style.fontSize = "26px"; } else { titre.style.fontSize = "38px"; }
         
-        if (modeActif === "FIREBASE" && (vue === 'auto' || vue === 'alarme')) {
+        // ---> NOUVEAU : Gère l'attente sur tous les écrans principaux
+        if (modeActif === "FIREBASE" && !premiereSynchroFaite && (vue === 'auto' || vue === 'manuel' || vue === 'alarme')) {
             titre.innerText = "Connexion..."; 
             return; 
         }
-
+        
         if (vue === 'auto') titre.innerText = `Auto ${modele}${mode}`;
         else if (vue === 'manuel') titre.innerText = (currentLang==='fr') ? `Manu ${modele}${mode}` : `Hand ${modele}${mode}`;
         else if (vue === 'alarme') titre.innerText = dict[currentLang]['titre_alarme']; 
@@ -693,11 +694,21 @@ async function lireDonneesFirebase() {
                     wStat = data.wifi_stat !== undefined ? data.wifi_stat : 0;
                     wRssi = data.wifi_rssi !== undefined ? data.wifi_rssi : 0;
                     
+                    // --- 1. ROUTAGE AUTOMATIQUE FIREBASE ---
                     if (!premiereSynchroFaite) {
                         premiereSynchroFaite = true;
                         if (alarme > 0) { switchView('alarme'); } 
                         else if (data.Mode && (data.Mode.includes("Manu") || data.Mode.includes("Hand"))) { switchView('manuel'); } 
                         else { switchView('auto'); }
+                    }
+                    
+                    // --- 2. MISE A JOUR DU TITRE DE L'ESP ---
+                    if (data.Mode !== undefined) {
+                        let activeEl = document.querySelector('.view.active');
+                        if (activeEl && (activeEl.id === 'auto-view' || activeEl.id === 'manuel-view' || activeEl.id === 'alarme-view')) {
+                            let titre = document.getElementById('val-Mode');
+                            if(titre) titre.innerText = data.Mode;
+                        }
                     }
                     
                     let teleIcon = document.getElementById('telegram-status-icon');
@@ -812,22 +823,29 @@ async function connecterBLE() {
         activerModeFirebase(); 
     }
 }
-    function activerModeFirebase() {
-    modeActif = "FIREBASE";
-    premiereSynchroFaite = false; 
-    adapterInterfaceSelonMode(); 
     
-    let btnBle = document.getElementById('btn-mode-ble');
-    let btnCloud = document.getElementById('btn-mode-cloud');
-    if(btnBle) btnBle.className = "mode-btn";
-    if(btnCloud) btnCloud.className = "mode-btn active";
-    
-    setTimeout(() => { if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect(); }, 500);
-    
-    lireDonneesFirebase();
-    if (timerFirebase) clearInterval(timerFirebase);
-    timerFirebase = setInterval(lireDonneesFirebase, 5000);
-}
+function activerModeFirebase() {
+        modeActif = "FIREBASE";
+        premiereSynchroFaite = false; 
+        adapterInterfaceSelonMode(); 
+        
+        // ---> NOUVEAU : On efface immédiatement l'écran et on affiche Connexion
+        let titre = document.getElementById('val-Mode');
+        if (titre) titre.innerText = "Connexion...";
+        afficherMaitresDonnees("--.-", null, null, null, null, "--", 0, 0, -100);
+        // <---
+        
+        let btnBle = document.getElementById('btn-mode-ble');
+        let btnCloud = document.getElementById('btn-mode-cloud');
+        if(btnBle) btnBle.className = "mode-btn";
+        if(btnCloud) btnCloud.className = "mode-btn active";
+        
+        setTimeout(() => { if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect(); }, 500);
+        
+        lireDonneesFirebase();
+        if (timerFirebase) clearInterval(timerFirebase);
+        timerFirebase = setInterval(lireDonneesFirebase, 5000);
+    }
 
     function scannerWifi() { 
         let btn = document.getElementById('btn-scanner');
