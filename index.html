@@ -58,7 +58,7 @@
         .temp-track { width: 100%; height: 14px; background: #000000; border-radius: 12px; overflow: hidden; border: 1px solid #1f2937; }
         .temp-fill { height: 100%; width: 0%; border-radius: 10px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.8s ease, box-shadow 0.8s ease; }
         
-        .btn-action-manuel { flex: 1; background-color: var(--bg-card); border: 1px solid var(--border-card); color: white; padding: 22px 15px; border-radius: 20px; font-weight: 700; font-size: 15px; text-transform: uppercase; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: gap: 12px; transition: all 0.1s ease; user-select: none; -webkit-user-select: none; }
+        .btn-action-manuel { flex: 1; background-color: var(--bg-card); border: 1px solid var(--border-card); color: white; padding: 22px 15px; border-radius: 20px; font-weight: 700; font-size: 15px; text-transform: uppercase; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; transition: all 0.1s ease; user-select: none; -webkit-user-select: none; }
         .btn-action-manuel i { font-size: 28px; color: var(--text-gray); transition: 0.2s; }
         .btn-action-manuel.active { background-color: rgba(59, 130, 246, 0.1); border-color: var(--accent-blue); }
         .btn-action-manuel.active i { color: var(--accent-blue); }
@@ -127,7 +127,6 @@
         <div class="sidebar-item" id="tab-ota" onclick="switchView('ota')"><i class="fa-solid fa-download"></i> <span data-i18n="menu_ota">Mise à jour</span></div>
         <div class="sidebar-item" id="tab-lang" onclick="switchView('lang')"><i class="fa-solid fa-language"></i> <span data-i18n="menu_lang">Langue / Taal</span></div>
         
-        <!-- Affichage de l'ID du coffret dans le menu -->
         <div id="sidebar-box-id" style="margin-top: auto; padding: 15px; text-align: center; color: var(--accent-blue); font-size: 14px; font-weight: 800; border-top: 1px solid var(--border-card); background: rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 20px;">Aucun coffret</div>
     </div>
 
@@ -320,6 +319,7 @@
     let dernierPing = -1;
     let tempsDernierPing = Date.now();
     let attenteDonneesFraiches = false;
+    let dernierModeFirebase = ""; // Mémoire pour éviter le clignotement Auto au passage en Cloud
 
     function setLang(lang) {
         currentLang = lang;
@@ -368,13 +368,19 @@
         
         if (vue === 'alarme') { titre.style.fontSize = "26px"; } else { titre.style.fontSize = "38px"; }
         
-        // ---> NOUVEAU : Gère l'attente sur tous les écrans principaux
+        // Sablier animé pendant l'attente Firebase
         if (modeActif === "FIREBASE" && !premiereSynchroFaite && (vue === 'auto' || vue === 'manuel' || vue === 'alarme')) {
-            titre.innerText = "Connexion..."; 
+            titre.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Connexion...'; 
             return; 
         }
         
-        if (vue === 'auto') titre.innerText = `Auto ${modele}${mode}`;
+        if (vue === 'auto') {
+            if (modeActif === "FIREBASE" && dernierModeFirebase !== "") {
+                titre.innerText = dernierModeFirebase; // Utilise la vraie valeur mémorisée
+            } else {
+                titre.innerText = `Auto ${modele}${mode}`;
+            }
+        }
         else if (vue === 'manuel') titre.innerText = (currentLang==='fr') ? `Manu ${modele}${mode}` : `Hand ${modele}${mode}`;
         else if (vue === 'alarme') titre.innerText = dict[currentLang]['titre_alarme']; 
         else titre.innerText = dict[currentLang]['menu_' + vue] || "Dashboard";
@@ -630,7 +636,7 @@
             switchView("manuel"); 
         } else { 
             let titre = document.getElementById('val-Mode');
-            if(titre) titre.innerText = "Connexion...";
+            if(titre) titre.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Connexion...';
             if (ID_COFFRET) {
                 try {
                     await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
@@ -787,16 +793,20 @@
                         wStat = data.wifi_stat !== undefined ? data.wifi_stat : 0;
                         wRssi = data.wifi_rssi !== undefined ? data.wifi_rssi : 0;
                         
+                        // Mémorisation du mode Firebase AVANT tout routage d'écran
+                        if (data.Mode !== undefined) {
+                            dernierModeFirebase = data.Mode; 
+                        }
+
                         if (!premiereSynchroFaite) {
                             premiereSynchroFaite = true;
                             if (alarme > 0) { switchView('alarme'); } 
-                            else if (data.Mode && (data.Mode.includes("Manu") || data.Mode.includes("Hand"))) { switchView('manuel'); } 
                             else { switchView('auto'); }
                         }
                         
                         if (data.Mode !== undefined) {
                             let activeEl = document.querySelector('.view.active');
-                            if (activeEl && (activeEl.id === 'auto-view' || activeEl.id === 'manuel-view' || activeEl.id === 'alarme-view')) {
+                            if (activeEl && (activeEl.id === 'auto-view' || activeEl.id === 'alarme-view')) {
                                 let titre = document.getElementById('val-Mode');
                                 if(titre) titre.innerText = data.Mode;
                             }
@@ -837,8 +847,9 @@
          
         adapterInterfaceSelonMode(); 
         
+        // Affichage du sablier animé lors de l'activation du mode Cloud
         let titre = document.getElementById('val-Mode');
-        if (titre) titre.innerText = "Connexion...";
+        if (titre) titre.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Connexion...';
         afficherMaitresDonnees("--.-", null, null, null, null, "--", 0, 0, -100);
         
         let btnBle = document.getElementById('btn-mode-ble');
