@@ -92,6 +92,58 @@
         
         .pwd-container { position: relative; width: 100%; }
         .pwd-icon { position: absolute; right: 15px; top: 18px; cursor: pointer; color: var(--text-gray); }
+
+         /* --- POPUP CYCLE DE LAVAGE (BENTO UI) --- */
+        .wash-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+        }
+        .wash-modal-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .wash-modal-content {
+            background: var(--bg-card); border: 1px solid var(--border-card);
+            border-radius: 32px; padding: 35px 25px; width: 80%; max-width: 300px;
+            text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
+            transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .wash-modal-overlay.active .wash-modal-content { transform: scale(1); }
+        
+        /* Tambour et Gicleurs */
+        .drum-anim-container {
+            position: relative; width: 160px; height: 160px; margin: 15px auto;
+        }
+        .drum-cylinder {
+            width: 100%; height: 100%; border-radius: 50%;
+            border: 8px dashed #374151; box-sizing: border-box;
+            background: radial-gradient(circle, transparent 40%, rgba(59, 130, 246, 0.05) 100%);
+        }
+        .water-jet-container {
+            position: absolute; top: 10px; right: 10px;
+            /* Placement à 45° dans le coin en haut à droite, orienté vers le centre */
+            transform: translate(30%, -30%) rotate(45deg);
+            display: flex; flex-direction: column; align-items: center; z-index: 10;
+        }
+        .jet-stream {
+            width: 8px; height: 0;
+            background: linear-gradient(to bottom, var(--accent-blue), transparent);
+            border-radius: 4px; margin-top: -2px;
+            transition: height 0.2s ease, opacity 0.2s ease;
+            opacity: 0;
+        }
+        .jet-stream.spraying {
+            height: 65px; opacity: 0.9;
+            animation: water-flow 0.15s infinite alternate;
+        }
+        @keyframes water-flow { 0% { height: 60px; opacity: 0.7; } 100% { height: 70px; opacity: 1; } }
+        
+        .wash-timer-text {
+            font-size: 38px; font-weight: 900; font-variant-numeric: tabular-nums;
+            color: var(--accent-blue); transition: color 0.4s ease; margin: 0; line-height: 1;
+        }
+        
     </style>
 </head>
 <body>
@@ -115,7 +167,7 @@
         <div class="main-title" id="val-Mode">Auto 70G</div>
         <button class="menu-toggle-btn" onclick="toggleSidebarMenu()"><i class="fa-solid fa-bars" id="menu-icon"></i></button>
     </header>
-
+    
     <div class="sidebar-menu" id="sidebarMenu">
         <div class="sidebar-item active" id="tab-auto" onclick="switchView('auto')"><i class="fa-solid fa-gauge"></i> <span data-i18n="menu_auto">Mode Auto</span></div>
         <div class="sidebar-item" id="tab-manuel" onclick="switchView('manuel')"><i class="fa-solid fa-hand-pointer"></i> <span data-i18n="menu_manuel">Mode Manuel</span></div>
@@ -206,7 +258,7 @@
                 <button class="auth-btn" onclick="sauvegarderTambour()"><i class="fa-solid fa-save"></i> <span data-i18n="btn_save_tamb">Enregistrer</span></button>
             </div>
         </div>
-
+    
         <div id="wifi-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_wifi">Connexion Wi-Fi</h3>
@@ -275,6 +327,31 @@
             </div>
         </div>
     </div>
+
+<!-- ========================================== -->
+    <!-- COLLE LA STRUCTURE HTML DE LA POPUP ICI :  -->
+    <!-- ========================================== -->
+    <div class="wash-modal-overlay" id="wash-modal">
+        <div class="wash-modal-content">
+            <h3 style="margin:0; font-size: 20px; color: var(--text-white);">Cycle en cours</h3>
+            
+            <div class="drum-anim-container">
+                <!-- Le cylindre qui va tourner -->
+                <div class="drum-cylinder" id="drum-cylinder-anim"></div>
+                
+                <!-- Le gicleur à 45° -->
+                <div class="water-jet-container">
+                    <i class="fa-solid fa-shower" id="shower-icon-anim" style="color: #1f2937; font-size: 24px; transition: 0.3s;"></i>
+                    <div class="jet-stream" id="jet-stream-anim"></div>
+                </div>
+            </div>
+            
+            <div class="wash-timer-text" id="wash-timer-anim">20s</div>
+            <p style="margin:0; font-size: 14px; color: var(--text-gray);" id="wash-status-text">Rotation & Lavage...</p>
+        </div>
+    </div>
+    <!-- ========================================== -->
+    
 </div>
 
 <script>
@@ -354,6 +431,11 @@
     let chartWashInstance = null;
     let systemeEnManuel = false; 
     let premiereSynchroFaite = false; 
+    // --- VARIABLES ANIMATION LAVAGE BLE ---
+    let animationLavageEnCours = false;
+    let chronoAnimInterval = null;
+    let timerFinLavage = null;
+    
 
     function rafraichirTitres(vue) {
         let modele = localStorage.getItem("tambour_modele") || "70";
@@ -527,140 +609,82 @@
         }
     }
 
-    function afficherMaitresDonnees(temp, secu, lav, couv, uv, compteur, alarme_code = 0, wifi_stat = 0, wifi_rssi = 0) {
-        try {
-            ['val-temperature', 'val-temperature-man', 'val-temperature-al'].forEach(id => { 
-                let el = document.getElementById(id);
-                if (el) { el.innerHTML = ((typeof temp === 'number') ? temp.toFixed(1) : temp) + '<span>°C</span>'; }
-            });
+    function afficherMaitresDonnees(temp, secu, lav, couv, uv, modeStr, alCode, wStat, wRssi) {
+    // 1. Mise à jour des valeurs textuelles principales
+    let elTemp = document.getElementById('val-temperature');
+    if (elTemp) elTemp.innerText = (temp !== null && temp !== undefined) ? temp.toFixed(1) + "°C" : "--.-°C";
+
+    let elMode = document.getElementById('val-Mode');
+    if (elMode) elMode.innerText = modeStr || "--";
+
+    let elLavages = document.getElementById('val-Nbre_lavage');
+    if (elLavages) elLavages.innerText = (lavages !== null && lavages !== undefined) ? lavages : "--"; // Note: remplace par ton ID exact si besoin pour le compteur
+
+    // 2. Gestion des états (Points verts / rouges)
+    let dotSecu = document.getElementById('dot-niveau_securite');
+    if (dotSecu) dotSecu.className = (secu === 1) ? "dot active" : "dot";
+
+    let dotLav = document.getElementById('dot-niveau_lavage');
+    if (dotLav) dotLav.className = (lav === 1) ? "dot active" : "dot";
+
+    let dotCouv = document.getElementById('dot-couvercle');
+    if (dotCouv) dotCouv.className = (couv === 1) ? "dot active" : "dot";
+
+    let dotUv = document.getElementById('dot-pompe_uv');
+    if (dotUv) dotUv.className = (uv === 1) ? "dot active" : "dot";
+
+    // 3. --- ANIMATION DU CYCLE DE LAVAGE (Seulement en BLE) ---
+    if (lav === 1 && !animationLavageEnCours && modeActif === "BLE") {
+        animationLavageEnCours = true;
+        
+        let modal = document.getElementById('wash-modal');
+        let drum = document.getElementById('drum-cylinder-anim');
+        let jet = document.getElementById('jet-stream-anim');
+        let timerEl = document.getElementById('wash-timer-anim');
+        let showerIcon = document.getElementById('shower-icon-anim');
+        let statusTxt = document.getElementById('wash-status-text');
+        
+        if (modal && drum && jet && timerEl) {
+            modal.classList.add('active');
             
-            let pct = 0;
-            let couleurDynamique = "hsl(190, 100%, 50%)"; 
-            let ombreLumineuse = "0px 0px 15px hsl(190, 100%, 50%)";
-
-            if (typeof temp === 'number') { 
-                pct = Math.min(Math.max((temp - 10.0) / 14.0, 0), 1); 
-                let hue = Math.round(190 - (pct * 190)); 
-                couleurDynamique = `hsl(${hue}, 100%, 50%)`;
-                ombreLumineuse = `0px 0px 15px hsl(${hue}, 100%, 50%)`;
-            }
-
-            ['temp-bar-fill', 'temp-bar-fill-man', 'temp-bar-fill-al'].forEach(id => { 
-                let el = document.getElementById(id);
-                if (el) { el.style.width = (pct * 100) + '%'; el.style.background = couleurDynamique; el.style.boxShadow = ombreLumineuse; }
-            });
-
-            let couvLogique = (couv === null) ? null : !(couv === 1 || couv === true);
-
-            gererBadgeDot('dot-niveau_securite', secu); gererBadgeDot('dot-niveau_securite-man', secu); gererBadgeDot('dot-niveau_securite-al', secu);
-            gererBadgeDot('dot-niveau_lavage', lav); gererBadgeDot('dot-niveau_lavage-man', lav); gererBadgeDot('dot-niveau_lavage-al', lav);
-            gererBadgeDot('dot-couvercle', couvLogique); gererBadgeDot('dot-couvercle-man', couvLogique); gererBadgeDot('dot-couvercle-al', couvLogique);
-            gererBadgeDot('dot-pompe_uv', uv); gererBadgeDot('dot-pompe_uv-man', uv); gererBadgeDot('dot-pompe_uv-al', uv);
+            drum.style.transition = 'none';
+            drum.style.transform = 'rotate(0deg)';
+            jet.classList.add('spraying');
+            showerIcon.style.color = "var(--accent-blue)";
+            timerEl.style.color = "var(--accent-blue)";
+            statusTxt.innerText = "Rotation & Lavage...";
             
-            let nbreLavage = document.getElementById('val-Nbre_lavage');
-            if(nbreLavage) nbreLavage.innerText = compteur;
+            void drum.offsetWidth;
             
-            let boxIdEl = document.getElementById('sidebar-box-id');
-            if(boxIdEl) boxIdEl.innerText = ID_COFFRET ? ID_COFFRET : "Aucun coffret";
-
-            let espWifiDiv = document.getElementById('esp-wifi-status');
-            let headerBars = document.querySelectorAll('#header-wifi-bars .bar');
-            if(espWifiDiv) espWifiDiv.style.display = 'flex';
-            headerBars.forEach(b => b.style.backgroundColor = '#374151'); 
-
-            if (wifi_stat === 1 && wifi_rssi !== -100) {
-                let force = (wifi_rssi > -60) ? 4 : (wifi_rssi > -70) ? 3 : (wifi_rssi > -80) ? 2 : 1;
-                let couleurBarre = (force > 2) ? "var(--dot-green)" : (force === 2) ? "#f59e0b" : "var(--dot-red)";
-                for(let i=0; i<force; i++) { if(headerBars[i]) headerBars[i].style.backgroundColor = couleurBarre; }
-            }
+            drum.style.transition = 'transform 16s linear';
+            drum.style.transform = 'rotate(360deg)';
             
-            let elWifiStatus = document.getElementById('lbl-wifi-status');
-            let elWifiRssi = document.getElementById('lbl-wifi-rssi');
-            let bars = document.querySelectorAll('#wifi-bars .bar');
-            bars.forEach(b => b.style.backgroundColor = '#374151');
+            let timeLeft = 20;
+            timerEl.innerText = timeLeft + "s";
             
-            if (elWifiStatus && elWifiRssi) {
-                if (wifi_stat === 1) {
-                    elWifiStatus.innerText = (dict[currentLang]['wifi_conn'] || "Connecté");
-                    elWifiStatus.style.color = "var(--dot-green)";
-                    elWifiRssi.innerText = wifi_rssi + " dBm";
-                    let force = (wifi_rssi > -60) ? 4 : (wifi_rssi > -70) ? 3 : (wifi_rssi > -80) ? 2 : 1;
-                    let couleurBarre = (force > 2) ? "var(--dot-green)" : (force === 2) ? "#f59e0b" : "var(--dot-red)";
-                    for(let i=0; i<force; i++) { if(bars[i]) bars[i].style.backgroundColor = couleurBarre; }
-                } else {
-                    elWifiStatus.innerText = dict[currentLang]['wifi_dec'] || "Déconnecté";
-                    elWifiStatus.style.color = "var(--dot-red)";
-                    elWifiRssi.innerText = "-- dBm";
+            if (chronoAnimInterval) clearInterval(chronoAnimInterval);
+            chronoAnimInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.innerText = timeLeft + "s";
+                
+                if (timeLeft === 4) { 
+                    jet.classList.remove('spraying');
+                    showerIcon.style.color = "#1f2937";
+                    timerEl.style.color = "var(--text-gray)";
+                    statusTxt.innerText = "Stabilisation...";
                 }
-            }
-
-            const btnMenu = document.querySelector('.menu-toggle-btn');
-            if(alarme_code > 0) {
-                let textAlarme = dict[currentLang]['al_inc'];
-                if(alarme_code === 1) textAlarme = dict[currentLang]['al_eau'];
-                else if(alarme_code === 2) textAlarme = dict[currentLang]['al_couv'];
-                else if(alarme_code === 3) textAlarme = dict[currentLang]['al_15'];
                 
-                let bnrText = document.getElementById('alarm-banner-text');
-                if(bnrText) bnrText.innerText = textAlarme;
-                
-                if(btnMenu) btnMenu.classList.remove('disabled');
-                
-                let alarmeView = document.getElementById('alarme-view');
-                if (alarmeView && !alarmeView.classList.contains('active')) { switchView('alarme'); }
-            } else {
-                if(btnMenu) btnMenu.classList.remove('disabled');
-                let alarmeView = document.getElementById('alarme-view');
-                if (alarmeView && alarmeView.classList.contains('active')) { switchView('auto'); }
-            }
-
-            let tabOta = document.getElementById('tab-ota');
-            let manView = document.getElementById('manuel-view');
-            if (tabOta && manView) {
-                let isManuel = manView.classList.contains('active');
-                if (modeActif === "BLE" && wifi_stat === 1 && isManuel) {
-                    tabOta.style.display = "flex";
-                } else {
-                    tabOta.style.display = "none";
-                    let activeEl = document.querySelector('.view.active');
-                    if (activeEl && activeEl.id === 'ota-view') { switchView('auto'); }
-                }
-            }
-
-        } catch (e) { console.error("Erreur affichage", e); }
-    }
-
-    async function resetAlarme() {
-        if (modeActif === "BLE") { 
-            envoyerCommande("RESET_ALARM", 1);
-            switchView("manuel"); 
-        } else { 
-            let titre = document.getElementById('val-Mode');
-            if(titre) titre.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Connexion...';
-            if (ID_COFFRET) {
-                try {
-                    await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
-                        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ Reset: 1 })
-                    });
-                } catch(e) { console.error("Erreur Reset Firebase", e); }
-            }
-            switchView("auto"); 
-            let btnMenu = document.querySelector('.menu-toggle-btn');
-            if(btnMenu) btnMenu.classList.remove('disabled'); 
+                if (timeLeft <= 0) clearInterval(chronoAnimInterval);
+            }, 1000);
+            
+            if (timerFinLavage) clearTimeout(timerFinLavage);
+            timerFinLavage = setTimeout(() => {
+                modal.classList.remove('active');
+                setTimeout(() => { animationLavageEnCours = false; }, 1000);
+            }, 20000);
         }
     }
-    
-    function sauvegarderTambour() {
-        let mod = document.getElementById('config-modele-select').value;
-        let typ = document.getElementById('config-mode-select').value;
-        localStorage.setItem("tambour_modele", mod);
-        localStorage.setItem("tambour_mode", typ);
-        envoyerCommande("CFG", mod + "," + typ);
-        let activeEl = document.querySelector('.view.active');
-        if(activeEl) rafraichirTitres(activeEl.id.replace('-view', ''));
-        alert("Modèle enregistré !");
-    }
-
+}
 async function connecterBLE() {
         try {
             modeActif = "BLE";
