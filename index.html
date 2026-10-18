@@ -126,6 +126,9 @@
         <div class="sidebar-item" id="tab-history" onclick="switchView('history')"><i class="fa-solid fa-chart-line"></i> <span data-i18n="menu_history">Historique</span></div>
         <div class="sidebar-item" id="tab-ota" onclick="switchView('ota')"><i class="fa-solid fa-download"></i> <span data-i18n="menu_ota">Mise à jour</span></div>
         <div class="sidebar-item" id="tab-lang" onclick="switchView('lang')"><i class="fa-solid fa-language"></i> <span data-i18n="menu_lang">Langue / Taal</span></div>
+        
+        <!-- Affichage de l'ID du coffret dans le menu -->
+        <div id="sidebar-box-id" style="margin-top: auto; padding: 15px; text-align: center; color: var(--accent-blue); font-size: 14px; font-weight: 800; border-top: 1px solid var(--border-card); background: rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 20px;">Aucun coffret</div>
     </div>
 
     <div id="dashboard-content">
@@ -238,9 +241,7 @@
                 <h3 data-i18n="titre_conn">Choix de la Connexion</h3>
                 <div class="conn-bar">
                     <button id="btn-mode-ble" class="mode-btn active" onclick="connecterBLE()"><i class="fa-brands fa-bluetooth"></i> <span data-i18n="btn_ble">Connexion (Locale)</span></button>
-                    <!-- NOUVEAU BOUTON : CHANGER DE COFFRET -->
-                    <button id="btn-force-scan" class="mode-btn" onclick="forcerScannerBLE()" style="background-color: var(--bg-card); color: var(--text-gray); border-color: var(--border-card); font-size: 13px; padding: 12px;"><i class="fa-solid fa-magnifying-glass"></i> Changer de coffret</button>
-                    
+                    <!-- BOUTON SUPPRIMÉ ICI -->
                     <button id="btn-mode-cloud" class="mode-btn" onclick="activerModeFirebase()"><i class="fa-solid fa-cloud"></i> <span data-i18n="btn_cloud">Mode Cloud (Distance)</span></button>
                 </div>
             </div>
@@ -352,8 +353,8 @@
     let reseauxTrouves = [];
     let chartTempInstance = null;
     let chartWashInstance = null;
-    let systemeEnManuel = false; // <-- AJOUTE CETTE LIGNE ICI
-    let premiereSynchroFaite = false; // <-- NOUVELLE VARIABLE
+    let systemeEnManuel = false; 
+    let premiereSynchroFaite = false; 
 
     function rafraichirTitres(vue) {
         let modele = localStorage.getItem("tambour_modele") || "70";
@@ -390,27 +391,26 @@
     }
 
     function switchView(target) {
-    // Mémorisation du mode global
-    if (target === 'manuel') systemeEnManuel = true;
-    if (target === 'auto') systemeEnManuel = false;
-    
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-    let targetView = document.getElementById(`${target}-view`);
-    if(targetView) targetView.classList.add('active');
-    
-    let tabObj = document.getElementById(`tab-${target}`);
-    if(tabObj) tabObj.classList.add('active');
-    
-    rafraichirTitres(target); 
-    let menu = document.getElementById('sidebarMenu');
-    if(menu) menu.classList.remove('open');
-    
-    adapterInterfaceSelonMode();
-    
-    if (target !== 'alarme' && modeActif === "BLE") { envoyerCommande("PAGE", target.toUpperCase()); }
-    if (target === 'history' && modeActif === "FIREBASE") { lireHistoriqueFirebase(); }
-}
+        if (target === 'manuel') systemeEnManuel = true;
+        if (target === 'auto') systemeEnManuel = false;
+        
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        let targetView = document.getElementById(`${target}-view`);
+        if(targetView) targetView.classList.add('active');
+        
+        let tabObj = document.getElementById(`tab-${target}`);
+        if(tabObj) tabObj.classList.add('active');
+        
+        rafraichirTitres(target); 
+        let menu = document.getElementById('sidebarMenu');
+        if(menu) menu.classList.remove('open');
+        
+        adapterInterfaceSelonMode();
+        
+        if (target !== 'alarme' && modeActif === "BLE") { envoyerCommande("PAGE", target.toUpperCase()); }
+        if (target === 'history' && modeActif === "FIREBASE") { lireHistoriqueFirebase(); }
+    }
 
     function lierTelegram() {
         if (!ID_COFFRET) { alert("Erreur : Identifiant introuvable."); return; }
@@ -477,37 +477,41 @@
     }
 
     function adapterInterfaceSelonMode() {
-    let activeEl = document.querySelector('.view.active');
-    if(!activeEl) return;
-    let activeView = activeEl.id;
-    
-    // CORRECTION : On utilise la mémoire globale, pas l'écran affiché
-    let isManuel = systemeEnManuel; 
+        let activeEl = document.querySelector('.view.active');
+        if(!activeEl) return;
+        let activeView = activeEl.id;
+        
+        let isManuel = systemeEnManuel; 
+        let tabAutoText = document.querySelector('#tab-auto span');
 
-    if (modeActif === "FIREBASE") {
-        ['tab-history', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "flex"; });
-        ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-ota'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
+        if (modeActif === "FIREBASE") {
+            if (tabAutoText) tabAutoText.innerText = "Monitoring";
 
-        if (['manuel-view', 'config-view', 'wifi-view', 'ota-view'].includes(activeView)) {
-            setTimeout(() => switchView('auto'), 10);
+            ['tab-history', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "flex"; });
+            ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-ota'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
+
+            if (['manuel-view', 'config-view', 'wifi-view', 'ota-view'].includes(activeView)) {
+                setTimeout(() => switchView('auto'), 10);
+            }
+        } else if (modeActif === "BLE") {
+            if (tabAutoText) tabAutoText.innerText = dict[currentLang]['menu_auto'];
+
+            ['tab-history', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
+            let elMan = document.getElementById('tab-manuel'); if (elMan) elMan.style.display = "flex";
+
+            let styleConfig = isManuel ? "flex" : "none";
+            ['tab-config', 'tab-wifi'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = styleConfig; });
+
+            if (!isManuel) { let ota = document.getElementById('tab-ota'); if (ota) ota.style.display = "none"; }
+
+            if (['history-view', 'telegram-view'].includes(activeView) || (!isManuel && ['config-view', 'wifi-view', 'ota-view'].includes(activeView))) {
+                if (activeView !== 'auto-view') { setTimeout(() => switchView('auto'), 10); }
+            }
         }
-    } else if (modeActif === "BLE") {
-        ['tab-history', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
-        let elMan = document.getElementById('tab-manuel'); if (elMan) elMan.style.display = "flex";
 
-        let styleConfig = isManuel ? "flex" : "none";
-        ['tab-config', 'tab-wifi'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = styleConfig; });
-
-        if (!isManuel) { let ota = document.getElementById('tab-ota'); if (ota) ota.style.display = "none"; }
-
-        if (['history-view', 'telegram-view'].includes(activeView) || (!isManuel && ['config-view', 'wifi-view', 'ota-view'].includes(activeView))) {
-            if (activeView !== 'auto-view') { setTimeout(() => switchView('auto'), 10); }
-        }
+        let teleIcon = document.getElementById('telegram-status-icon');
+        if (teleIcon && modeActif === "BLE") { teleIcon.style.color = "#374151"; }
     }
-
-    let teleIcon = document.getElementById('telegram-status-icon');
-    if (teleIcon && modeActif === "BLE") { teleIcon.style.color = "#374151"; }
-}
 
     function gererBadgeDot(id, status) {
         const dot = document.getElementById(id);
@@ -549,6 +553,9 @@
             
             let nbreLavage = document.getElementById('val-Nbre_lavage');
             if(nbreLavage) nbreLavage.innerText = compteur;
+            
+            let boxIdEl = document.getElementById('sidebar-box-id');
+            if(boxIdEl) boxIdEl.innerText = ID_COFFRET ? ID_COFFRET : "Aucun coffret";
 
             let espWifiDiv = document.getElementById('esp-wifi-status');
             let headerBars = document.querySelectorAll('#header-wifi-bars .bar');
@@ -590,9 +597,8 @@
                 
                 let bnrText = document.getElementById('alarm-banner-text');
                 if(bnrText) bnrText.innerText = textAlarme;
-                if(btnMenu) btnMenu.classList.add('disabled');
-                let sideMenu = document.getElementById('sidebarMenu');
-                if(sideMenu) sideMenu.classList.remove('open');
+                
+                if(btnMenu) btnMenu.classList.remove('disabled');
                 
                 let alarmeView = document.getElementById('alarme-view');
                 if (alarmeView && !alarmeView.classList.contains('active')) { switchView('alarme'); }
@@ -687,14 +693,12 @@ async function lireDonneesFirebase() {
                     wStat = data.wifi_stat !== undefined ? data.wifi_stat : 0;
                     wRssi = data.wifi_rssi !== undefined ? data.wifi_rssi : 0;
                     
-                    // --- ROUTAGE AUTOMATIQUE FIREBASE ---
                     if (!premiereSynchroFaite) {
                         premiereSynchroFaite = true;
                         if (alarme > 0) { switchView('alarme'); } 
                         else if (data.Mode && (data.Mode.includes("Manu") || data.Mode.includes("Hand"))) { switchView('manuel'); } 
                         else { switchView('auto'); }
                     }
-                    // ------------------------------------
                     
                     let teleIcon = document.getElementById('telegram-status-icon');
                     if (teleIcon) {
@@ -734,7 +738,7 @@ async function lireDonneesFirebase() {
 async function connecterBLE() {
     try {
         modeActif = "BLE";
-        premiereSynchroFaite = false; // On attend la réponse de l'ESP32
+        premiereSynchroFaite = false; 
         adapterInterfaceSelonMode(); 
         if (timerFirebase) clearInterval(timerFirebase);
         
@@ -767,7 +771,6 @@ async function connecterBLE() {
         txCharacteristic.addEventListener('characteristicvaluechanged', (e) => {
             let text = new TextDecoder("utf-8").decode(e.target.value);
             
-            // --- ROUTAGE AUTOMATIQUE BLE : RÉPONSE DE L'ESP32 ---
             if (text.startsWith("MODE:")) {
                 let modeStr = text.substring(5).trim().toUpperCase();
                 if (!premiereSynchroFaite || document.querySelector('.view.active').id === 'ble-view') {
@@ -776,7 +779,6 @@ async function connecterBLE() {
                     else { switchView('auto'); }
                 }
             } 
-            // -----------------------------------------------------
             
             else if (text.startsWith("ID:")) {
                 let parts = text.split(",D:");
@@ -789,7 +791,6 @@ async function connecterBLE() {
                     let wStat = (d.length > 7) ? parseInt(d[7]) : 0;
                     let wRssi = (d.length > 8) ? parseInt(d[8]) : 0;
                     
-                    // Si l'ESP32 envoie un code d'alarme, on bascule tout de suite
                     if (!premiereSynchroFaite && alCode > 0) {
                         premiereSynchroFaite = true;
                         switchView('alarme');
@@ -804,7 +805,6 @@ async function connecterBLE() {
             }
         });
         
-        // --- ON QUESTIONNE L'ESP32 POUR CONNAÎTRE SON ÉTAT ---
         envoyerCommande("GET_MODE", "");
         
     } catch (error) { 
@@ -814,7 +814,7 @@ async function connecterBLE() {
 }
     function activerModeFirebase() {
     modeActif = "FIREBASE";
-    premiereSynchroFaite = false; // On attend les données de Firebase
+    premiereSynchroFaite = false; 
     adapterInterfaceSelonMode(); 
     
     let btnBle = document.getElementById('btn-mode-ble');
@@ -977,7 +977,6 @@ async function connecterBLE() {
 
     function toggleSidebarMenu() { 
         let btn = document.querySelector('.menu-toggle-btn');
-        if(btn && btn.classList.contains('disabled')) return;
         let menu = document.getElementById('sidebarMenu');
         if(menu) menu.classList.toggle('open'); 
     }
@@ -987,12 +986,10 @@ async function connecterBLE() {
         chargerMemos(); 
         adapterInterfaceSelonMode(); 
         
-        // On force l'ouverture sur la page de connexion au lieu de 'auto'
         switchView('ble'); 
         
         setLang(currentLang); 
         
-        // Optionnel : on efface le mot "Attente..." au démarrage pour faire plus propre
         let textStatus = document.getElementById('app-conn-text');
         if (textStatus) {
             textStatus.removeAttribute('data-i18n');
