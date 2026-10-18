@@ -722,16 +722,7 @@
         alert("Modèle enregistré !");
     }
 
-// --- NOUVELLE FONCTION POUR FORCER LE CHOIX DU COFFRET ---
-    function forcerScannerBLE() {
-        if (bleDevice && bleDevice.gatt.connected) {
-            bleDevice.gatt.disconnect();
-        }
-        connecterBLE(true); // Le 'true' force l'ouverture de la fenêtre de scan
-    }
-
-    // --- LA FONCTION BLE SÉCURISÉE MULTI-COFFRETS ---
-    async function connecterBLE(forceScan = false) {
+ async function connecterBLE() {
         try {
             modeActif = "BLE";
             adapterInterfaceSelonMode(); 
@@ -745,7 +736,7 @@
             let textStatus = document.getElementById('app-conn-text');
             if(textStatus) {
                 textStatus.removeAttribute('data-i18n'); 
-                textStatus.innerText = "Recherche coffret...";
+                textStatus.innerText = "Sélectionnez le coffret...";
             }
             
             let dotStatus = document.getElementById('app-conn-dot');
@@ -754,45 +745,12 @@
                 dotStatus.style.color = "#f59e0b";
             }
 
-            let appareilConnu = null;
+            // Ouvre systématiquement la fenêtre sécurisée du téléphone
+            bleDevice = await navigator.bluetooth.requestDevice({ 
+                filters: [{ namePrefix: 'Tambour_' }], 
+                optionalServices: [SERVICE_UUID] 
+            });
             
-            // Si on ne force pas le scan, on cherche dans la mémoire de Chrome
-            if (!forceScan && navigator.bluetooth && navigator.bluetooth.getDevices) {
-                try {
-                    let devices = await navigator.bluetooth.getDevices();
-                    let savedId = localStorage.getItem("ble_device_id"); 
-                    
-                    if (devices.length > 0) {
-                        // 1. Cherche par l'ID exact sauvegardé
-                        if (savedId) {
-                            appareilConnu = devices.find(d => d.id === savedId);
-                        }
-                        // 2. Si l'ID a changé mais que le nom correspond
-                        if (!appareilConnu) {
-                            appareilConnu = devices.find(d => d.name && d.name.startsWith("Tambour_"));
-                        }
-                        // 3. En désespoir de cause, s'il y a un appareil en mémoire, on le prend
-                        if (!appareilConnu) {
-                            appareilConnu = devices[0];
-                        }
-                    }
-                } catch(err) {
-                    console.warn("Mémoire BLE bloquée", err);
-                }
-            }
-            
-            // Si c'est un nouveau scan (ou si la mémoire est vide)
-            if (!appareilConnu || forceScan) {
-                appareilConnu = await navigator.bluetooth.requestDevice({ 
-                    filters: [{ namePrefix: 'Tambour_' }], 
-                    optionalServices: [SERVICE_UUID] 
-                });
-            }
-            
-            // On sauvegarde l'ID unique de ce coffret pour la prochaine fois
-            localStorage.setItem("ble_device_id", appareilConnu.id);
-            bleDevice = appareilConnu; 
-
             bleDevice.addEventListener('gattserverdisconnected', () => { setTimeout(activerModeFirebase, 2000); });
             const server = await bleDevice.gatt.connect();
             const service = await server.getPrimaryService(SERVICE_UUID);
@@ -829,8 +787,9 @@
             
             let activeEl = document.querySelector('.sidebar-item.active');
             if(activeEl) envoyerCommande("PAGE", activeEl.id.replace('tab-', '').toUpperCase());
+            
         } catch (error) { 
-            console.warn("Erreur globale BLE:", error); 
+            console.warn("Connexion BLE annulée ou échouée:", error); 
             activerModeFirebase(); 
         }
     }
