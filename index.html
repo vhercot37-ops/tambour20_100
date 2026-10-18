@@ -627,7 +627,6 @@ function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode,
         if (elLavages) elLavages.innerText = (cpt !== null && cpt !== undefined) ? cpt : "--";
 
         // 2. Gestion des états (Points verts / rouges) sur les différents écrans
-        ['', '-man', '-al'].suffix = '';
         ['', '-man', '-al'].forEach(suf => {
             gererBadgeDot('dot-niveau_securite' + suf, secu);
             gererBadgeDot('dot-niveau_lavage' + suf, lav);
@@ -649,8 +648,9 @@ function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode,
         let sideBox = document.getElementById('sidebar-box-id');
         if (sideBox && ID_COFFRET) sideBox.innerText = ID_COFFRET;
 
-        // 3. --- ANIMATION DU CYCLE DE LAVAGE (Seulement en BLE) ---
-        if (lav === 1 && !animationLavageEnCours && modeActif === "BLE") {
+        // 3. --- ANIMATION DU CYCLE DE LAVAGE (Se déclenche quand le niveau de lavage est ROUGE, soit lav === 0, en mode BLE) ---
+        // Note: Si ton état rouge est 0, mets (lav === 0). S'il faut inverser, mets (lav === 1).
+        if (lav === 0 && !animationLavageEnCours && modeActif === "BLE") {
             animationLavageEnCours = true;
             
             let modal = document.getElementById('wash-modal');
@@ -701,7 +701,6 @@ function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode,
             }
         }
     }
-
     
 async function connecterBLE() {
         try {
