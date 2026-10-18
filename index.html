@@ -663,13 +663,14 @@
 
     async function connecterBLE() {
         try {
-
-           if (ID_COFFRET) {
-           fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
-           method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode_ble: true })
-           }).catch(e => console.error(e));
-           }
-           
+            // ---> NOUVEAU : Le téléphone prévient Firebase direct via sa 4G/Wi-Fi
+            if (ID_COFFRET) {
+                fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
+                    method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode_ble: true })
+                }).catch(e => console.warn("Erreur envoi mode_ble", e));
+            }
+            // <---
+            
             modeActif = "BLE";
             premiereSynchroFaite = false; 
             adapterInterfaceSelonMode(); 
@@ -845,12 +846,13 @@
     }
     
     function activerModeFirebase() {
-        
+       
         if (ID_COFFRET) {
         fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode_ble: false })
-        }).catch(e => console.error(e));
+        }).catch(e => console.warn("Erreur envoi mode_ble", e));
         }
+        // <---
         
         modeActif = "FIREBASE";
         premiereSynchroFaite = false; 
