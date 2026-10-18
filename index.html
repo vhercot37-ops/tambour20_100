@@ -663,6 +663,13 @@
 
     async function connecterBLE() {
         try {
+
+           if (ID_COFFRET) {
+           fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
+           method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode_ble: true })
+           }).catch(e => console.error(e));
+           }
+           
             modeActif = "BLE";
             premiereSynchroFaite = false; 
             adapterInterfaceSelonMode(); 
@@ -838,6 +845,13 @@
     }
     
     function activerModeFirebase() {
+        
+        if (ID_COFFRET) {
+        fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode_ble: false })
+        }).catch(e => console.error(e));
+        }
+        
         modeActif = "FIREBASE";
         premiereSynchroFaite = false; 
         
