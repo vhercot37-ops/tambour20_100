@@ -848,11 +848,16 @@ async function connecterBLE() {
     }
     
    async function activerModeFirebase() {
-        // ---> NOUVEAU : On attend (await) que l'effacement dans Firebase soit validé
+        // ---> NOUVEAU : On remet mode_ble à false ET on relance le chrono de 5 minutes
         if (ID_COFFRET) {
             try {
                 await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
-                    method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode_ble: false })
+                    method: 'PATCH', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ 
+                        mode_ble: false,
+                        dernier_ping_timestamp: Date.now() // Donne 5 min à l'ESP pour se reconnecter
+                    })
                 });
             } catch(e) { console.error("Erreur mode_ble false", e); }
         }
