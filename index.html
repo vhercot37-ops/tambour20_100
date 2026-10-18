@@ -661,10 +661,12 @@
         alert("Modèle enregistré !");
     }
 
-   async function connecterBLE() {
+async function connecterBLE() {
         try {
             modeActif = "BLE";
             premiereSynchroFaite = false; 
+            let avertissementFirebaseFait = false; // ---> NOUVEAU : Drapeau dédié à Firebase
+            
             adapterInterfaceSelonMode(); 
             if (timerFirebase) clearInterval(timerFirebase);
             
@@ -709,17 +711,17 @@
                     let parts = text.split(",D:");
                     if (parts.length >= 2) {
                         let nouvelID = parts[0].replace("ID:", "").trim();
+                        ID_COFFRET = nouvelID;
+                        localStorage.setItem("tambour_id", ID_COFFRET);
                         
-                        // ---> NOUVEAU : On avertit Firebase une fois le BLE connecté et l'ID reçu
-                        if (!premiereSynchroFaite || nouvelID !== ID_COFFRET) {
-                            fetch(`${FIREBASE_HOST}clients/${nouvelID}.json?auth=${FIREBASE_AUTH}`, { 
+                        // ---> CORRECTION : Écriture Firebase garantie à 100% à la réception de l'ID
+                        if (!avertissementFirebaseFait) {
+                            avertissementFirebaseFait = true;
+                            fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
                                 method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode_ble: true })
                             }).catch(err => console.error("Erreur Firebase mode_ble", err));
                         }
                         // <---
-
-                        ID_COFFRET = nouvelID;
-                        localStorage.setItem("tambour_id", ID_COFFRET);
                         
                         let d = parts[1].split(",");
                         let alCode = (d.length > 6) ? parseInt(d[6]) : 0;
@@ -747,7 +749,6 @@
             activerModeFirebase(); 
         }
     }
-    
     async function lireDonneesFirebase() {
         if (!ID_COFFRET) return;
         let dot = document.getElementById('app-conn-dot');
