@@ -661,16 +661,8 @@
         alert("Modèle enregistré !");
     }
 
-    async function connecterBLE() {
+   async function connecterBLE() {
         try {
-            // ---> NOUVEAU : Le téléphone prévient Firebase direct via sa 4G/Wi-Fi
-            if (ID_COFFRET) {
-                fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
-                    method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode_ble: true })
-                }).catch(e => console.warn("Erreur envoi mode_ble", e));
-            }
-            // <---
-            
             modeActif = "BLE";
             premiereSynchroFaite = false; 
             adapterInterfaceSelonMode(); 
@@ -713,11 +705,20 @@
                         else { switchView('auto'); }
                     }
                 } 
-                
                 else if (text.startsWith("ID:")) {
                     let parts = text.split(",D:");
                     if (parts.length >= 2) {
-                        ID_COFFRET = parts[0].replace("ID:", "").trim();
+                        let nouvelID = parts[0].replace("ID:", "").trim();
+                        
+                        // ---> NOUVEAU : On avertit Firebase une fois le BLE connecté et l'ID reçu
+                        if (!premiereSynchroFaite || nouvelID !== ID_COFFRET) {
+                            fetch(`${FIREBASE_HOST}clients/${nouvelID}.json?auth=${FIREBASE_AUTH}`, { 
+                                method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode_ble: true })
+                            }).catch(err => console.error("Erreur Firebase mode_ble", err));
+                        }
+                        // <---
+
+                        ID_COFFRET = nouvelID;
                         localStorage.setItem("tambour_id", ID_COFFRET);
                         
                         let d = parts[1].split(",");
@@ -746,7 +747,7 @@
             activerModeFirebase(); 
         }
     }
-
+    
     async function lireDonneesFirebase() {
         if (!ID_COFFRET) return;
         let dot = document.getElementById('app-conn-dot');
@@ -845,15 +846,17 @@
         }
     }
     
-    function activerModeFirebase() {
-       
+   async function activerModeFirebase() {
+        // ---> NOUVEAU : On attend (await) que l'effacement dans Firebase soit validé
         if (ID_COFFRET) {
-        fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode_ble: false })
-        }).catch(e => console.warn("Erreur envoi mode_ble", e));
+            try {
+                await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
+                    method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode_ble: false })
+                });
+            } catch(e) { console.error("Erreur mode_ble false", e); }
         }
         // <---
-        
+
         modeActif = "FIREBASE";
         premiereSynchroFaite = false; 
         
@@ -863,7 +866,6 @@
          
         adapterInterfaceSelonMode(); 
         
-        // Affichage du sablier animé lors de l'activation du mode Cloud
         let titre = document.getElementById('val-Mode');
         if (titre) titre.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Connexion...';
         afficherMaitresDonnees("--.-", null, null, null, null, "--", 0, 0, -100);
