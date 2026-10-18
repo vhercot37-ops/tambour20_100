@@ -962,12 +962,22 @@
         if(menu) menu.classList.toggle('open'); 
     }
     
-    window.addEventListener('load', () => { 
+   window.addEventListener('load', () => { 
         initBoutonsManuels(); 
         chargerMemos(); 
         adapterInterfaceSelonMode(); 
-        rafraichirTitres('auto'); 
+        
+        // On force l'ouverture sur la page de connexion au lieu de 'auto'
+        switchView('ble'); 
+        
         setLang(currentLang); 
+        
+        // Optionnel : on efface le mot "Attente..." au démarrage pour faire plus propre
+        let textStatus = document.getElementById('app-conn-text');
+        if (textStatus) {
+            textStatus.removeAttribute('data-i18n');
+            textStatus.innerText = "Déconnecté";
+        }
     });
 </script>
 </body>
