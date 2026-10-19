@@ -457,9 +457,14 @@
         }
     }
 
-    // --- CORRECTION : AJOUT FONCTION RESET ALARME ---
-    function resetAlarme() {
-        envoyerCommande("RESET_ALARM", "");
+   function resetAlarme() {
+        if (modeActif === "BLE") {
+            // Comportement BLE actuel (inchangé pour ton code C++)
+            envoyerCommande("RESET_ALARM", "");
+        } else {
+            // Mode Cloud : ordonne la création de la variable Reset=1 sur Firebase
+            envoyerCommande("Reset", 1);
+        }
     }
 
     function rafraichirTitres(vue) {
@@ -494,20 +499,23 @@
     }
 
    async function envoyerCommande(action, valeur) {
-        let trame = valeur === "" ? action : `${action}:${valeur}`;
-        
         if (modeActif === "BLE" && rxCharacteristic) {
             try {
                 let enc = new TextEncoder();
+                // En BLE : construit la trame texte classique
+                let trame = valeur === "" ? action : `${action}:${valeur}`;
                 await rxCharacteristic.writeValueWithResponse(enc.encode(trame));
             } catch (e) { console.warn("Erreur BLE", e); }
         } else if (modeActif === "FIREBASE" && ID_COFFRET) {
             try {
-                // Envoi de la trame texte exacte vers Firebase
+                // En Cloud : construit un objet JSON propre (ex: { "Reset": 1 })
+                let payload = {};
+                payload[action] = valeur; 
+                
                 await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ commande_web: trame })
+                    body: JSON.stringify(payload)
                 });
             } catch (e) { console.warn("Erreur Cloud Cmd", e); }
         }
