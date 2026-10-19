@@ -615,7 +615,7 @@
             let styleConfig = isManuel ? "flex" : "none";
             ['tab-config', 'tab-wifi'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = styleConfig; });
 
-            if (!isManuel) { let ota = document.getElementById('tab-ota'); if (ota) ota.style.display = "none"; }
+            // L'affichage de l'onglet OTA est maintenant géré par l'état du Wi-Fi
 
             if (['history-view', 'telegram-view'].includes(activeView) || (!isManuel && ['config-view', 'wifi-view', 'ota-view'].includes(activeView))) {
                 if (activeView !== 'auto-view') { setTimeout(() => switchView('auto'), 10); }
@@ -694,9 +694,12 @@
         // Sidebar ID Box
         let sideBox = document.getElementById('sidebar-box-id');
         if (sideBox && ID_COFFRET) sideBox.innerText = ID_COFFRET;
-
+       
         // --- CORRECTION : MISE A JOUR DES BARRES WIFI ET DU SIGNAL (BLE ET CLOUD) ---
+        let tabOta = document.getElementById('tab-ota');
+
         if (wStat === 1) {
+            if (tabOta) tabOta.style.display = (modeActif === "BLE") ? "flex" : "none";
             updateWifiBars(wRssi, 'header-wifi-bars');
             updateWifiBars(wRssi, 'wifi-bars');
             
@@ -708,6 +711,9 @@
             let lblRssi = document.getElementById('lbl-wifi-rssi');
             if(lblRssi) lblRssi.innerText = wRssi + " dBm";
         } else {
+            if (tabOta) tabOta.style.display = "none";
+            let activeEl = document.querySelector('.view.active');
+            if (activeEl && activeEl.id === 'ota-view') switchView('auto');
             updateWifiBars(-100, 'header-wifi-bars');
             updateWifiBars(-100, 'wifi-bars');
             
@@ -849,13 +855,14 @@ async function connecterBLE() {
                         let alCode = (d.length > 6) ? parseInt(d[6]) : 0;
                         let wStat = (d.length > 7) ? parseInt(d[7]) : 0;
                         let wRssi = (d.length > 8) ? parseInt(d[8]) : 0;
+                        let bleCptConsecutif = (d.length > 9) ? parseInt(d[9]) : 0;
                         
                         if (!premiereSynchroFaite && alCode > 0) {
                             premiereSynchroFaite = true;
                             switchView('alarme');
                         }
 
-                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, cptConsecutif);
+                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, bleCptConsecutif);
                   }
                 } else if (text.startsWith("WNET:")) {
                     let reseau = text.substring(5);
