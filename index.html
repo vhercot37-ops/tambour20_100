@@ -493,13 +493,23 @@
         else titre.innerText = dict[currentLang]['menu_' + vue] || "Dashboard";
     }
 
-    async function envoyerCommande(action, valeur) {
+   async function envoyerCommande(action, valeur) {
+        let trame = valeur === "" ? action : `${action}:${valeur}`;
+        
         if (modeActif === "BLE" && rxCharacteristic) {
             try {
                 let enc = new TextEncoder();
-                let trame = valeur === "" ? action : `${action}:${valeur}`;
                 await rxCharacteristic.writeValueWithResponse(enc.encode(trame));
             } catch (e) { console.warn("Erreur BLE", e); }
+        } else if (modeActif === "FIREBASE" && ID_COFFRET) {
+            try {
+                // Envoi de la trame texte exacte vers Firebase
+                await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ commande_web: trame })
+                });
+            } catch (e) { console.warn("Erreur Cloud Cmd", e); }
         }
     }
 
@@ -694,6 +704,28 @@
         // Sidebar ID Box
         let sideBox = document.getElementById('sidebar-box-id');
         if (sideBox && ID_COFFRET) sideBox.innerText = ID_COFFRET;
+
+        // ---> BASCULE AUTOMATIQUE SUR L'ÉCRAN D'ALARME <---
+        let vueActive = document.querySelector('.view.active');
+        if (vueActive) {
+            if (alCode > 0 && vueActive.id !== 'alarme-view') {
+                let modal = document.getElementById('wash-modal');
+                if (modal) modal.classList.remove('active'); // Ferme la popup si alarme
+                switchView('alarme');
+            } else if (alCode === 0 && vueActive.id === 'alarme-view') {
+                switchView('auto');
+            }
+        }
+
+        // Mise à jour du texte de l'alarme
+        let bannerTxt = document.getElementById('alarm-banner-text');
+        if (bannerTxt && alCode > 0) {
+            if (alCode === 1) bannerTxt.innerText = dict[currentLang]['al_eau'] || "ALARME : NIVEAU D'EAU";
+            else if (alCode === 2) bannerTxt.innerText = dict[currentLang]['al_couv'] || "ALARME : COUVERCLE OUVERT";
+            else if (alCode === 3) bannerTxt.innerText = dict[currentLang]['al_15'] || "ALARME : 15 LAVAGES CONSÉCUTIFS";
+            else bannerTxt.innerText = dict[currentLang]['al_inc'] || "ALARME INCONNUE";
+        }
+        // ---> FIN BASCULE ALARME <---
        
         // --- CORRECTION : MISE A JOUR DES BARRES WIFI ET DU SIGNAL (BLE ET CLOUD) ---
         let tabOta = document.getElementById('tab-ota');
