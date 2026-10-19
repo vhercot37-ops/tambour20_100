@@ -349,6 +349,7 @@
             
             <div class="wash-timer-text" id="wash-timer-anim">20s</div>
             <p style="margin:0; font-size: 14px; color: var(--text-gray);" id="wash-status-text">Rotation & Lavage...</p>
+            <p style="margin:8px 0 0 0; font-size: 13px; color: var(--accent-purple); font-weight: bold; display: none;" id="wash-consecutif-text">Série : 1 / 15</p>
         </div>
     </div>
     
@@ -655,7 +656,7 @@
         });
     }
 
-    function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi) {
+    function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi,cptConsecutif) {
         // 1. Mise à jour des valeurs textuelles principales
         let elTemp = document.getElementById('val-temperature');
         if (elTemp) elTemp.innerText = (temp !== null && temp !== undefined && !isNaN(temp)) ? Number(temp).toFixed(1) + "°C" : "--.-°C";
@@ -729,9 +730,21 @@
             let timerEl = document.getElementById('wash-timer-anim');
             let showerIcon = document.getElementById('shower-icon-anim');
             let statusTxt = document.getElementById('wash-status-text');
+            let txtConsecutif = document.getElementById('wash-consecutif-text'); // <-- NOUVELLE LIGNE
             
             if (modal && drum && jet && timerEl) {
                 modal.classList.add('active');
+
+                // ---> NOUVEAU BLOC : Affichage des consécutifs
+                if (txtConsecutif) {
+                    if (cptConsecutif > 0) {
+                        txtConsecutif.style.display = "block";
+                        txtConsecutif.innerText = `Série actuelle : ${cptConsecutif} / 15`;
+                    } else {
+                        txtConsecutif.style.display = "none";
+                    }
+                }
+                // <---
                 
                 drum.style.transition = 'none';
                 drum.style.transform = 'rotate(0deg)';
@@ -842,8 +855,8 @@ async function connecterBLE() {
                             switchView('alarme');
                         }
 
-                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi);
-                    }
+                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, cptConsecutif);
+                  }
                 } else if (text.startsWith("WNET:")) {
                     let reseau = text.substring(5);
                     if (reseau === "END") afficherListeWifi();
@@ -911,6 +924,7 @@ async function connecterBLE() {
                         alarme = data.code_alarme !== undefined ? data.code_alarme : 0;
                         wStat = data.wifi_stat !== undefined ? data.wifi_stat : 0;
                         wRssi = data.wifi_rssi !== undefined ? data.wifi_rssi : 0;
+                        let cptConsecutif = data.lavages_consecutifs !== undefined ? data.lavages_consecutifs : 0; // <-- NOUVELLE LIGNE
                         
                         if (data.Mode !== undefined) {
                             dernierModeFirebase = data.Mode; 
@@ -938,11 +952,12 @@ async function connecterBLE() {
                     } else {
                         temp = "--.-"; secu = null; lav = null; couv = null; uv = null;
                         cpt = "--"; alarme = 0; wStat = 0; wRssi = -100; 
+                        var cptConsecutif = 0; // <-- NOUVELLE LIGNE (utilise "var" ici pour la portée globale du if/else)
                         let teleIcon = document.getElementById('telegram-status-icon');
                         if (teleIcon) teleIcon.style.color = "#374151";
                     }
 
-                    afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, data.Mode, alarme, wStat, wRssi);
+                    afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, data.Mode, alarme, wStat, wRssi, cptConsecutif);
                 } else {
                     if(dot) { dot.className = "fa-solid fa-triangle-exclamation"; dot.style.color = "#f59e0b"; }
                     if(text) text.innerText = "Pas de données";
