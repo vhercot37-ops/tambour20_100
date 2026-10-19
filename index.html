@@ -93,28 +93,11 @@
         .pwd-container { position: relative; width: 100%; }
         .pwd-icon { position: absolute; right: 15px; top: 18px; cursor: pointer; color: var(--text-gray); }
 
-         /* --- POPUP CYCLE DE LAVAGE (BENTO UI) --- */
-        .wash-modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
-        }
-        .wash-modal-overlay.active { opacity: 1; pointer-events: all; }
-        
-        .wash-modal-content {
-            background: var(--bg-card); border: 1px solid var(--border-card);
-            border-radius: 32px; padding: 35px 25px; width: 80%; max-width: 300px;
-            text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column; align-items: center; gap: 15px;
-            transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .wash-modal-overlay.active .wash-modal-content { transform: scale(1); }
-        
        /* --- POPUP CYCLE DE LAVAGE (BENTO UI CENTRÉ) --- */
         .wash-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.80); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            background: rgba(0, 0, 0, 0.40); /* <-- CORRIGÉ : opacity réduite pour voir derrière */
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             display: flex; justify-content: center; align-items: center;
             z-index: 99999; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
             box-sizing: border-box; padding: 20px;
@@ -274,6 +257,7 @@
                     <label class="auth-input" style="border:none; padding:0;" data-i18n="lbl_mode">Mode :</label>
                     <select id="config-mode-select" class="auth-input"><option value="G" data-i18n="opt_grav">Gravitaire (G)</option><option value="P" data-i18n="opt_pomp">Pompage (P)</option></select>
                 </div>
+                <!-- CORRIGÉ : L'appel sauvegarderTambour() fonctionnera maintenant -->
                 <button class="auth-btn" onclick="sauvegarderTambour()"><i class="fa-solid fa-save"></i> <span data-i18n="btn_save_tamb">Enregistrer</span></button>
             </div>
         </div>
@@ -347,9 +331,7 @@
         </div>
     </div>
 
-<!-- ========================================== -->
-    <!-- COLLE LA STRUCTURE HTML DE LA POPUP ICI :  -->
-    <!-- ========================================== -->
+    <!-- POPUP CYCLE DE LAVAGE (BENTO UI CENTRÉ) -->
     <div class="wash-modal-overlay" id="wash-modal">
         <div class="wash-modal-content">
             <h3 style="margin:0; font-size: 20px; color: var(--text-white);">Cycle en cours</h3>
@@ -369,7 +351,6 @@
             <p style="margin:0; font-size: 14px; color: var(--text-gray);" id="wash-status-text">Rotation & Lavage...</p>
         </div>
     </div>
-    <!-- ========================================== -->
     
 </div>
 
@@ -415,7 +396,7 @@
     let dernierPing = -1;
     let tempsDernierPing = Date.now();
     let attenteDonneesFraiches = false;
-    let dernierModeFirebase = ""; // Mémoire pour éviter le clignotement Auto au passage en Cloud
+    let dernierModeFirebase = ""; 
 
     function setLang(lang) {
         currentLang = lang;
@@ -450,11 +431,35 @@
     let chartWashInstance = null;
     let systemeEnManuel = false; 
     let premiereSynchroFaite = false; 
+    
     // --- VARIABLES ANIMATION LAVAGE BLE ---
     let animationLavageEnCours = false;
     let chronoAnimInterval = null;
     let timerFinLavage = null;
     
+    // --- CORRECTION : AJOUT FONCTION SAUVEGARDER TAMBOUR ---
+    function sauvegarderTambour() {
+        let modeleEl = document.getElementById('config-modele-select');
+        let modeEl = document.getElementById('config-mode-select');
+        
+        if (modeleEl && modeEl) {
+            let modele = modeleEl.value;
+            let mode = modeEl.value;
+            
+            localStorage.setItem("tambour_modele", modele);
+            localStorage.setItem("tambour_mode", mode);
+            
+            envoyerCommande("CFG", modele + "," + mode);
+            
+            alert(dict[currentLang]['btn_save_tamb'] + " OK !");
+            rafraichirTitres('config');
+        }
+    }
+
+    // --- CORRECTION : AJOUT FONCTION RESET ALARME ---
+    function resetAlarme() {
+        envoyerCommande("RESET_ALARM", "");
+    }
 
     function rafraichirTitres(vue) {
         let modele = localStorage.getItem("tambour_modele") || "70";
@@ -628,7 +633,29 @@
         }
     }
 
-function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi) {
+    // --- CORRECTION : AJOUT MISE A JOUR DES BARRES WIFI ---
+    function updateWifiBars(rssi, containerId) {
+        let container = document.getElementById(containerId);
+        if (!container) return;
+        
+        let bars = container.querySelectorAll('.bar');
+        let activeCount = 0;
+        
+        if (rssi > -60) activeCount = 4;
+        else if (rssi > -70) activeCount = 3;
+        else if (rssi > -80) activeCount = 2;
+        else if (rssi >= -95) activeCount = 1;
+        
+        bars.forEach((bar, index) => {
+            if (index < activeCount) {
+                bar.style.backgroundColor = "var(--dot-green)";
+            } else {
+                bar.style.backgroundColor = "#374151";
+            }
+        });
+    }
+
+    function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi) {
         // 1. Mise à jour des valeurs textuelles principales
         let elTemp = document.getElementById('val-temperature');
         if (elTemp) elTemp.innerText = (temp !== null && temp !== undefined && !isNaN(temp)) ? Number(temp).toFixed(1) + "°C" : "--.-°C";
@@ -667,8 +694,32 @@ function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode,
         let sideBox = document.getElementById('sidebar-box-id');
         if (sideBox && ID_COFFRET) sideBox.innerText = ID_COFFRET;
 
-        // 3. --- ANIMATION DU CYCLE DE LAVAGE (Se déclenche quand le niveau de lavage est ROUGE, soit lav === 0, en mode BLE) ---
-        // Note: Si ton état rouge est 0, mets (lav === 0). S'il faut inverser, mets (lav === 1).
+        // --- CORRECTION : MISE A JOUR DES BARRES WIFI ET DU SIGNAL (BLE ET CLOUD) ---
+        if (wStat === 1) {
+            updateWifiBars(wRssi, 'header-wifi-bars');
+            updateWifiBars(wRssi, 'wifi-bars');
+            
+            let lblStat = document.getElementById('lbl-wifi-status');
+            if(lblStat) {
+                lblStat.innerText = dict[currentLang]['wifi_conn'] || "Connecté";
+                lblStat.style.color = "var(--dot-green)";
+            }
+            let lblRssi = document.getElementById('lbl-wifi-rssi');
+            if(lblRssi) lblRssi.innerText = wRssi + " dBm";
+        } else {
+            updateWifiBars(-100, 'header-wifi-bars');
+            updateWifiBars(-100, 'wifi-bars');
+            
+            let lblStat = document.getElementById('lbl-wifi-status');
+            if(lblStat) {
+                lblStat.innerText = dict[currentLang]['wifi_dec'] || "Déconnecté";
+                lblStat.style.color = "var(--dot-red)";
+            }
+            let lblRssi = document.getElementById('lbl-wifi-rssi');
+            if(lblRssi) lblRssi.innerText = "-- dBm";
+        }
+
+        // 3. --- ANIMATION DU CYCLE DE LAVAGE (Se déclenche quand lav === 0 en mode BLE) ---
         if (lav === 0 && !animationLavageEnCours && modeActif === "BLE") {
             animationLavageEnCours = true;
             
@@ -725,7 +776,7 @@ async function connecterBLE() {
         try {
             modeActif = "BLE";
             premiereSynchroFaite = false; 
-            let avertissementFirebaseFait = false; // ---> NOUVEAU : Drapeau dédié à Firebase
+            let avertissementFirebaseFait = false; 
             
             adapterInterfaceSelonMode(); 
             if (timerFirebase) clearInterval(timerFirebase);
@@ -774,14 +825,12 @@ async function connecterBLE() {
                         ID_COFFRET = nouvelID;
                         localStorage.setItem("tambour_id", ID_COFFRET);
                         
-                        // ---> CORRECTION : Écriture Firebase garantie à 100% à la réception de l'ID
                         if (!avertissementFirebaseFait) {
                             avertissementFirebaseFait = true;
                             fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
                                 method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode_ble: true })
                             }).catch(err => console.error("Erreur Firebase mode_ble", err));
                         }
-                        // <---
                         
                         let d = parts[1].split(",");
                         let alCode = (d.length > 6) ? parseInt(d[6]) : 0;
@@ -793,7 +842,7 @@ async function connecterBLE() {
                             switchView('alarme');
                         }
 
-                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], alCode, wStat, wRssi);
+                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi);
                     }
                 } else if (text.startsWith("WNET:")) {
                     let reseau = text.substring(5);
@@ -863,7 +912,6 @@ async function connecterBLE() {
                         wStat = data.wifi_stat !== undefined ? data.wifi_stat : 0;
                         wRssi = data.wifi_rssi !== undefined ? data.wifi_rssi : 0;
                         
-                        // Mémorisation du mode Firebase AVANT tout routage d'écran
                         if (data.Mode !== undefined) {
                             dernierModeFirebase = data.Mode; 
                         }
@@ -894,7 +942,7 @@ async function connecterBLE() {
                         if (teleIcon) teleIcon.style.color = "#374151";
                     }
 
-                    afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi);
+                    afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, data.Mode, alarme, wStat, wRssi);
                 } else {
                     if(dot) { dot.className = "fa-solid fa-triangle-exclamation"; dot.style.color = "#f59e0b"; }
                     if(text) text.innerText = "Pas de données";
@@ -908,7 +956,6 @@ async function connecterBLE() {
     }
     
    async function activerModeFirebase() {
-        // ---> NOUVEAU : On remet mode_ble à false ET on relance le chrono de 5 minutes
         if (ID_COFFRET) {
             try {
                 await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
@@ -916,12 +963,11 @@ async function connecterBLE() {
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ 
                         mode_ble: false,
-                        dernier_ping_timestamp: Date.now() // Donne 5 min à l'ESP pour se reconnecter
+                        dernier_ping_timestamp: Date.now()
                     })
                 });
             } catch(e) { console.error("Erreur mode_ble false", e); }
         }
-        // <---
 
         modeActif = "FIREBASE";
         premiereSynchroFaite = false; 
@@ -934,7 +980,7 @@ async function connecterBLE() {
         
         let titre = document.getElementById('val-Mode');
         if (titre) titre.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Connexion...';
-        afficherMaitresDonnees("--.-", null, null, null, null, "--", 0, 0, -100);
+        afficherMaitresDonnees("--.-", null, null, null, null, "--", "--", 0, 0, -100);
         
         let btnBle = document.getElementById('btn-mode-ble');
         let btnCloud = document.getElementById('btn-mode-cloud');
