@@ -329,6 +329,7 @@
                     <button class="lang-btn" id="btn-nl" onclick="setLang('nl')">Nederlands</button>
                 </div>
             </div>
+        </div>
 
          <div id="pdf-view" class="view">
             <div class="telegram-config-block" style="height: 70vh; padding: 15px; display: flex; flex-direction: column;">
@@ -337,7 +338,7 @@
             </div>
          </div>
               
-        </div>
+     </div>
     </div>
 
     <!-- POPUP CYCLE DE LAVAGE (BENTO UI CENTRÉ) -->
@@ -634,7 +635,7 @@
             if (tabAutoText) tabAutoText.innerText = "Monitoring";
 
             ['tab-history', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "flex"; });
-          ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-ota', 'tab-pdf'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
+            ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-ota', 'tab-pdf'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
 
             if (['manuel-view', 'config-view', 'wifi-view', 'ota-view'].includes(activeView)) {
                 setTimeout(() => switchView('auto'), 10);
@@ -646,11 +647,11 @@
             let elMan = document.getElementById('tab-manuel'); if (elMan) elMan.style.display = "flex";
 
             let styleConfig = isManuel ? "flex" : "none";
-            ['tab-config', 'tab-wifi'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = styleConfig; });
+           ['tab-config', 'tab-wifi', 'tab-pdf'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = styleConfig; });
 
             // L'affichage de l'onglet OTA est maintenant géré par l'état du Wi-Fi
 
-            if (['history-view', 'telegram-view'].includes(activeView) || (!isManuel && ['config-view', 'wifi-view', 'ota-view'].includes(activeView))) {
+           if (['history-view', 'telegram-view'].includes(activeView) || (!isManuel && ['config-view', 'wifi-view', 'ota-view', 'pdf-view'].includes(activeView))) {
                 if (activeView !== 'auto-view') { setTimeout(() => switchView('auto'), 10); }
             }
         }
