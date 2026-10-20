@@ -243,7 +243,7 @@
                 <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-box-open status-tile-icon"></i><div class="dot" id="dot-couvercle-al"></div></div><div class="status-tile-title" data-i18n="couv">Couvercle</div></div>
                 <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-lightbulb status-tile-icon"></i><div class="dot" id="dot-pompe_uv-al"></div></div><div class="status-tile-title" data-i18n="pompe">UV</div></div>
             </div>
-            <button class="auth-btn" style="background-color: #dc2626; margin-top: 10px;" onclick="resetAlarme()"><i class="fa-solid fa-power-off"></i> <span data-i18n="btn_reset">Réarmer le système</span></button>
+                <button class="auth-btn" id="btn-reset-alarme" style="background-color: #dc2626; margin-top: 10px;" onclick="resetAlarme()"><i class="fa-solid fa-power-off" id="icon-reset-alarme"></i> <span data-i18n="btn_reset">Reset Alarme</span></button>
         </div>
 
         <div id="config-view" class="view">
@@ -369,7 +369,7 @@
             titre_hist: "Historique (15 jours)", titre_lang: "Choisissez votre langue", lbl_boitier: "Boîtier:",
             titre_tele: "Alertes Telegram", lbl_tele_actif: "Activer les alarmes :", btn_save_tele: "Enregistrer",
             titre_ota: "Mise à jour du système", desc_ota: "Vérifiez si une nouvelle version est disponible.", lbl_ver_act: "Version actuelle :", lbl_ver_dispo: "Version dispo. :", btn_check_ota: "Vérifier", btn_start_ota: "Installer",
-            titre_alarme: "Arrêt Tambour", btn_reset: "Réarmer le système", temp_eau: "Température Eau",
+            titre_alarme: "Arrêt Tambour", btn_reset: "Reset Alarme", temp_eau: "Température Eau",
             al_eau: "ALARME : NIVEAU D'EAU", al_couv: "ALARME : COUVERCLE OUVERT", al_15: "ALARME : 15 LAVAGES CONSÉCUTIFS", al_inc: "ALARME INCONNUE",
             lbl_wifi_etat: "État Wi-Fi :", lbl_wifi_signal: "Signal :", wifi_conn: "Connecté", wifi_dec: "Déconnecté", ota_no_update: "À jour", ota_update_found: "Disponible"
         },
@@ -385,7 +385,7 @@
             titre_hist: "Geschiedenis", titre_lang: "Kies uw taal", lbl_boitier: "Controller:",
             titre_tele: "Telegram Meldingen", lbl_tele_actif: "Activeren:", btn_save_tele: "Opslaan",
             titre_ota: "Systeemupdate", desc_ota: "Controleer op updates.", lbl_ver_act: "Huidige versie:", lbl_ver_dispo: "Beschikbaar:", btn_check_ota: "Controleren", btn_start_ota: "Installeren",
-            titre_alarme: "Trommel Stop", btn_reset: "Systeem resetten", temp_eau: "Watertemperatuur",
+            titre_alarme: "Trommel Stop", btn_reset: "Reset Alarm", temp_eau: "Watertemperatuur",
             al_eau: "ALARM: WATERNIVEAU", al_couv: "ALARM: DEKSEL OPEN", al_15: "ALARM: 15 SPOELINGEN", al_inc: "ONBEKEND ALARM",
             lbl_wifi_etat: "Wi-Fi Status:", lbl_wifi_signal: "Signaal:", wifi_conn: "Verbonden", wifi_dec: "Niet verbonden", ota_no_update: "Up-to-date", ota_update_found: "Beschikbaar"
         }
@@ -457,12 +457,16 @@
         }
     }
 
-   function resetAlarme() {
+  function resetAlarme() {
+        let btnReset = document.getElementById('btn-reset-alarme');
+        let iconReset = document.getElementById('icon-reset-alarme');
+
         if (modeActif === "BLE") {
-            // Comportement BLE actuel (inchangé pour ton code C++)
             envoyerCommande("RESET_ALARM", "");
         } else {
-            // Mode Cloud : ordonne la création de la variable Reset=1 sur Firebase
+            // Mode Cloud : on met le sablier et on bloque le bouton
+            if (iconReset) iconReset.className = "fa-solid fa-hourglass-half fa-spin";
+            if (btnReset) btnReset.style.opacity = "0.7";
             envoyerCommande("Reset", 1);
         }
     }
@@ -721,6 +725,14 @@
                 if (modal) modal.classList.remove('active'); // Ferme la popup si alarme
                 switchView('alarme');
             } else if (alCode === 0 && vueActive.id === 'alarme-view') {
+                
+                // ---> AJOUT ICI : On restaure l'apparence normale du bouton Reset
+                let btnReset = document.getElementById('btn-reset-alarme');
+                let iconReset = document.getElementById('icon-reset-alarme');
+                if (iconReset) iconReset.className = "fa-solid fa-power-off";
+                if (btnReset) btnReset.style.opacity = "1";
+                // <---
+                
                 switchView('auto');
             }
         }
