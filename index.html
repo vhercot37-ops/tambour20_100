@@ -783,7 +783,9 @@
         let tabOta = document.getElementById('tab-ota');
 
         if (wStat === 1) {
-            if (tabOta) tabOta.style.display = (modeActif === "BLE") ? "flex" : "none";
+            // Visible en BLE SEULEMENT si le Wi-Fi est connecté ET qu'on est en mode manuel
+            if (tabOta) tabOta.style.display = (modeActif === "BLE" && systemeEnManuel) ? "flex" : "none";
+            updateWifiBars(wRssi, 'header-wifi-bars');
             updateWifiBars(wRssi, 'header-wifi-bars');
             updateWifiBars(wRssi, 'wifi-bars');
             
