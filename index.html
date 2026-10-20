@@ -180,6 +180,7 @@
         <div class="sidebar-item" id="tab-history" onclick="switchView('history')"><i class="fa-solid fa-chart-line"></i> <span data-i18n="menu_history">Historique</span></div>
         <div class="sidebar-item" id="tab-ota" onclick="switchView('ota')"><i class="fa-solid fa-download"></i> <span data-i18n="menu_ota">Mise à jour</span></div>
         <div class="sidebar-item" id="tab-lang" onclick="switchView('lang')"><i class="fa-solid fa-language"></i> <span data-i18n="menu_lang">Langue / Taal</span></div>
+        <div class="sidebar-item" id="tab-pdf" onclick="switchView('pdf')"><i class="fa-solid fa-file-pdf"></i> <span data-i18n="menu_pdf">Manuel</span></div>
         
         <div id="sidebar-box-id" style="margin-top: auto; padding: 15px; text-align: center; color: var(--accent-blue); font-size: 14px; font-weight: 800; border-top: 1px solid var(--border-card); background: rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 20px;">Aucun coffret</div>
     </div>
@@ -328,6 +329,14 @@
                     <button class="lang-btn" id="btn-nl" onclick="setLang('nl')">Nederlands</button>
                 </div>
             </div>
+
+         <div id="pdf-view" class="view">
+            <div class="telegram-config-block" style="height: 70vh; padding: 15px; display: flex; flex-direction: column;">
+                <h3 data-i18n="menu_pdf" style="margin-top: 0; margin-bottom: 15px;">Manuel d'utilisation</h3>
+                <iframe src="https://firebasestorage.googleapis.com/v0/b/tambour20100-29236.firebasestorage.app/o/Manuel%20d'utilisation%20filtre%2020-100%2030-50-70.pdf?alt=media&token=4f6dcd61-d0ed-4537-84a7-b39efce1f13e" style="flex: 1; width: 100%; border: none; border-radius: 12px; background: white;"></iframe>
+            </div>
+         </div>
+              
         </div>
     </div>
 
@@ -361,6 +370,7 @@
             status_wait: "Attente...", menu_auto: "Mode Auto", menu_manuel: "Mode Manuel", menu_config: "Configuration",
             menu_wifi: "Config. Wi-Fi", menu_telegram: "Telegram", menu_ble: "Connexion", menu_history: "Historique", 
             menu_ota: "Mise à jour", menu_lang: "Langue / Taal",
+            menu_pdf: "Manuel d'utilisation",
             niv_secu: "Niveau Sécurité", niv_lav: "Niveau Lavage", couv: "Couvercle", pompe: "Pompe UV", nbre_lav: "Nombre de Lavages",
             btn_rot: "Rotation", btn_lav: "Lavage", titre_config: "Paramètres du Tambour", lbl_modele: "Modèle :", lbl_mode: "Mode :",
             opt_grav: "Gravitaire (G)", opt_pomp: "Pompage (P)", btn_save_tamb: "Enregistrer", titre_wifi: "Connexion Wi-Fi",
@@ -377,6 +387,7 @@
             status_wait: "Wachten...", menu_auto: "Auto Modus", menu_manuel: "Handmatig", menu_config: "Configuration",
             menu_wifi: "Wi-Fi Config", menu_telegram: "Telegram", menu_ble: "Verbinding", menu_history: "Geschiedenis", 
             menu_ota: "Update", menu_lang: "Langue / Taal",
+            menu_pdf: "Handleiding",
             niv_secu: "Beveiligingsniveau", niv_lav: "Spoelniveau", couv: "Deksel", pompe: "UV Pomp", nbre_lav: "Aantal Spoelingen",
             btn_rot: "Rotatie", btn_lav: "Spoelen", titre_config: "Trommel Instellingen", lbl_modele: "Model:", lbl_mode: "Modus:",
             opt_grav: "Zwaartekracht (G)", opt_pomp: "Pomp (P)", btn_save_tamb: "Opslaan", titre_wifi: "Wi-Fi Instellen",
@@ -623,7 +634,7 @@
             if (tabAutoText) tabAutoText.innerText = "Monitoring";
 
             ['tab-history', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "flex"; });
-            ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-ota'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
+          ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-ota', 'tab-pdf'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
 
             if (['manuel-view', 'config-view', 'wifi-view', 'ota-view'].includes(activeView)) {
                 setTimeout(() => switchView('auto'), 10);
