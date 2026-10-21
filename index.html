@@ -1067,6 +1067,7 @@ async function connecterBLE() {
 
                         let espVersion = (d.length > 10) ? d[10] : "v1.0.0";
                         if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, bleCptConsecutif, espVersion);
+                    } // <--- C'EST CETTE ACCOLADE QUI MANQUAIT !
                 } else if (text.startsWith("WNET:")) {
                     let reseau = text.substring(5);
                     if (reseau === "END") afficherListeWifi();
@@ -1081,6 +1082,7 @@ async function connecterBLE() {
             activerModeFirebase(); 
         }
     }
+    
     async function lireDonneesFirebase() {
         if (!ID_COFFRET) return;
         let dot = document.getElementById('app-conn-dot');
