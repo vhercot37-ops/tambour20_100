@@ -1412,13 +1412,13 @@ async function connecterBLE() {
         lier('btn-man-rotation', 'Rotation'); lier('btn-man-lavage', 'Lavage');
     }
 
-    function toggleSidebarMenu() { 
+function toggleSidebarMenu() { 
         let btn = document.querySelector('.menu-toggle-btn');
         let menu = document.getElementById('sidebarMenu');
         if(menu) menu.classList.toggle('open'); 
     }
     
-   document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
         initBoutonsManuels(); 
         chargerMemos(); 
         adapterInterfaceSelonMode(); 
@@ -1434,33 +1434,32 @@ async function connecterBLE() {
         }
     });
 
-function verifierMotDePasseInstallateur() {
-    const inputPass = document.getElementById('inst-pass-input').value;
-    const errEl = document.getElementById('inst-pass-error');
+    function verifierMotDePasseInstallateur() {
+        const inputPass = document.getElementById('inst-pass-input').value;
+        const errEl = document.getElementById('inst-pass-error');
 
-    if (inputPass === "73carolineh") {
-        isInstallateurDeverrouille = true;
-        document.getElementById('inst-lock-screen').style.display = "none";
-        document.getElementById('inst-config-screen').style.display = "block";
-        if (errEl) errEl.style.display = "none";
-    } else {
-        if (errEl) errEl.style.display = "block";
+        if (inputPass === "73carolineh") {
+            isInstallateurDeverrouille = true;
+            document.getElementById('inst-lock-screen').style.display = "none";
+            document.getElementById('inst-config-screen').style.display = "block";
+            if (errEl) errEl.style.display = "none";
+        } else {
+            if (errEl) errEl.style.display = "block";
+        }
     }
-}
 
-function envoyerConfigInstallateur() {
-    const pos = document.getElementById('inst-pos').checked ? 1 : 0;
-    const rot = document.getElementById('inst-rot').value || 16;
-    const rearm = document.getElementById('inst-rearm').value || 20;
-    const couv = document.getElementById('inst-couv').checked ? 1 : 0;
+    function envoyerConfigInstallateur() {
+        const pos = document.getElementById('inst-pos').checked ? 1 : 0;
+        const rot = document.getElementById('inst-rot').value || 16;
+        const rearm = document.getElementById('inst-rearm').value || 20;
+        const couv = document.getElementById('inst-couv').checked ? 1 : 0;
 
-    const tramePayload = `${pos},${rot},${rearm},${couv}`;
+        const tramePayload = `${pos},${rot},${rearm},${couv}`;
 
-    // Appelle ta fonction d'envoi existante
-    envoyerCommande("CFG_INST", tramePayload);
+        envoyerCommande("CFG_INST", tramePayload);
 
-    alert(`Configuration usine transmise au tambour !\nPosition : ${pos}\nLavage : ${rot}s\nRéarmement : ${rearm}s\nCouvercle : ${couv}`);
-}
+        alert(`Configuration usine transmise au tambour !\nPosition : ${pos}\nLavage : ${rot}s\nRéarmement : ${rearm}s\nCouvercle : ${couv}`);
+    }
     
 </script>
 </body>
