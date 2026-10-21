@@ -451,8 +451,6 @@
             <p style="margin:8px 0 0 0; font-size: 13px; color: var(--accent-purple); font-weight: bold; display: none;" id="wash-consecutif-text">Série : 1 / 15</p>
         </div>
     </div>
-    
-</div>
 
 <script>
     const dict = {
@@ -504,6 +502,7 @@
     let tempsDernierPing = Date.now();
     let attenteDonneesFraiches = false;
     let dernierModeFirebase = ""; 
+    let isInstallateurDeverrouille = false;
 
     function setLang(lang) {
         currentLang = lang;
@@ -903,7 +902,6 @@
             // Visible en BLE SEULEMENT si le Wi-Fi est connecté ET qu'on est en mode manuel
             if (tabOta) tabOta.style.display = (modeActif === "BLE" && systemeEnManuel) ? "flex" : "none";
             updateWifiBars(wRssi, 'header-wifi-bars');
-            updateWifiBars(wRssi, 'header-wifi-bars');
             updateWifiBars(wRssi, 'wifi-bars');
             
             let lblStat = document.getElementById('lbl-wifi-status');
@@ -1123,7 +1121,7 @@ async function connecterBLE() {
                         if(text) text.innerText = "Boîtier Hors Ligne";
                     }
 
-                    let temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi;
+                    let temp, secu, lav, couv, uv, cpt, alarme, wStat, wRssi, cptConsecutif;
                     if (espEnLigne) {
                         temp = data.temperature !== undefined ? data.temperature : 0;
                         secu = data.niveau_securite !== undefined ? data.niveau_securite : 0;
@@ -1134,7 +1132,7 @@ async function connecterBLE() {
                         alarme = data.code_alarme !== undefined ? data.code_alarme : 0;
                         wStat = data.wifi_stat !== undefined ? data.wifi_stat : 0;
                         wRssi = data.wifi_rssi !== undefined ? data.wifi_rssi : 0;
-                        let cptConsecutif = data.lavages_consecutifs !== undefined ? data.lavages_consecutifs : 0; // <-- NOUVELLE LIGNE
+                        cptConsecutif = data.lavages_consecutifs !== undefined ? data.lavages_consecutifs : 0; // <-- NOUVELLE LIGNE
                         
                         if (data.Mode !== undefined) {
                             dernierModeFirebase = data.Mode; 
@@ -1162,7 +1160,7 @@ async function connecterBLE() {
                     } else {
                         temp = "--.-"; secu = null; lav = null; couv = null; uv = null;
                         cpt = "--"; alarme = 0; wStat = 0; wRssi = -100; 
-                        var cptConsecutif = 0; // <-- NOUVELLE LIGNE (utilise "var" ici pour la portée globale du if/else)
+                        cptConsecutif = 0; // <-- NOUVELLE LIGNE (utilise "var" ici pour la portée globale du if/else)
                         let teleIcon = document.getElementById('telegram-status-icon');
                         if (teleIcon) teleIcon.style.color = "#374151";
                     }
@@ -1433,9 +1431,6 @@ async function connecterBLE() {
             textStatus.innerText = "Déconnecté";
         }
     });
-
-     // --- LOGIQUE INSTALLATEUR ---
-let isInstallateurDeverrouille = false;
 
 function verifierMotDePasseInstallateur() {
     const inputPass = document.getElementById('inst-pass-input').value;
