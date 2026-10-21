@@ -152,7 +152,17 @@
             font-size: 34px; font-weight: 900; font-variant-numeric: tabular-nums;
             color: var(--accent-blue); transition: color 0.4s ease; margin: 0; line-height: 1;
         }
-        
+
+        /* --- Tes styles existants --- */
+
+        /* 📍 COLLE LE CODE CSS ICI (à la fin de tes styles) */
+        .form-group-inst { margin-bottom: 18px; text-align: left; }
+        .form-group-inst label { display: block; margin-bottom: 6px; font-size: 0.95rem; color: #e2e8f0; }
+        .form-group-inst small { display: block; color: #94a3b8; font-size: 0.8rem; margin-top: 4px; }
+        .checkbox-label { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+        .checkbox-label input[type="checkbox"] { width: 20px; height: 20px; accent-color: #3b82f6; cursor: pointer; }
+        .badge-tech { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-family: monospace; }
+         
     </style>
 </head>
 <body>
@@ -188,6 +198,7 @@
         <div class="sidebar-item" id="tab-ota" onclick="switchView('ota')"><i class="fa-solid fa-download"></i> <span data-i18n="menu_ota">Mise à jour</span></div>
         <div class="sidebar-item" id="tab-lang" onclick="switchView('lang')"><i class="fa-solid fa-language"></i> <span data-i18n="menu_lang">Langue / Taal</span></div>
         <div class="sidebar-item" id="tab-pdf" onclick="switchView('pdf')"><i class="fa-solid fa-file-pdf"></i> <span data-i18n="menu_pdf">Manuel</span></div>
+        <div class="sidebar-item" id="tab-installer" onclick="switchView('installer')" style="display: none;"><i class="fa-solid fa-user-gear"></i> <span data-i18n="menu_installer">Installateur</span></div>
         
         <div id="sidebar-box-id" style="margin-top: auto; padding: 15px; text-align: center; color: var(--accent-blue); font-size: 14px; font-weight: 800; border-top: 1px solid var(--border-card); background: rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 20px;">Aucun coffret</div>
     </div>
@@ -379,6 +390,7 @@
             menu_wifi: "Config. Wi-Fi", menu_telegram: "Telegram", menu_ble: "Connexion", menu_history: "Historique", 
             menu_ota: "Mise à jour", menu_lang: "Langue / Taal",
             menu_pdf: "Manuel d'utilisation",
+            menu_installer: "Installateur" // 📍 AJOUTE CETTE LIGNE
             niv_secu: "Niveau Sécurité", niv_lav: "Niveau Lavage", couv: "Couvercle", pompe: "Pompe UV", nbre_lav: "Nombre de Lavages",
             btn_rot: "Rotation", btn_lav: "Lavage", titre_config: "Paramètres du Tambour", lbl_modele: "Modèle :", lbl_mode: "Mode :",
             opt_grav: "Gravitaire (G)", opt_pomp: "Pompage (P)", btn_save_tamb: "Enregistrer", titre_wifi: "Connexion Wi-Fi",
@@ -396,6 +408,7 @@
             menu_wifi: "Wi-Fi Config", menu_telegram: "Telegram", menu_ble: "Verbinding", menu_history: "Geschiedenis", 
             menu_ota: "Update", menu_lang: "Langue / Taal",
             menu_pdf: "Handleiding",
+            menu_installer: "Installateur" // 📍 AJOUTE CETTE LIGNE
             niv_secu: "Beveiligingsniveau", niv_lav: "Spoelniveau", couv: "Deksel", pompe: "UV Pomp", nbre_lav: "Aantal Spoelingen",
             btn_rot: "Rotatie", btn_lav: "Spoelen", titre_config: "Trommel Instellingen", lbl_modele: "Model:", lbl_mode: "Modus:",
             opt_grav: "Zwaartekracht (G)", opt_pomp: "Pomp (P)", btn_save_tamb: "Opslaan", titre_wifi: "Wi-Fi Instellen",
@@ -665,7 +678,26 @@
 
         let teleIcon = document.getElementById('telegram-status-icon');
         if (teleIcon && modeActif === "BLE") { teleIcon.style.color = "#374151"; }
-    }
+
+        // 📍 AJOUTE CE BLOC À L'INTÉRIEUR DE LA FONCTION
+       let tabInst = document.getElementById('tab-installer');
+       if (tabInst) {
+        const visible = (modeActif === "BLE" && systemeEnManuel);
+        tabInst.style.display = visible ? "flex" : "none";
+
+        if (!visible) {
+            isInstallateurDeverrouille = false;
+            let lockScreen = document.getElementById('inst-lock-screen');
+            let configScreen = document.getElementById('inst-config-screen');
+            let passInput = document.getElementById('inst-pass-input');
+
+            if (lockScreen) lockScreen.style.display = "block";
+            if (configScreen) configScreen.style.display = "none";
+            if (passInput) passInput.value = "";
+        }
+     }
+        
+}
 
     function gererBadgeDot(id, status) {
         const dot = document.getElementById(id);
@@ -1269,6 +1301,41 @@ async function connecterBLE() {
             textStatus.innerText = "Déconnecté";
         }
     });
+
+        // 📍 COLLE CES DEUX FONCTIONS À LA FIN DE TON SCRIPT
+    let isInstallateurDeverrouille = false;
+
+    function verifierMotDePasseInstallateur() {
+        const inputPass = document.getElementById('inst-pass-input').value;
+        const errEl = document.getElementById('inst-pass-error');
+
+        if (inputPass === "73carolineh") {
+            isInstallateurDeverrouille = true;
+            document.getElementById('inst-lock-screen').style.display = "none";
+            document.getElementById('inst-config-screen').style.display = "block";
+            if (errEl) errEl.style.display = "none";
+        } else {
+            if (errEl) errEl.style.display = "block";
+        }
+    }
+
+    function envoyerConfigInstallateur() {
+        const pos = document.getElementById('inst-pos').checked ? 1 : 0;
+        const rot = document.getElementById('inst-rot').value || 16;
+        const rearm = document.getElementById('inst-rearm').value || 20;
+        const couv = document.getElementById('inst-couv').checked ? 1 : 0;
+
+        const tramePayload = `${pos},${rot},${rearm},${couv}`;
+
+        if (typeof envoyerCommande === "function") {
+            envoyerCommande("CFG_INST", tramePayload);
+        } else if (typeof sendBleCommand === "function") {
+            sendBleCommand(`CFG_INST:${tramePayload}`);
+        }
+
+        alert(`Configuration usine transmise au tambour :\nPosition : ${pos}\nLavage : ${rot}s\nRéarmement : ${rearm}s\nCouvercle : ${couv}`);
+    }
+    
 </script>
 </body>
 </html>
