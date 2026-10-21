@@ -494,7 +494,8 @@
     };
 
     let currentLang = localStorage.getItem('app_lang') || 'fr';
-    let currentFirmwareVersion = "v1.0.0"; 
+    if (!dict[currentLang]) currentLang = 'fr'; // <-- SÉCURITÉ ANTI-CRASH
+    let currentFirmwareVersion = "v1.0.0";
     let otaUrl = "";
     let otaVersion = "";       
     let systemWifiStat = 0;    
@@ -1417,7 +1418,7 @@ async function connecterBLE() {
         if(menu) menu.classList.toggle('open'); 
     }
     
-   window.addEventListener('load', () => { 
+   document.addEventListener('DOMContentLoaded', () => {
         initBoutonsManuels(); 
         chargerMemos(); 
         adapterInterfaceSelonMode(); 
