@@ -734,6 +734,27 @@
 
         let teleIcon = document.getElementById('telegram-status-icon');
         if (teleIcon && modeActif === "BLE") { teleIcon.style.color = "#374151"; }
+
+        // --- GESTION AFFICHAGE ONGLET INSTALLATEUR ---
+    let tabInst = document.getElementById('tab-installer');
+    if (tabInst) {
+        // Apparaît uniquement en BLE + Mode Manuel
+        const visible = (modeActif === "BLE" && systemeEnManuel);
+        tabInst.style.display = visible ? "flex" : "none";
+
+        // Si on quitte le mode Manuel ou le BLE, on reverrouille tout par sécurité
+        if (!visible) {
+            isInstallateurDeverrouille = false;
+            let lockScreen = document.getElementById('inst-lock-screen');
+            let configScreen = document.getElementById('inst-config-screen');
+            let passInput = document.getElementById('inst-pass-input');
+
+            if (lockScreen) lockScreen.style.display = "block";
+            if (configScreen) configScreen.style.display = "none";
+            if (passInput) passInput.value = "";
+        }
+    }
+        
     }
 
     function gererBadgeDot(id, status) {
