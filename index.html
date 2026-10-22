@@ -964,20 +964,20 @@
         }
 
 // 3. --- ANIMATION DU CYCLE DE LAVAGE ---
-    
-    // SÉCURITÉ : Si le tambour s'arrête (lav=1) OU se met en alarme (alCode>0), on coupe la popup
-    if ((lav === 1 || alCode > 0) && animationLavageEnCours) {
-        let modal = document.getElementById('wash-modal');
-        if (modal) modal.classList.remove('active');
-        if (chronoAnimInterval) clearInterval(chronoAnimInterval);
-        if (timerFinLavage) clearTimeout(timerFinLavage);
-        setTimeout(() => { animationLavageEnCours = false; }, 500);
-    }
 
-    // Lancement de la popup (Uniquement si AUCUNE ALARME en cours : alCode === 0)
-    if (lav === 0 && !animationLavageEnCours && modeActif === "BLE" && !systemeEnManuel && alCode === 0) {
-        animationLavageEnCours = true;
-        
+// SÉCURITÉ : On coupe la popup UNIQUEMENT en cas d'alarme (alCode > 0) ou de passage en Manuel
+if ((alCode > 0 || systemeEnManuel) && animationLavageEnCours) {
+    let modal = document.getElementById('wash-modal');
+    if (modal) modal.classList.remove('active');
+    if (chronoAnimInterval) clearInterval(chronoAnimInterval);
+    if (timerFinLavage) clearTimeout(timerFinLavage);
+    setTimeout(() => { animationLavageEnCours = false; }, 500);
+}
+
+// Lancement de la popup (Si niveau de lavage bas, mode Auto, pas d'alarme)
+if (lav === 0 && !animationLavageEnCours && modeActif === "BLE" && !systemeEnManuel && alCode === 0) {
+    animationLavageEnCours = true;
+    
         let modal = document.getElementById('wash-modal');
         let drum = document.getElementById('drum-cylinder-anim');
         let jet = document.getElementById('jet-stream-anim');
