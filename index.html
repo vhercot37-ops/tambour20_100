@@ -946,10 +946,10 @@
             if(lblRssi) lblRssi.innerText = "-- dBm";
         }
 
-  // 3. --- ANIMATION DU CYCLE DE LAVAGE ---
+// 3. --- ANIMATION DU CYCLE DE LAVAGE ---
     
-    // SÉCURITÉ : Si le tambour s'arrête brutalement (lav=1), on cache la popup immédiatement
-    if (lav === 1 && animationLavageEnCours) {
+    // SÉCURITÉ : Si le tambour s'arrête (lav=1) OU se met en alarme (alCode>0), on coupe la popup
+    if ((lav === 1 || alCode > 0) && animationLavageEnCours) {
         let modal = document.getElementById('wash-modal');
         if (modal) modal.classList.remove('active');
         if (chronoAnimInterval) clearInterval(chronoAnimInterval);
@@ -957,8 +957,8 @@
         setTimeout(() => { animationLavageEnCours = false; }, 500);
     }
 
-    // Lancement de la popup (Uniquement en mode AUTO, ignoré en mode Manuel)
-    if (lav === 0 && !animationLavageEnCours && modeActif === "BLE" && !systemeEnManuel) {
+    // Lancement de la popup (Uniquement si AUCUNE ALARME en cours : alCode === 0)
+    if (lav === 0 && !animationLavageEnCours && modeActif === "BLE" && !systemeEnManuel && alCode === 0) {
         animationLavageEnCours = true;
         
         let modal = document.getElementById('wash-modal');
@@ -1026,7 +1026,7 @@
             }, totalTime * 1000);
         }
     }
-} // Fin de la fonction afficherMaitresDonnees  
+} // Fin de la fonction afficherMaitresDonnees
     
 async function connecterBLE() {
         try {
