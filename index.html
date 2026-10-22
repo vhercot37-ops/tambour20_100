@@ -25,7 +25,7 @@
         }
         
         body { background-color: var(--bg-main); color: var(--text-white); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; overflow-x: hidden; }
-        .phone-container { width: 100%; max-width: 500px; background-color: var(--bg-main); padding: max(env(safe-area-inset-top, 20px), 20px) 20px 30px 20px; box-sizing: border-box; display: flex; flex-direction: column; position: relative; min-height: 100vh; }
+       .phone-container { width: 100%; max-width: 500px; background-color: var(--bg-main); padding: max(env(safe-area-inset-top, 20px), 20px) 20px 30px 20px; box-sizing: border-box; display: flex; flex-direction: column; position: relative; min-height: 100vh; overflow-x: hidden; }
         
         header { text-align: center; margin-bottom: 25px; position: relative; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 0 45px 0 0; }
         .main-title { font-size: 38px; font-weight: 900; margin: 15px 0 0 0; width: 100%; text-align: left; color: var(--text-white); letter-spacing: -0.5px;}
@@ -431,7 +431,10 @@
      </div>
     </div>
 
-   <div class="wash-modal-content">
+  <!-- IL MANQUAIT CETTE LIGNE CI-DESSOUS -->
+<div id="wash-modal" class="wash-modal-overlay">
+   
+    <div class="wash-modal-content">
         <h3 style="margin:0; font-size: 20px; color: var(--text-white);">Cycle Lavage</h3>
         
         <div class="drum-anim-container">
@@ -455,6 +458,8 @@
         <p style="margin:8px 0 0 0; font-size: 13px; color: var(--accent-purple); font-weight: bold; display: none;" id="wash-consecutif-text">Lavage Consécutif : 1 / 15</p>
     </div>
 
+<!-- ET IL MANQUAIT CELLE-CI POUR FERMER -->
+</div>
 <script>
     const dict = {
         fr: {
