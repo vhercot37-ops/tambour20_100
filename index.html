@@ -431,26 +431,28 @@
      </div>
     </div>
 
-    <!-- POPUP CYCLE DE LAVAGE (BENTO UI CENTRÉ) -->
-    <div class="wash-modal-overlay" id="wash-modal">
-        <div class="wash-modal-content">
-            <h3 style="margin:0; font-size: 20px; color: var(--text-white);">Cycle en cours</h3>
+   <div class="wash-modal-content">
+        <h3 style="margin:0; font-size: 20px; color: var(--text-white);">Cycle Lavage</h3>
+        
+        <div class="drum-anim-container">
+            <div class="drum-glow"></div>
+            <!-- SVG pour contrôler le pointillé foncé tournant sur un fond clair -->
+            <svg viewBox="0 0 100 100" style="width:100%; height:100%; position:absolute; z-index:2; left:0; top:0;">
+                <!-- Pointillés clairs de fond -->
+                <circle cx="50" cy="50" r="45" fill="rgba(0,0,0,0.5)" stroke="#64748b" stroke-width="4" stroke-dasharray="6 6" />
+                <!-- Pointillé foncé animé (un seul tiret) -->
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#000000" stroke-width="8" stroke-dasharray="15 300" stroke-linecap="round" id="drum-cylinder-anim" style="transform-origin: center; transform: rotate(-90deg);" />
+            </svg>
             
-            <div class="drum-anim-container">
-                <!-- Le cylindre qui va tourner -->
-                <div class="drum-cylinder" id="drum-cylinder-anim"></div>
-                
-                <!-- Le gicleur à 45° -->
-                <div class="water-jet-container">
-                    <i class="fa-solid fa-shower" id="shower-icon-anim" style="color: #1f2937; font-size: 24px; transition: 0.3s;"></i>
-                    <div class="jet-stream" id="jet-stream-anim"></div>
-                </div>
+            <div class="water-jet-container">
+                <i class="fa-solid fa-shower" id="shower-icon-anim" style="color: #1f2937; font-size: 24px; transition: 0.3s;"></i>
+                <div class="jet-stream" id="jet-stream-anim"></div>
             </div>
-            
-            <div class="wash-timer-text" id="wash-timer-anim">20s</div>
-            <p style="margin:0; font-size: 14px; color: var(--text-gray);" id="wash-status-text">Rotation & Lavage...</p>
-            <p style="margin:8px 0 0 0; font-size: 13px; color: var(--accent-purple); font-weight: bold; display: none;" id="wash-consecutif-text">Série : 1 / 15</p>
         </div>
+        
+        <div class="wash-timer-text" id="wash-timer-anim">20s</div>
+        <p style="margin:0; font-size: 14px; color: var(--text-gray);" id="wash-status-text">Rotation & Lavage...</p>
+        <p style="margin:8px 0 0 0; font-size: 13px; color: var(--accent-purple); font-weight: bold; display: none;" id="wash-consecutif-text">Lavage Consécutif : 1 / 15</p>
     </div>
 
 <script>
@@ -944,70 +946,87 @@
             if(lblRssi) lblRssi.innerText = "-- dBm";
         }
 
-        // 3. --- ANIMATION DU CYCLE DE LAVAGE (Se déclenche quand lav === 0 en mode BLE) ---
-        if (lav === 0 && !animationLavageEnCours && modeActif === "BLE") {
-            animationLavageEnCours = true;
-            
-            let modal = document.getElementById('wash-modal');
-            let drum = document.getElementById('drum-cylinder-anim');
-            let jet = document.getElementById('jet-stream-anim');
-            let timerEl = document.getElementById('wash-timer-anim');
-            let showerIcon = document.getElementById('shower-icon-anim');
-            let statusTxt = document.getElementById('wash-status-text');
-            let txtConsecutif = document.getElementById('wash-consecutif-text'); // <-- NOUVELLE LIGNE
-            
-            if (modal && drum && jet && timerEl) {
-                modal.classList.add('active');
+  // 3. --- ANIMATION DU CYCLE DE LAVAGE ---
+    
+    // SÉCURITÉ : Si le tambour s'arrête brutalement (lav=1), on cache la popup immédiatement
+    if (lav === 1 && animationLavageEnCours) {
+        let modal = document.getElementById('wash-modal');
+        if (modal) modal.classList.remove('active');
+        if (chronoAnimInterval) clearInterval(chronoAnimInterval);
+        if (timerFinLavage) clearTimeout(timerFinLavage);
+        setTimeout(() => { animationLavageEnCours = false; }, 500);
+    }
 
-                // ---> NOUVEAU BLOC : Affichage des consécutifs
-                if (txtConsecutif) {
-                    if (cptConsecutif > 0) {
-                        txtConsecutif.style.display = "block";
-                        txtConsecutif.innerText = `Série actuelle : ${cptConsecutif} / 15`;
-                    } else {
-                        txtConsecutif.style.display = "none";
-                    }
+    // Lancement de la popup (Uniquement en mode AUTO, ignoré en mode Manuel)
+    if (lav === 0 && !animationLavageEnCours && modeActif === "BLE" && !systemeEnManuel) {
+        animationLavageEnCours = true;
+        
+        let modal = document.getElementById('wash-modal');
+        let drum = document.getElementById('drum-cylinder-anim');
+        let jet = document.getElementById('jet-stream-anim');
+        let timerEl = document.getElementById('wash-timer-anim');
+        let showerIcon = document.getElementById('shower-icon-anim');
+        let statusTxt = document.getElementById('wash-status-text');
+        let txtConsecutif = document.getElementById('wash-consecutif-text');
+        
+        // --- Récupération des paramètres dynamiques de l'installateur ---
+        let washTime = parseInt(document.getElementById('inst-rot').value) || 16;
+        let totalTime = parseInt(document.getElementById('inst-rearm').value) || 20;
+        let stabTime = totalTime - washTime; // Temps de temporisation
+        if (stabTime < 0) stabTime = 0;
+        
+        if (modal && drum && jet && timerEl) {
+            modal.classList.add('active');
+
+            if (txtConsecutif) {
+                if (cptConsecutif > 0) {
+                    txtConsecutif.style.display = "block";
+                    txtConsecutif.innerText = `Lavage Consécutif : ${cptConsecutif} / 15`;
+                } else {
+                    txtConsecutif.style.display = "none";
                 }
-                // <---
-                
-                drum.style.transition = 'none';
-                drum.style.transform = 'rotate(0deg)';
-                jet.classList.add('spraying');
-                showerIcon.style.color = "var(--accent-blue)";
-                timerEl.style.color = "var(--accent-blue)";
-                statusTxt.innerText = "Rotation & Lavage...";
-                
-                void drum.offsetWidth;
-                
-                drum.style.transition = 'transform 16s linear';
-                drum.style.transform = 'rotate(360deg)';
-                
-                let timeLeft = 20;
+            }
+            
+            drum.style.transition = 'none';
+            drum.style.transform = 'rotate(-90deg)'; // Remet le pointillé noir en haut
+            jet.classList.add('spraying');
+            showerIcon.style.color = "var(--accent-blue)";
+            timerEl.style.color = "var(--accent-blue)";
+            statusTxt.innerText = "Rotation & Lavage...";
+            
+            void drum.offsetWidth; // Force la réinitialisation graphique
+            
+            // Animation : Un tour complet (360°) exactement pendant le temps de lavage (washTime)
+            drum.style.transition = `transform ${washTime}s linear`;
+            drum.style.transform = 'rotate(270deg)'; // -90° + 360° = 270°
+            
+            let timeLeft = totalTime;
+            timerEl.innerText = timeLeft + "s";
+            
+            if (chronoAnimInterval) clearInterval(chronoAnimInterval);
+            chronoAnimInterval = setInterval(() => {
+                timeLeft--;
                 timerEl.innerText = timeLeft + "s";
                 
-                if (chronoAnimInterval) clearInterval(chronoAnimInterval);
-                chronoAnimInterval = setInterval(() => {
-                    timeLeft--;
-                    timerEl.innerText = timeLeft + "s";
-                    
-                    if (timeLeft === 4) { 
-                        jet.classList.remove('spraying');
-                        showerIcon.style.color = "#1f2937";
-                        timerEl.style.color = "var(--text-gray)";
-                        statusTxt.innerText = "Stabilisation...";
-                    }
-                    
-                    if (timeLeft <= 0) clearInterval(chronoAnimInterval);
-                }, 1000);
+                // Passage à l'état Temporisation
+                if (timeLeft === stabTime) { 
+                    jet.classList.remove('spraying');
+                    showerIcon.style.color = "#1f2937";
+                    timerEl.style.color = "var(--text-gray)";
+                    statusTxt.innerText = "Temporisation...";
+                }
                 
-                if (timerFinLavage) clearTimeout(timerFinLavage);
-                timerFinLavage = setTimeout(() => {
-                    modal.classList.remove('active');
-                    setTimeout(() => { animationLavageEnCours = false; }, 1000);
-                }, 20000);
-            }
+                if (timeLeft <= 0) clearInterval(chronoAnimInterval);
+            }, 1000);
+            
+            if (timerFinLavage) clearTimeout(timerFinLavage);
+            timerFinLavage = setTimeout(() => {
+                modal.classList.remove('active');
+                setTimeout(() => { animationLavageEnCours = false; }, 1000);
+            }, totalTime * 1000);
         }
     }
+} // Fin de la fonction afficherMaitresDonnees  
     
 async function connecterBLE() {
         try {
@@ -1313,6 +1332,13 @@ async function connecterBLE() {
 
         let lblVer = document.getElementById('lbl-version-actuelle');
         if(lblVer) lblVer.innerText = currentFirmwareVersion;
+
+        let memRot = localStorage.getItem("inst_rot");
+        if(memRot) { let r = document.getElementById('inst-rot'); if(r) r.value = memRot; }
+    
+        let memRearm = localStorage.getItem("inst_rearm");
+        if(memRearm) { let rm = document.getElementById('inst-rearm'); if(rm) rm.value = memRearm; }
+        
     }
 
     async function verifierMaj() {
@@ -1471,6 +1497,11 @@ function toggleSidebarMenu() {
         const rearm = document.getElementById('inst-rearm').value || 20;
         const couv = document.getElementById('inst-couv').checked ? 1 : 0;
 
+        // --- Sauvegarde des paramètres pour l'animation de la popup ---
+        localStorage.setItem("inst_rot", rot);
+        localStorage.setItem("inst_rearm", rearm);
+        // --------------------------------------------------------------
+        
         const tramePayload = `${pos},${rot},${rearm},${couv}`;
 
         envoyerCommande("CFG_INST", tramePayload);
