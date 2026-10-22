@@ -1228,7 +1228,22 @@ async function connecterBLE() {
     }
     
    async function activerModeFirebase() {
-        if (ID_COFFRET) {
+
+       // --- DÉBUT DE LA MODIFICATION ---
+    // Si l'ID est celui par défaut, on demande à l'utilisateur de le saisir
+    if (!ID_COFFRET || ID_COFFRET === "Coffret_01") {
+        let idSaisi = prompt("Saisissez l'identifiant de votre coffret (visible en bas du menu sur votre GSM) :", "Coffret_");
+        if (idSaisi && idSaisi.trim() !== "") {
+            ID_COFFRET = idSaisi.trim();
+            localStorage.setItem("tambour_id", ID_COFFRET);
+        } else {
+            alert("Connexion Cloud annulée : Identifiant requis.");
+            return; // On arrête tout si aucun ID n'est fourni
+        }
+    }
+    // --- FIN DE LA MODIFICATION ---
+       
+       if (ID_COFFRET) {
             try {
                 await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
                     method: 'PATCH', 
