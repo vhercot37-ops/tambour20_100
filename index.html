@@ -757,7 +757,7 @@
         });
     }
 
-    function genererGraphiques(labels, temps, lavages) {
+   function genererGraphiques(labels, temps, lavages) {
         if (chartTempInstance) chartTempInstance.destroy();
         if (chartWashInstance) chartWashInstance.destroy();
 
@@ -768,15 +768,39 @@
             if (msgDiv) msgDiv.style.display = 'none';
         });
 
-        const commonOptions = { responsive: true, plugins: { legend: { labels: { color: '#ffffff' } } }, scales: { x: { ticks: { color: '#94a3b8' }, grid: { color: '#1f2937' } }, y: { ticks: { color: '#94a3b8' }, grid: { color: '#1f2937' } } } };
+        const commonOptions = { 
+            responsive: true, 
+            plugins: { legend: { labels: { color: '#ffffff' } } }, 
+            scales: { 
+                x: { ticks: { color: '#94a3b8' }, grid: { color: '#1f2937' } }, 
+                y: { ticks: { color: '#94a3b8' }, grid: { color: '#1f2937' } } 
+            } 
+        };
 
+        // Graphique 1 : Température (Courbe Rouge)
         const ctxTemp = document.getElementById('chartTemp').getContext('2d');
-        chartTempInstance = new Chart(ctxTemp, { type: 'line', data: { labels: labels, datasets: [{ label: 'Température (°C)', data: temps, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.2)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 3 }] }, options: commonOptions });
+        chartTempInstance = new Chart(ctxTemp, { 
+            type: 'line', 
+            data: { 
+                labels: labels, 
+                datasets: [{ label: 'Température (°C)', data: temps, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.2)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 3 }] 
+            }, 
+            options: commonOptions 
+        });
 
+        // Graphique 2 : Lavages (Courbe Bleue au lieu des barres)
         const ctxWash = document.getElementById('chartWash').getContext('2d');
-        chartWashInstance = new Chart(ctxWash, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Nombre de lavages', data: lavages, backgroundColor: '#3b82f6', borderRadius: 4 }] }, options: { ...commonOptions, scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, beginAtZero: true } } } });
+        chartWashInstance = new Chart(ctxWash, { 
+            type: 'line', // <--- Changé de 'bar' à 'line'
+            data: { 
+                labels: labels, 
+                datasets: [{ label: 'Nombre de lavages', data: lavages, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 3 }] // <--- Mêmes effets que la température
+            }, 
+            options: { ...commonOptions, scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, beginAtZero: true } } } 
+        });
     }
 
+    
     function adapterInterfaceSelonMode() {
         if (miseAJourEnCours) return; // <-- NOUVELLE LIGNE À AJOUTER ICI
         let activeEl = document.querySelector('.view.active');
