@@ -196,6 +196,22 @@
             <div class="main-title" id="val-Mode">Auto 70G</div>
             <button class="menu-toggle-btn" onclick="toggleSidebarMenu()"><i class="fa-solid fa-bars" id="menu-icon"></i></button>
         </div>
+
+        <!-- POPUP GARANTIE -->
+<div id="garantie-modal" class="wash-modal-overlay">
+    <div class="wash-modal-content" style="max-width: 320px; padding: 25px;">
+        <div style="font-size: 32px; color: var(--accent-blue); margin-bottom: 10px;"><i class="fa-solid fa-file-contract"></i></div>
+        <h3 style="margin: 0 0 10px 0; color: var(--text-white);">Activation Garantie</h3>
+        <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 20px;">Pour activer la garantie de votre coffret, veuillez renseigner vos coordonnées.</p>
+        
+        <input type="text" id="gar-nom" placeholder="Nom complet" class="auth-input" style="text-align: left; padding: 14px; margin-bottom: 10px;">
+        <input type="email" id="gar-email" placeholder="Adresse E-mail" class="auth-input" style="text-align: left; padding: 14px; margin-bottom: 10px;">
+        <input type="tel" id="gar-tel" placeholder="Numéro de téléphone" class="auth-input" style="text-align: left; padding: 14px; margin-bottom: 20px;">
+        
+        <button class="auth-btn" style="background-color: var(--dot-green);" onclick="validerGarantie()"><i class="fa-solid fa-check"></i> Activer ma garantie</button>
+    </div>
+</div>
+       
     </header>
     
     <div class="sidebar-menu" id="sidebarMenu">
@@ -422,6 +438,13 @@
         <button onclick="envoyerConfigInstallateur()" class="auth-btn" style="width: 100%; margin-top: 15px; background-color: var(--dot-green);">
             <i class="fa-solid fa-floppy-disk"></i> Enregistrer & Envoyer
         </button>
+
+        <div style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+        <button onclick="effacerGarantieUsine()" class="auth-btn" style="background-color: #f59e0b; width: 100%;">
+            <i class="fa-solid fa-eraser"></i> Effacer Garantie (Sortie d'Usine)
+        </button>
+    </div>
+        
     </div>
 </div>
 
@@ -1074,7 +1097,79 @@ if (tempsRestantReel > 0 && !animationLavageEnCours && modeActif === "BLE" && !s
         }, timeLeft * 1000);
     }
 }
-} // <-- C'est l'accolade qui ferme afficherMaitresDonnees
+} 
+
+let garantieVerifiee = false;
+const TELEGRAM_BOT_TOKEN = "8803564628:AAEntgbIiQ4ipAdTukiWDxsHMXKtkk8P_8k"; 
+const TELEGRAM_ADMIN_ID = "8538368862"; 
+
+    
+async function verifierGarantiePopup(id) {
+    if (!id || id === "Coffret_01" || garantieVerifiee) return;
+    garantieVerifiee = true; 
+    
+    try {
+        let response = await fetch(`${FIREBASE_HOST}Garantie/${id}.json?auth=${FIREBASE_AUTH}`);
+        let data = await response.json();
+        // Si le dossier est vide (null), le coffret est neuf : on affiche la popup !
+        if (data === null) {
+            document.getElementById('garantie-modal').classList.add('active');
+        }
+    } catch (e) { console.warn("Erreur vérification garantie", e); }
+}
+
+// 2. Validation par le client (Bouton vert)
+async function validerGarantie() {
+    let nom = document.getElementById('gar-nom').value.trim();
+    let email = document.getElementById('gar-email').value.trim();
+    let tel = document.getElementById('gar-tel').value.trim();
+    
+    if (nom === "" || email === "") { alert("Veuillez remplir au moins votre nom et votre email."); return; }
+
+    let btn = document.querySelector('#garantie-modal .auth-btn');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Activation...';
+    btn.disabled = true;
+
+    let dateJour = new Date().toISOString().split('T')[0];
+    let payload = { nom: nom, email: email, telephone: tel, date_activation: dateJour };
+
+    try {
+        // A. Sauvegarde propre dans le classeur Firebase
+        await fetch(`${FIREBASE_HOST}Garantie/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        });
+
+        // B. Envoi de l'alerte sur ton GSM via Telegram
+        if (TELEGRAM_BOT_TOKEN !== "TON_TOKEN_BOT_ICI") {
+            let msg = `✅ *Nouvelle Garantie Activée*\n\n📦 *Coffret:* ${ID_COFFRET}\n👤 *Nom:* ${nom}\n📧 *Email:* ${email}\n📱 *Tel:* ${tel}\n📅 *Date:* ${dateJour}`;
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: TELEGRAM_ADMIN_ID, text: msg, parse_mode: "Markdown" })
+            });
+        }
+
+        document.getElementById('garantie-modal').classList.remove('active');
+        alert("Merci ! Votre garantie a été activée avec succès.");
+    } catch (e) {
+        console.error(e); alert("Erreur de connexion, veuillez réessayer.");
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Activer ma garantie';
+        btn.disabled = false;
+    }
+}
+
+
+async function effacerGarantieUsine() {
+    if (!ID_COFFRET) return;
+    if (confirm(`Voulez-vous vraiment effacer la garantie du ${ID_COFFRET} pour une remise à neuf en sortie d'usine ?`)) {
+        try {
+            await fetch(`${FIREBASE_HOST}Garantie/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { method: 'DELETE' });
+            alert("Garantie effacée ! Le client verra la popup lors de sa première connexion.");
+            garantieVerifiee = false; 
+        } catch (e) { console.error(e); alert("Erreur lors de l'effacement."); }
+    }
+}
+
+    
 async function connecterBLE() {
         try {
             modeActif = "BLE";
@@ -1127,6 +1222,7 @@ async function connecterBLE() {
                         let nouvelID = parts[0].replace("ID:", "").trim();
                         ID_COFFRET = nouvelID;
                         localStorage.setItem("tambour_id", ID_COFFRET);
+                        verifierGarantiePopup(ID_COFFRET);
                         
                         if (!avertissementFirebaseFait) {
                             avertissementFirebaseFait = true;
