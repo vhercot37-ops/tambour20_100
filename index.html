@@ -305,7 +305,7 @@
                     <select id="wifi-ssid-select" class="auth-input"><option value="">-- Sélectionnez --</option></select>
                 </div>
                 <div class="pwd-container">
-                    <input type="text" id="inst-pass-input" autocomplete="off" spellcheck="false" placeholder="Mot de passe" class="auth-input" style="-webkit-text-security: disc; width: 100%; text-align: center; font-size: 1.1rem;">
+                    <input type="text" id="wifi-password-input" autocomplete="off" spellcheck="false" placeholder="Mot de passe" class="auth-input" style="-webkit-text-security: disc; width: 100%; text-align: center; font-size: 1.1rem;">
                     <i class="fa-solid fa-eye pwd-icon" id="togglePasswordIcon" onclick="togglePasswordVis()"></i>
                 </div>
                 <button class="auth-btn" onclick="sauvegarderWifiClient()"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="btn_send_wifi">Envoyer</span></button>
@@ -374,9 +374,10 @@
         <h3 style="margin-bottom: 8px;">Accès Installateur</h3>
         <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px;">Saisissez le mot de passe pour accéder aux réglages usine.</p>
         
-        <div style="margin-bottom: 15px;">
-            <input type="password" id="inst-pass-input" placeholder="Mot de passe" class="auth-input" style="width: 100%; text-align: center; font-size: 1.1rem;">
-        </div>
+       <div class="pwd-container" style="margin-bottom: 15px;">
+        <input type="text" id="inst-pass-input" autocomplete="off" spellcheck="false" placeholder="Mot de passe" class="auth-input" style="-webkit-text-security: disc; width: 100%; text-align: center; font-size: 1.1rem; padding-right: 40px;">
+        <i class="fa-solid fa-eye pwd-icon" id="toggleInstPwdIcon" onclick="toggleInstPasswordVis()"></i>
+    </div>
         
         <button onclick="verifierMotDePasseInstallateur()" class="auth-btn" style="width: 100%;">
             <i class="fa-solid fa-lock-open"></i> Déverrouiller
@@ -1550,6 +1551,21 @@ function toggleSidebarMenu() {
 
         alert(`Configuration usine transmise au tambour !\nPosition : ${pos}\nLavage : ${rot}s\nRéarmement : ${rearm}s\nCouvercle : ${couv}`);
     }
+
+    function toggleInstPasswordVis() {
+    let input = document.getElementById("inst-pass-input");
+    let icon = document.getElementById("toggleInstPwdIcon");
+    if(input && icon) {
+        // Bascule entre les points noirs (disc) et le texte en clair (none)
+        if (input.style.webkitTextSecurity === "disc") {
+            input.style.webkitTextSecurity = "none";
+            icon.className = "fa-solid fa-eye-slash pwd-icon";
+        } else {
+            input.style.webkitTextSecurity = "disc";
+            icon.className = "fa-solid fa-eye pwd-icon";
+        }
+    }
+}
     
 </script>
 </body>
