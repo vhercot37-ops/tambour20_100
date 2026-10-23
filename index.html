@@ -1337,13 +1337,19 @@ async function connecterBLE() {
     }
     
     function togglePasswordVis() {
-        let input = document.getElementById("wifi-password-input");
-        let icon = document.getElementById("togglePasswordIcon");
-        if(input && icon) {
-            input.type = (input.type === "password") ? "text" : "password";
-            icon.className = (input.type === "password") ? "fa-solid fa-eye pwd-icon" : "fa-solid fa-eye-slash pwd-icon";
+    let input = document.getElementById("wifi-password-input");
+    let icon = document.getElementById("togglePasswordIcon");
+    if(input && icon) {
+        // Utilise la nouvelle logique (comme pour l'installateur)
+        if (input.style.webkitTextSecurity === "disc") {
+            input.style.webkitTextSecurity = "none";
+            icon.className = "fa-solid fa-eye-slash pwd-icon";
+        } else {
+            input.style.webkitTextSecurity = "disc";
+            icon.className = "fa-solid fa-eye pwd-icon";
         }
     }
+}
     
     function sauvegarderWifiClient() { 
         let ssidEl = document.getElementById('wifi-ssid-select');
