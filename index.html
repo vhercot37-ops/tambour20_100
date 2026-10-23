@@ -182,8 +182,8 @@
                 <i class="fa-solid fa-circle" id="app-conn-dot" style="color: var(--text-gray); font-size: 16px;"></i>
                 <span id="app-conn-text" data-i18n="status_wait">Attente...</span>
             </div>
-            <div id="esp-wifi-status" style="display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: bold; color: var(--text-gray);">
-                <span data-i18n="lbl_boitier">Boîtier:</span>
+            <div id="esp-wifi-status" style="display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: bold; color: var(--text-white);">
+                <span data-i18n="lbl_boitier">Coffret:</span>
                 <span class="signal-bars" id="header-wifi-bars" style="margin-left: 2px;">
                     <span class="bar bar-1"></span><span class="bar bar-2"></span><span class="bar bar-3"></span><span class="bar bar-4"></span>
                 </span>
@@ -485,7 +485,7 @@
             opt_grav: "Gravitaire (G)", opt_pomp: "Pompage (P)", btn_save_tamb: "Enregistrer", titre_wifi: "Connexion Wi-Fi",
             btn_scan: "Scanner", lbl_sel_wifi: "Réseau :", ph_ssid: "Nom du Wi-Fi (SSID)", ph_pass: "Mot de passe",
             btn_send_wifi: "Envoyer au Boîtier", titre_conn: "Choix de la Connexion", btn_ble: "Connexion (Locale)", btn_cloud: "Mode Cloud (Distance)",
-            titre_hist: "Historique (15 jours)", titre_lang: "Choisissez votre langue", lbl_boitier: "Boîtier:",
+            titre_hist: "Historique (15 jours)", titre_lang: "Choisissez votre langue", lbl_boitier: "Coffret:",
             titre_tele: "Alertes Telegram", lbl_tele_actif: "Activer les alarmes :", btn_save_tele: "Enregistrer",
             titre_ota: "Mise à jour du système", desc_ota: "Vérifiez si une nouvelle version est disponible.", lbl_ver_act: "Version actuelle :", lbl_ver_dispo: "Version dispo. :", btn_check_ota: "Vérifier", btn_start_ota: "Installer",
             titre_alarme: "Arrêt Tambour", btn_reset: "Reset Alarme", temp_eau: "Température Eau",
@@ -921,7 +921,7 @@
                 if (btnReset) btnReset.style.opacity = "1";
                 // <---
                 
-                switchView('manuel');
+                //switchView('manuel');
             }
         }
 
@@ -1086,7 +1086,7 @@ async function connecterBLE() {
             txCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_TX);
 
             if(dotStatus) { dotStatus.className = "fa-brands fa-bluetooth"; dotStatus.style.color = "var(--accent-blue)"; }
-            if(textStatus) textStatus.innerText = "Local Actif (BLE)";
+            if(textStatus) textStatus.innerText = "Local Actif";
 
             await txCharacteristic.startNotifications();
             txCharacteristic.addEventListener('characteristicvaluechanged', (e) => {
