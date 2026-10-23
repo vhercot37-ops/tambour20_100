@@ -1116,44 +1116,69 @@ async function verifierGarantiePopup(id) {
 }
 
 // 2. Validation par le client (Bouton vert)
-async function validerGarantie() {
-    let nom = document.getElementById('gar-nom').value.trim();
-    let email = document.getElementById('gar-email').value.trim();
-    let tel = document.getElementById('gar-tel').value.trim();
-    
-    if (nom === "" || email === "") { alert("Veuillez remplir au moins votre nom et votre email."); return; }
-
-    let btn = document.querySelector('#garantie-modal .auth-btn');
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Activation...';
-    btn.disabled = true;
-
-    let dateJour = new Date().toISOString().split('T')[0];
-    let payload = { nom: nom, email: email, telephone: tel, date_activation: dateJour };
-
-    try {
-        // A. Sauvegarde propre dans le classeur Firebase
-        await fetch(`${FIREBASE_HOST}Garantie/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, {
-            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-        });
-
-        // B. Envoi de l'alerte sur ton GSM via Telegram
-        if (TELEGRAM_BOT_TOKEN !== "TON_TOKEN_BOT_ICI") {
-            let msg = `✅ *Nouvelle Garantie Activée*\n\n📦 *Coffret:* ${ID_COFFRET}\n👤 *Nom:* ${nom}\n📧 *Email:* ${email}\n📱 *Tel:* ${tel}\n📅 *Date:* ${dateJour}`;
-            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: TELEGRAM_ADMIN_ID, text: msg, parse_mode: "Markdown" })
-            });
+    async function validerGarantie() {
+        let nom = document.getElementById('gar-nom').value.trim();
+        let email = document.getElementById('gar-email').value.trim();
+        let tel = document.getElementById('gar-tel').value.trim();
+        
+        if (nom === "" || email === "") { 
+            alert("Veuillez remplir au moins votre nom et votre email."); 
+            return; 
         }
 
-        document.getElementById('garantie-modal').classList.remove('active');
-        alert("Merci ! Votre garantie a été activée avec succès.");
-    } catch (e) {
-        console.error(e); alert("Erreur de connexion, veuillez réessayer.");
-        btn.innerHTML = '<i class="fa-solid fa-check"></i> Activer ma garantie';
-        btn.disabled = false;
-    }
-}
+        let btn = document.querySelector('#garantie-modal .auth-btn');
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Activation...';
+            btn.disabled = true;
+        }
 
+        let dateJour = new Date().toISOString().split('T')[0];
+        let payload = { nom: nom, email: email, telephone: tel, date_activation: dateJour };
+
+        try {
+            // A. Sauvegarde dans le classeur Firebase
+            await fetch(`${FIREBASE_HOST}Garantie/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, {
+                method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+            });
+
+            // B. Envoi de l'alerte Telegram (Corrigé avec format HTML)
+            if (TELEGRAM_BOT_TOKEN !== "TON_TOKEN_BOT_ICI") {
+                try {
+                    let msg = `✅ <b>Nouvelle Garantie</b>\n\n📦 <b>Coffret:</b> ${ID_COFFRET}\n👤 <b>Nom:</b> ${nom}\n📧 <b>Email:</b> ${email}\n📱 <b>Tel:</b> ${tel}\n📅 <b>Date:</b> ${dateJour}`;
+                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        // parse_mode est passé en "HTML" pour éviter le crash lié au tiret bas "_" de "Coffret_"
+                        body: JSON.stringify({ chat_id: TELEGRAM_ADMIN_ID, text: msg, parse_mode: "HTML" })
+                    });
+                } catch (errTele) {
+                    console.warn("Erreur Telegram", errTele);
+                }
+            }
+
+            // C. Remise à zéro visuelle de la popup pour le prochain client
+            document.getElementById('gar-nom').value = "";
+            document.getElementById('gar-email').value = "";
+            document.getElementById('gar-tel').value = "";
+            
+            if (btn) {
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Activer ma garantie';
+                btn.disabled = false;
+            }
+
+            // D. Fermeture
+            let modal = document.getElementById('garantie-modal');
+            if (modal) modal.classList.remove('active');
+            alert("Merci ! Votre garantie a été activée avec succès.");
+            
+        } catch (e) {
+            console.error(e); 
+            alert("Erreur de connexion, veuillez réessayer.");
+            if (btn) {
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Activer ma garantie';
+                btn.disabled = false;
+            }
+        }
+    }
 
 async function effacerGarantieUsine() {
     if (!ID_COFFRET || ID_COFFRET === "Coffret_01") return;
