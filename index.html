@@ -993,8 +993,6 @@
         }
 
 // 3. --- ANIMATION DU CYCLE DE LAVAGE ---
-// 3. --- ANIMATION DU CYCLE DE LAVAGE ---
-
 // SÉCURITÉ : On coupe la popup en cas d'alarme ou de passage en Manuel
 if ((alCode > 0 || systemeEnManuel) && animationLavageEnCours) {
     let modal = document.getElementById('wash-modal');
@@ -1099,10 +1097,9 @@ if (tempsRestantReel > 0 && !animationLavageEnCours && modeActif === "BLE" && !s
 }
 } 
 
-let garantieVerifiee = false;
+
 const TELEGRAM_BOT_TOKEN = "8803564628:AAEntgbIiQ4ipAdTukiWDxsHMXKtkk8P_8k"; 
 const TELEGRAM_ADMIN_ID = "8538368862"; 
-
     
 async function verifierGarantiePopup(id) {
     if (!id || id === "Coffret_01" || garantieVerifiee) return;
@@ -1159,13 +1156,13 @@ async function validerGarantie() {
 
 
 async function effacerGarantieUsine() {
-    if (!ID_COFFRET) return;
+    if (!ID_COFFRET || ID_COFFRET === "Coffret_01") return;
     if (confirm(`Voulez-vous vraiment effacer la garantie du ${ID_COFFRET} pour une remise à neuf en sortie d'usine ?`)) {
         try {
             await fetch(`${FIREBASE_HOST}Garantie/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { method: 'DELETE' });
-            alert("Garantie effacée ! Le client verra la popup lors de sa première connexion.");
-            garantieVerifiee = false; 
-        } catch (e) { console.error(e); alert("Erreur lors de l'effacement."); }
+            alert("Garantie effacée ! Le coffret est vierge. La popup s'affichera à la prochaine connexion du client.");
+            // On NE remet PAS garantieVerifiee à false ici, pour te laisser travailler en paix !
+        } catch (e) { console.error(e); alert("Erreur lors de l'effacement de la garantie."); }
     }
 }
 
