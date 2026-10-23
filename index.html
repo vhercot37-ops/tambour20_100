@@ -1160,9 +1160,12 @@ async function effacerGarantieUsine() {
     if (confirm(`Voulez-vous vraiment effacer la garantie du ${ID_COFFRET} pour une remise à neuf en sortie d'usine ?`)) {
         try {
             await fetch(`${FIREBASE_HOST}Garantie/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { method: 'DELETE' });
-            alert("Garantie effacée ! Le coffret est vierge. La popup s'affichera à la prochaine connexion du client.");
-            // On NE remet PAS garantieVerifiee à false ici, pour te laisser travailler en paix !
-        } catch (e) { console.error(e); alert("Erreur lors de l'effacement de la garantie."); }
+            alert("Garantie effacée avec succès ! Le coffret est prêt pour l'expédition.");
+            // On ne touche plus à garantieVerifiee ici pour te laisser tester tranquillement
+        } catch (e) { 
+            console.error(e); 
+            alert("Erreur lors de l'effacement de la garantie."); 
+        }
     }
 }
 
@@ -1171,6 +1174,7 @@ async function connecterBLE() {
         try {
             modeActif = "BLE";
             premiereSynchroFaite = false; 
+            garantieVerifiee = false;
             let avertissementFirebaseFait = false; 
             
             adapterInterfaceSelonMode(); 
