@@ -843,7 +843,7 @@
         });
     }
 
-    function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi, cptConsecutif, espVersion) {
+  function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi, cptConsecutif, espVersion, tempsRestantReel = 0) {
         systemWifiStat = wStat; 
 
         if (espVersion && espVersion !== "--") {
@@ -970,8 +970,9 @@
         }
 
 // 3. --- ANIMATION DU CYCLE DE LAVAGE ---
+// 3. --- ANIMATION DU CYCLE DE LAVAGE ---
 
-// SÉCURITÉ : On coupe la popup UNIQUEMENT en cas d'alarme (alCode > 0) ou de passage en Manuel
+// SÉCURITÉ : On coupe la popup en cas d'alarme ou de passage en Manuel
 if ((alCode > 0 || systemeEnManuel) && animationLavageEnCours) {
     let modal = document.getElementById('wash-modal');
     if (modal) modal.classList.remove('active');
@@ -980,82 +981,100 @@ if ((alCode > 0 || systemeEnManuel) && animationLavageEnCours) {
     setTimeout(() => { animationLavageEnCours = false; }, 500);
 }
 
-// Lancement de la popup (Si niveau de lavage bas, mode Auto, pas d'alarme)
-if (lav === 0 && !animationLavageEnCours && modeActif === "BLE" && !systemeEnManuel && alCode === 0) {
+// LANCEMENT : Basé sur le temps restant réel dicté par l'ESP32
+if (tempsRestantReel > 0 && !animationLavageEnCours && modeActif === "BLE" && !systemeEnManuel && alCode === 0) {
     animationLavageEnCours = true;
     
-        let modal = document.getElementById('wash-modal');
-        let drum = document.getElementById('drum-cylinder-anim');
-        let jet = document.getElementById('jet-stream-anim');
-        let timerEl = document.getElementById('wash-timer-anim');
-        let showerIcon = document.getElementById('shower-icon-anim');
-        let statusTxt = document.getElementById('wash-status-text');
-        let txtConsecutif = document.getElementById('wash-consecutif-text');
-        
-        // --- Récupération des paramètres dynamiques de l'installateur ---
-        let washTime = parseInt(document.getElementById('inst-rot').value) || 16;
-        let totalTime = parseInt(document.getElementById('inst-rearm').value) || 20;
-        let stabTime = totalTime - washTime; // Temps de temporisation
-        if (stabTime < 0) stabTime = 0;
-        
-        if (modal && drum && jet && timerEl) {
-            modal.classList.add('active');
+    let modal = document.getElementById('wash-modal');
+    let drum = document.getElementById('drum-cylinder-anim');
+    let jet = document.getElementById('jet-stream-anim');
+    let timerEl = document.getElementById('wash-timer-anim');
+    let showerIcon = document.getElementById('shower-icon-anim');
+    let statusTxt = document.getElementById('wash-status-text');
+    let txtConsecutif = document.getElementById('wash-consecutif-text');
+    
+    // Récupération des temps configurés
+    let washTime = parseInt(document.getElementById('inst-rot').value) || 16;
+    let totalTime = parseInt(document.getElementById('inst-rearm').value) || 20;
+    let stabTime = totalTime - washTime; 
+    if (stabTime < 0) stabTime = 0;
+    
+    if (modal && drum && jet && timerEl) {
+        modal.classList.add('active');
 
-            if (txtConsecutif) {
-                if (cptConsecutif > 0) {
-                    txtConsecutif.style.display = "block";
-                    txtConsecutif.innerText = `Lavage Consécutif : ${cptConsecutif} / 15`;
-                } else {
-                    txtConsecutif.style.display = "none";
-                }
+        if (txtConsecutif) {
+            if (cptConsecutif > 0) {
+                txtConsecutif.style.display = "block";
+                txtConsecutif.innerText = `Lavage Consécutif : ${cptConsecutif} / 15`;
+            } else {
+                txtConsecutif.style.display = "none";
             }
+        }
+        
+        let timeLeft = tempsRestantReel;
+        timerEl.innerText = timeLeft + "s";
+        
+        // Calcul de l'avancement matériel
+        let tempsEcoule = totalTime - timeLeft;
+        
+        if (timeLeft > stabTime) {
+            // CAS 1 : On est en pleine rotation (Gicleur actif)
+            let tempsRestantLavage = timeLeft - stabTime;
+            
+            // On calcule l'angle exact où la roue doit démarrer pour être synchro !
+            let pourcentageEcoule = tempsEcoule / washTime;
+            let angleDepart = -90 + (360 * pourcentageEcoule);
             
             drum.style.transition = 'none';
-            drum.style.transform = 'rotate(-90deg)'; // Remet le pointillé noir en haut
             jet.classList.add('spraying');
             showerIcon.style.color = "var(--accent-blue)";
             timerEl.style.color = "var(--accent-blue)";
             statusTxt.innerText = "Rotation & Lavage...";
-                      
-            // Utilisation de l'API d'animation native (100% fiable à chaque réouverture)
+            
             drum.animate([
-                { transform: 'rotate(-90deg)' },
+                { transform: `rotate(${angleDepart}deg)` },
                 { transform: 'rotate(270deg)' }
             ], {
-                duration: washTime * 1000,
+                duration: tempsRestantLavage * 1000,
                 iterations: 1,
                 easing: 'linear',
-                fill: 'forwards' // Maintient la position finale
+                fill: 'forwards'
             });
-            
-            let timeLeft = totalTime;
+        } else {
+            // CAS 2 : On se connecte pendant les dernières secondes (Temporisation / Gicleur coupé)
+            drum.style.transform = 'rotate(270deg)';
+            jet.classList.remove('spraying');
+            showerIcon.style.color = "#1f2937";
+            timerEl.style.color = "var(--text-gray)";
+            statusTxt.innerText = "Temporisation...";
+        }
+        
+        // Chronomètre visuel
+        if (chronoAnimInterval) clearInterval(chronoAnimInterval);
+        chronoAnimInterval = setInterval(() => {
+            timeLeft--;
             timerEl.innerText = timeLeft + "s";
             
-            if (chronoAnimInterval) clearInterval(chronoAnimInterval);
-            chronoAnimInterval = setInterval(() => {
-                timeLeft--;
-                timerEl.innerText = timeLeft + "s";
-                
-                // Passage à l'état Temporisation
-                if (timeLeft === stabTime) { 
-                    jet.classList.remove('spraying');
-                    showerIcon.style.color = "#1f2937";
-                    timerEl.style.color = "var(--text-gray)";
-                    statusTxt.innerText = "Temporisation...";
-                }
-                
-                if (timeLeft <= 0) clearInterval(chronoAnimInterval);
-            }, 1000);
+            // Coupure du gicleur au moment exact de la temporisation
+            if (timeLeft === stabTime) { 
+                jet.classList.remove('spraying');
+                showerIcon.style.color = "#1f2937";
+                timerEl.style.color = "var(--text-gray)";
+                statusTxt.innerText = "Temporisation...";
+            }
             
-            if (timerFinLavage) clearTimeout(timerFinLavage);
-            timerFinLavage = setTimeout(() => {
-                modal.classList.remove('active');
-                setTimeout(() => { animationLavageEnCours = false; }, 1000);
-            }, totalTime * 1000);
-        }
+            if (timeLeft <= 0) clearInterval(chronoAnimInterval);
+        }, 1000);
+        
+        // Fermeture de la popup
+        if (timerFinLavage) clearTimeout(timerFinLavage);
+        timerFinLavage = setTimeout(() => {
+            modal.classList.remove('active');
+            setTimeout(() => { animationLavageEnCours = false; }, 1000);
+        }, timeLeft * 1000);
     }
-} // Fin de la fonction afficherMaitresDonnees
-    
+}
+} // <-- C'est l'accolade qui ferme afficherMaitresDonnees
 async function connecterBLE() {
         try {
             modeActif = "BLE";
@@ -1129,9 +1148,10 @@ async function connecterBLE() {
 
                         let espVersion = (d.length > 10) ? d[10] : "v1.0.0";
                         let espMode = (d.length > 11) ? parseInt(d[11]) : -1; // <-- Lecture du mode en temps réel
+                        let espTempsRestant = (d.length > 12) ? parseInt(d[12]) : 0; // <-- Nouveau !
 
-                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, bleCptConsecutif, espVersion);
-                    
+                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, bleCptConsecutif, espVersion, espTempsRestant);
+                  
                         // <-- BASCULE AUTOMATIQUE SUR APPUI DU BOUTON PHYSIQUE -->
                         if (alCode === 0 && espMode !== -1) {
                         let vueAct = document.querySelector('.view.active').id;
