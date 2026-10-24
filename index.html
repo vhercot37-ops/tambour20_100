@@ -164,13 +164,23 @@
 
       .badge-tech { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-family: monospace; }
       
-      /* ---> DÉBUT MODIFICATION 2 : CSS ÉCRAN MANUEL COMPACT <--- */
-      .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 12px; }
-      .btn-thin { width: 100%; padding: 12px !important; font-size: 14px; margin-bottom: 15px; flex-direction: row; }
-      .compact-grid .status-tile { padding: 10px !important; min-height: 70px !important; aspect-ratio: auto; }
-      .compact-grid .status-tile-icon { font-size: 18px; }
-      .compact-grid .status-tile-title { font-size: 12px; margin-top: 8px; }
-      /* ---> FIN MODIFICATION 2 <--- */
+    /* --- AJUSTEMENTS ÉCRAN MANUEL SANS SCROLLING --- */
+    /* Rend le bouton Positionnement plus fin, avec icône et texte alignés à l'horizontale */
+    .btn-thin-manuel {
+        flex-direction: row; 
+        padding: 15px !important; 
+        margin-bottom: 15px;
+    }
+    .btn-thin-manuel i { font-size: 22px; }
+
+    /* Écrase légèrement les 4 tuiles du bas (annule le format carré 1/1) */
+    .compact-grid .status-tile {
+        aspect-ratio: auto; 
+        min-height: 85px; 
+        padding: 14px 15px; 
+    }
+    .compact-grid .status-tile-icon { font-size: 22px; }
+    .compact-grid .status-tile-title { margin-top: 8px; font-size: 13px; }
         
     </style>
 </head>
@@ -255,33 +265,43 @@
             </div>
         </div>
 
-        <div id="manuel-view" class="view">
-    
-    <!-- 1. Bloc Température (Ne change pas) -->
-    <div class="bento-card">
-        ... (ton code pour la température) ...
-    </div>
 
-    <!-- 2. Bloc des Boutons d'action (Remonté ici) -->
-    <div class="manual-controls">
-        <!-- Les deux boutons côte à côte -->
-        <div class="btn-row">
-            <button id="btn-rotation" class="action-btn">Rotation</button>
-            <button id="btn-lavage" class="action-btn">Lavage</button>
+  <div id="manuel-view" class="view">
+        
+        <!-- 1. Température -->
+        <div class="bento-card">
+            <div class="temp-header"><span data-i18n="temp_eau">Température Eau</span> <i class="fa-solid fa-temperature-half"></i></div>
+            <div class="temp-value-large" id="val-temperature-man">--.-<span>°C</span></div>
+            <div class="temp-track"><div class="temp-fill" id="temp-bar-fill-man"></div></div>
         </div>
-        <!-- Le nouveau bouton fin et large -->
-        <button id="btn-positionnement" class="action-btn btn-thin">Positionnement Tambour</button>
-    </div>
 
-    <!-- 3. Bloc des 4 états (Descendu ici) -->
-    <div class="bento-grid compact-grid">
-        <div class="bento-card status-card">... (Niveau) ...</div>
-        <div class="bento-card status-card">... (Lavage) ...</div>
-        <div class="bento-card status-card">... (Sécurité) ...</div>
-        <div class="bento-card status-card">... (Pompe UV) ...</div>
-    </div>
+        <!-- 2. Boutons d'action (Design Bento conservé) -->
+        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+            <div class="btn-action-manuel" id="btn-man-rotation">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span data-i18n="btn_rot">Rotation</span>
+            </div>
+            <div class="btn-action-manuel" id="btn-man-lavage">
+                <i class="fa-solid fa-shower"></i>
+                <span data-i18n="btn_lav">Lavage</span>
+            </div>
+        </div>
+        
+        <!-- Nouveau Bouton Positionnement (Fin, pleine largeur, texte à côté de l'icône) -->
+        <div class="btn-action-manuel btn-thin-manuel" id="btn-positionnement">
+            <i class="fa-solid fa-crosshairs"></i>
+            <span>Positionnement Tambour</span>
+        </div>
 
-</div>
+        <!-- 3. Statuts (Version compactée) -->
+        <div class="bento-grid-2x2 compact-grid">
+            <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-shield-halved status-tile-icon"></i><div class="dot" id="dot-niveau_securite-man"></div></div><div class="status-tile-title" data-i18n="niv_secu">Niveau<br>Sécurité</div></div>
+            <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-water status-tile-icon"></i><div class="dot" id="dot-niveau_lavage-man"></div></div><div class="status-tile-title" data-i18n="niv_lav">Niveau<br>Lavage</div></div>
+            <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-toolbox status-tile-icon"></i><div class="dot" id="dot-couvercle-man"></div></div><div class="status-tile-title" data-i18n="couv">Couvercle<br>Fermé</div></div>
+            <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-filter status-tile-icon"></i><div class="dot" id="dot-pompe_uv-man"></div></div><div class="status-tile-title" data-i18n="pompe">Pompe<br>UV</div></div>
+        </div>
+
+    </div>
 
         <div id="alarme-view" class="view">
             <div class="alarm-banner"><i class="fa-solid fa-triangle-exclamation" style="margin-right:8px;"></i> <span id="alarm-banner-text">ALARME</span></div>
@@ -1677,22 +1697,19 @@ async function connecterBLE() {
     }
     
 function initBoutonsManuels() {
-        const lier = (idBtn, nomAction) => {
-            const btn = document.getElementById(idBtn);
-            if (!btn) return;
-            const onDown = (e) => { e.preventDefault(); btn.classList.add('active'); envoyerCommande(nomAction, 1); };
-            const onUp = (e) => { e.preventDefault(); btn.classList.remove('active'); envoyerCommande(nomAction, 0); };
-            btn.addEventListener('mousedown', onDown); btn.addEventListener('mouseup', onUp); btn.addEventListener('mouseleave', onUp); 
-            btn.addEventListener('touchstart', onDown, {passive: false}); btn.addEventListener('touchend', onUp, {passive: false}); btn.addEventListener('touchcancel', onUp, {passive: false});
-        };
-        
-        // Tes boutons actuels
-        lier('btn-man-rotation', 'Rotation'); 
-        lier('btn-man-lavage', 'Lavage');
-        
-        // ---> MODIFICATION 3 : Ajout du bouton Positionnement <---
-        lier('btn-positionnement', 'POS_TAMBOUR'); // <-- Remplace 'POS_TAMBOUR' par le mot que ton ESP32 attend
-    }
+    const lier = (idBtn, nomAction) => {
+        const btn = document.getElementById(idBtn);
+        if (!btn) return;
+        const onDown = (e) => { e.preventDefault(); btn.classList.add('active'); envoyerCommande(nomAction, 1); };
+        const onUp = (e) => { e.preventDefault(); btn.classList.remove('active'); envoyerCommande(nomAction, 0); };
+        btn.addEventListener('mousedown', onDown); btn.addEventListener('mouseup', onUp); btn.addEventListener('mouseleave', onUp); 
+        btn.addEventListener('touchstart', onDown, {passive: false}); btn.addEventListener('touchend', onUp, {passive: false}); btn.addEventListener('touchcancel', onUp, {passive: false});
+    };
+    
+    lier('btn-man-rotation', 'Rotation'); 
+    lier('btn-man-lavage', 'Lavage');
+    lier('btn-positionnement', 'POS_TAMBOUR'); // NOUVEAU BOUTON (Vérifie le mot-clé pour ton ESP32)
+}
             
 function toggleSidebarMenu() { 
         let btn = document.querySelector('.menu-toggle-btn');
