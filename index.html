@@ -38,7 +38,7 @@
         .sidebar-item { background: transparent; border: none; color: var(--text-gray); padding: 14px 16px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
         .sidebar-item:active { background: #1f2937; }
         .sidebar-item.active { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); }
-        .view { display: none; animation: fadeIn 0.3s ease; }
+        .view { display: none; animation: fadeIn 0.3s ease; } 
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
@@ -57,13 +57,13 @@
         .temp-value-large { font-size: 52px; font-weight: 800; color: #ffffff; letter-spacing: -2px; margin-bottom: 15px; }
         .temp-value-large span { font-size: 22px; color: var(--text-gray); font-weight: 600; margin-left: 4px; letter-spacing: 0; }
         .temp-track { width: 100%; height: 14px; background: #000000; border-radius: 12px; overflow: hidden; border: 1px solid #1f2937; }
-      .temp-fill { 
+     .temp-fill { 
             height: 100%; 
             width: 0%; 
             border-radius: 10px; 
-            /* Dégradé inversé et très contrasté : Pastel clair (0%) -> Rouge vif (40%) -> Noir/Bordeaux (100%) */
-            background: linear-gradient(90deg, #fca5a5 0%, #dc2626 40%, #220505 100%);
-            box-shadow: 0 0 12px rgba(220, 38, 38, 0.4);
+            /* Dégradé inversé : Départ (Rouge clair) -> Milieu (Rouge vif) -> Fin (Bordeaux) */
+            background: linear-gradient(90deg, #f87171 0%, #ef4444 60%, #7f1d1d 100%);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); /* Conserve le halo rouge vif */
             transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
         }
         .btn-action-manuel { flex: 1; background-color: var(--bg-card); border: 1px solid var(--border-card); color: white; padding: 22px 15px; border-radius: 20px; font-weight: 700; font-size: 15px; text-transform: uppercase; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; transition: all 0.1s ease; user-select: none; -webkit-user-select: none; }
