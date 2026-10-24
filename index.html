@@ -57,12 +57,13 @@
         .temp-value-large { font-size: 52px; font-weight: 800; color: #ffffff; letter-spacing: -2px; margin-bottom: 15px; }
         .temp-value-large span { font-size: 22px; color: var(--text-gray); font-weight: 600; margin-left: 4px; letter-spacing: 0; }
         .temp-track { width: 100%; height: 14px; background: #000000; border-radius: 12px; overflow: hidden; border: 1px solid #1f2937; }
-        .temp-fill { 
+       .temp-fill { 
             height: 100%; 
             width: 0%; 
             border-radius: 10px; 
-            background: linear-gradient(90deg, #041027 0%, #38bdf8 100%);
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+            /* Dégradé à 3 étapes : Départ (Bleu profond) -> Milieu à 50% (Bleu pur) -> Fin (Bleu ciel) */
+            background: linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #38bdf8 100%);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
             transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
         }
         .btn-action-manuel { flex: 1; background-color: var(--bg-card); border: 1px solid var(--border-card); color: white; padding: 22px 15px; border-radius: 20px; font-weight: 700; font-size: 15px; text-transform: uppercase; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; transition: all 0.1s ease; user-select: none; -webkit-user-select: none; }
