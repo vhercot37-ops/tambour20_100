@@ -1326,13 +1326,32 @@ async function connecterBLE() {
 
                         if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, bleCptConsecutif, espVersion, espTempsRestant);
                   
-                        // <-- BASCULE AUTOMATIQUE SUR APPUI DU BOUTON PHYSIQUE -->
+                       // <-- BASCULE AUTOMATIQUE SUR APPUI DU BOUTON PHYSIQUE & GESTION MODE 5 -->
                         // On n'écoute l'ESP32 QUE SI l'anti-rebond n'est pas actif (!blocageSynchroMode)
                         if (alCode === 0 && espMode !== -1 && !blocageSynchroMode) {
-                        let vueAct = document.querySelector('.view.active').id;
-                        if (espMode === 0 && vueAct === 'manuel-view') switchView('auto');
-                        else if (espMode === 1 && vueAct === 'auto-view') switchView('manuel');
-                        }   
+                            let vueAct = document.querySelector('.view.active').id;
+                            
+                            // 1. Bascule automatique d'écran (Le Mode 5 force l'écran Auto)
+                            if ((espMode === 0 || espMode === 5) && vueAct === 'manuel-view') {
+                                switchView('auto');
+                                vueAct = 'auto-view'; // Mise à jour de la variable pour l'étape suivante
+                            }
+                            else if (espMode === 1 && vueAct === 'auto-view') {
+                                switchView('manuel');
+                            }
+                            
+                            // 2. Affichage dynamique du titre avec le Sablier
+                            if (vueAct === 'auto-view') {
+                                let titre = document.getElementById('val-Mode');
+                                if (titre) {
+                                    if (espMode === 5) {
+                                        titre.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Positionnement...';
+                                    } else if (espMode === 0 && titre.innerText.includes("Positionnement")) {
+                                        rafraichirTitres('auto'); // Restaure le texte normal "Auto"
+                                    }
+                                }
+                            }
+                        }  
                 }
             } else if (text.startsWith("WNET:")) {
                     let reseau = text.substring(5);
