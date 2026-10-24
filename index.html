@@ -58,22 +58,13 @@
         .temp-value-large span { font-size: 22px; color: var(--text-gray); font-weight: 600; margin-left: 4px; letter-spacing: 0; }
         .temp-track { width: 100%; height: 14px; background: #000000; border-radius: 12px; overflow: hidden; border: 1px solid #1f2937; }
         .temp-fill { 
-         height: 100%; 
-         width: 0%; 
-         border-radius: 10px; 
-         /* 
-           0% (0°C)   : Bleu nuit très foncé
-           15% (4°C)  : Bleu océan
-           35% (10°C) : Bleu clair
-           55% (15°C) : Vert émeraude
-           75% (21°C) : Orange
-           90% (25°C) : Rouge vif
-           100% (28°C): Rouge sang
-         */
-         background: linear-gradient(to right, #050b14 0%, #1e3a8a 15%, #0ea5e9 35%, #10b981 55%, #f59e0b 75%, #ef4444 90%, #991b1b 100%);
-         background-repeat: no-repeat;
-         transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.8s ease; 
-         }
+            height: 100%; 
+            width: 0%; 
+            border-radius: 10px; 
+            background: linear-gradient(90deg, #1e3a8a 0%, var(--accent-blue) 100%);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
         .btn-action-manuel { flex: 1; background-color: var(--bg-card); border: 1px solid var(--border-card); color: white; padding: 22px 15px; border-radius: 20px; font-weight: 700; font-size: 15px; text-transform: uppercase; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; transition: all 0.1s ease; user-select: none; -webkit-user-select: none; }
         .btn-action-manuel i { font-size: 28px; color: var(--text-gray); transition: 0.2s; }
         .btn-action-manuel.active { background-color: rgba(59, 130, 246, 0.1); border-color: var(--accent-blue); }
@@ -934,30 +925,17 @@
             gererBadgeDot('dot-pompe_uv' + suf, uv);
         });
 
-        // Mise à jour de la barre de température (Dégradé dynamique 0°C -> 28°C)
+        // Mise à jour de la barre de température (Calibrée pour Bassin Koï)
         let tempVal = Number(temp);
         if (!isNaN(tempVal)) {
-            let pourcentage = Math.min(Math.max((tempVal / 28) * 100, 0), 100);
+            // 28°C est le maximum exceptionnel pour le bassin
+            const TEMP_MAX = 28; 
+            
+            // Calcul automatique du pourcentage (bloqué à 100% si ça dépasse 28°C)
+            let pourcentage = Math.min(Math.max((tempVal / TEMP_MAX) * 100, 0), 100);
             
             document.querySelectorAll('.temp-fill').forEach(bar => {
                 bar.style.width = pourcentage + '%';
-                
-                if (pourcentage > 0) {
-                    bar.style.backgroundSize = (10000 / pourcentage) + '% 100%';
-                }
-
-                // Halo lumineux adaptatif ajusté au métabolisme des Koïs
-            if (tempVal >= 25) {
-                bar.style.boxShadow = '0 0 14px rgba(239, 68, 68, 0.9)';  // Rouge vif (Stress / Danger)
-            } else if (tempVal >= 21) {
-                bar.style.boxShadow = '0 0 10px rgba(245, 158, 11, 0.6)';  // Orange doux
-            } else if (tempVal >= 15) {
-                bar.style.boxShadow = '0 0 12px rgba(16, 185, 129, 0.8)';  // Vert (Nourrissage idéal)
-            } else if (tempVal >= 10) {
-                bar.style.boxShadow = '0 0 12px rgba(14, 165, 233, 0.8)';   // Bleu clair
-            } else {
-                bar.style.boxShadow = '0 0 10px rgba(30, 58, 138, 0.8)';   // Bleu océan profond (Hivernage)
-            }
             });
         }
 
