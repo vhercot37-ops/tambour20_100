@@ -861,7 +861,7 @@
         if (btnPos) {
             let avecPos = localStorage.getItem("inst_pos") !== "0"; // Vrai par défaut, faux si désactivé dans l'installateur
             if (!avecPos) {
-                btnPos.style.opacity = "0.3";          // Rend le bouton transparent (grisé)
+                btnPos.style.opacity = "0.6";          // Rend le bouton transparent (grisé)
                 btnPos.style.pointerEvents = "none";   // Bloque les clics/touches (pas de changement de couleur)
             } else {
                 btnPos.style.opacity = "1";            // Normal
@@ -1630,6 +1630,12 @@ async function connecterBLE() {
     
         let memRearm = localStorage.getItem("inst_rearm");
         if(memRearm) { let rm = document.getElementById('inst-rearm'); if(rm) rm.value = memRearm; }
+
+        let memPos = localStorage.getItem("inst_pos");
+        if(memPos !== null) { 
+            let chkPos = document.getElementById('inst-pos'); 
+            if(chkPos) chkPos.checked = (memPos === "1"); 
+        }
         
     }
 
