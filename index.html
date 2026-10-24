@@ -673,9 +673,12 @@
             return; 
         }
         
-        if (vue === 'auto') {
+       if (vue === 'auto') {
             if (modeActif === "FIREBASE" && dernierModeFirebase !== "") {
-                titre.innerText = dernierModeFirebase; // Utilise la vraie valeur mémorisée
+                titre.innerText = dernierModeFirebase; 
+            } else if (modeActif === "BLE" && blocageSynchroMode && !titre.innerText.includes("Auto")) {
+                // Anticipation : évite le flash visuel quand on vient du mode Manuel
+                titre.innerHTML = 'Positionnement <i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-left: 12px; color: var(--accent-blue);"></i>';
             } else {
                 titre.innerText = `Auto ${modele}${mode}`;
             }
@@ -1340,12 +1343,12 @@ async function connecterBLE() {
                                 switchView('manuel');
                             }
                             
-                            // 2. Affichage dynamique du titre avec le Sablier
+                           // 2. Affichage dynamique du titre avec le Sablier (à droite et sans points)
                             if (vueAct === 'auto-view') {
                                 let titre = document.getElementById('val-Mode');
                                 if (titre) {
                                     if (espMode === 5) {
-                                        titre.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Positionnement...';
+                                        titre.innerHTML = 'Positionnement <i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-left: 12px; color: var(--accent-blue);"></i>';
                                     } else if (espMode === 0 && titre.innerText.includes("Positionnement")) {
                                         rafraichirTitres('auto'); // Restaure le texte normal "Auto"
                                     }
