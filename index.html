@@ -678,6 +678,7 @@
                 titre.innerText = dernierModeFirebase; 
             } else if (modeActif === "BLE" && blocageSynchroMode && !titre.innerText.includes("Auto")) {
                 // Anticipation : évite le flash visuel quand on vient du mode Manuel
+                titre.style.fontSize = "26px";
                 titre.innerHTML = 'Positionnement <i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-left: 12px; color: var(--accent-blue);"></i>';
             } else {
                 titre.innerText = `Auto ${modele}${mode}`;
@@ -1350,6 +1351,7 @@ async function connecterBLE() {
                                     if (espMode === 5) {
                                         titre.innerHTML = 'Positionnement <i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-left: 12px; color: var(--accent-blue);"></i>';
                                     } else if (espMode === 0 && titre.innerText.includes("Positionnement")) {
+                                        titre.style.fontSize = "38px";
                                         rafraichirTitres('auto'); // Restaure le texte normal "Auto"
                                     }
                                 }
