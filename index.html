@@ -549,6 +549,8 @@
     let attenteDonneesFraiches = false;
     let dernierModeFirebase = ""; 
     let isInstallateurDeverrouille = false;
+    let blocageSynchroMode = false;
+    let timerBlocageMode = null;
 
     function setLang(lang) {
         currentLang = lang;
@@ -691,6 +693,15 @@
           if (errEl) errEl.style.display = "none";
          }
         // -----------------------------------------------------
+
+        // --- AJOUT : Sécurité Anti-Rebond (Flickering) ---
+        if (target === 'manuel' || target === 'auto') {
+        blocageSynchroMode = true;
+        if (timerBlocageMode) clearTimeout(timerBlocageMode);
+        // On ignore le matériel pendant 1.5 seconde le temps qu'il comprenne l'ordre
+        timerBlocageMode = setTimeout(() => { blocageSynchroMode = false; }, 1500); 
+       }
+       // -------------------------------------------------
         
         if (target === 'manuel') systemeEnManuel = true;
         if (target === 'auto') systemeEnManuel = false;
@@ -1299,11 +1310,12 @@ async function connecterBLE() {
                         if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, bleCptConsecutif, espVersion, espTempsRestant);
                   
                         // <-- BASCULE AUTOMATIQUE SUR APPUI DU BOUTON PHYSIQUE -->
-                        if (alCode === 0 && espMode !== -1) {
+                        // On n'écoute l'ESP32 QUE SI l'anti-rebond n'est pas actif (!blocageSynchroMode)
+                        if (alCode === 0 && espMode !== -1 && !blocageSynchroMode) {
                         let vueAct = document.querySelector('.view.active').id;
                         if (espMode === 0 && vueAct === 'manuel-view') switchView('auto');
                         else if (espMode === 1 && vueAct === 'auto-view') switchView('manuel');
-                    }
+                        }   
                 }
             } else if (text.startsWith("WNET:")) {
                     let reseau = text.substring(5);
