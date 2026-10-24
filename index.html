@@ -856,6 +856,20 @@
         let isManuel = systemeEnManuel; 
         let tabAutoText = document.querySelector('#tab-auto span');
 
+        // --- NOUVEAU : Griser et désactiver le bouton Positionnement si pas d'aimant ---
+        let btnPos = document.getElementById('btn-positionnement');
+        if (btnPos) {
+            let avecPos = localStorage.getItem("inst_pos") !== "0"; // Vrai par défaut, faux si désactivé dans l'installateur
+            if (!avecPos) {
+                btnPos.style.opacity = "0.3";          // Rend le bouton transparent (grisé)
+                btnPos.style.pointerEvents = "none";   // Bloque les clics/touches (pas de changement de couleur)
+            } else {
+                btnPos.style.opacity = "1";            // Normal
+                btnPos.style.pointerEvents = "auto";   // Actif
+            }
+        }
+        // -----------------------------------------------------------------------------
+
         if (modeActif === "FIREBASE") {
             if (tabAutoText) tabAutoText.innerText = "Monitoring";
 
