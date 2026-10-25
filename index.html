@@ -677,11 +677,10 @@
             let avecPos = localStorage.getItem("inst_pos") !== "0";
             if (modeActif === "FIREBASE" && dernierModeFirebase !== "") {
                 titre.innerText = dernierModeFirebase; 
-            } else if (modeActif === "BLE" && blocageSynchroMode && !titre.innerText.includes("Auto") && avecPos) {
-                // Anticipation : évite le flash visuel quand on vient du mode Manuel
-                titre.style.fontSize = "26px";
-                titre.innerHTML = 'Positionnement <i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-left: 12px; color: var(--accent-blue);"></i>';
-            } else {
+                } else if (modeActif === "BLE" && blocageSynchroMode && (titre.innerText.includes("Manu") || titre.innerText.includes("Hand")) && avecPos) {
+                           titre.style.fontSize = "26px";
+                           titre.innerHTML = 'Positionnement <i class="fa-solid fa-hourglass-half fa-spin" style="margin-left: 8px; color: var(--accent-blue);"></i>';
+                           } else {
                 titre.innerText = `Auto ${modele}${mode}`;
             }
         }
