@@ -1394,11 +1394,14 @@ async function connecterBLE() {
         let text = document.getElementById('app-conn-text');
         
         try {
-            let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`);
+            //let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`);
+            let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}&_=${Date.now()}`, { cache: 'no-store' });
             if (response.ok) {
                 let data = await response.json();
                 if (data) {
                     let pingActuel = data.ping !== undefined ? data.ping : 0;
+
+                    
                     
                     if (attenteDonneesFraiches) {
                         if (dernierPing === -1) {
