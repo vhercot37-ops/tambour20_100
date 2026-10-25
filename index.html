@@ -262,14 +262,14 @@
                 <span data-i18n="btn_lav">Lavage</span>
             </div>
         </div>
-        
-        <!-- Nouveau Bouton Positionnement (Fin, pleine largeur, texte à côté de l'icône) -->
-        <div class="btn-action-manuel btn-thin-manuel" id="btn-positionnement">
-            <i class="fa-solid fa-crosshairs"></i>
-            <span>Positionnement Tambour</span>
-        </div>
 
-        <!-- 3. Statuts (Version compactée) -->
+        <!-- Bouton Positionnement -->
+        <div class="btn-action-manuel btn-thin-manuel" id="btn-positionnement">
+            <i class="fa-solid fa-crosshairs" id="icon-btn-pos"></i>
+            <span id="text-btn-pos">Positionnement Tambour</span>
+        </div>
+      
+            <!-- 3. Statuts (Version compactée) -->
         <div class="bento-grid-2x2 compact-grid">
             <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-shield-halved status-tile-icon"></i><div class="dot" id="dot-niveau_securite-man"></div></div><div class="status-tile-title" data-i18n="niv_secu">Niveau<br>Sécurité</div></div>
             <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-water status-tile-icon"></i><div class="dot" id="dot-niveau_lavage-man"></div></div><div class="status-tile-title" data-i18n="niv_lav">Niveau<br>Lavage</div></div>
@@ -1172,8 +1172,7 @@ async function connecterBLE() {
 
                         let espVersion = (d.length > 10) ? d[10] : "v1.0.0";
                         let espMode = (d.length > 11) ? parseInt(d[11]) : -1; 
-                        let espTempsRestant = (d.length > 12) ? parseInt(d[12]) : 0; 
-                        let espPosManu = (d.length > 13) ? parseInt(d[13]) : 0; // Lecture de l'état du positionnement manuel
+                        let espPosManu = (d.length > 12) ? parseInt(d[12]) : 0; // Le positionnement a glissé d'une case !
 
                         // --- 1. AFFICHAGE DE LA BULLE "SÉRIE DE LAVAGES" ---
                         let zoneSerie = document.getElementById('zone-lavage-consecutif');
@@ -1188,8 +1187,9 @@ async function connecterBLE() {
                         }
 
                         // --- ACTUALISATION DES DONNÉES DE L'INTERFACE ---
-                        if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, bleCptConsecutif, espVersion, espTempsRestant);
-                  
+                        
+                         if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, bleCptConsecutif, espVersion);
+                        
                         // --- 2. BASCULE AUTOMATIQUE & ANIMATIONS DES TITRES ---
                         if (alCode === 0 && espMode !== -1 && !blocageSynchroMode) {
                             let vueAct = document.querySelector('.view.active').id;
@@ -1208,6 +1208,27 @@ async function connecterBLE() {
                             if (vueAct === 'auto-view') {
                                 let titre = document.getElementById('val-Mode');
                                 if (titre) {
+
+                                    // --- ANIMATION DU BOUTON POSITIONNEMENT ---
+                                   let iconPos = document.getElementById('icon-btn-pos');
+                                   let textPos = document.getElementById('text-btn-pos');
+        
+                                   if (espPosManu === 1) {
+                                   // Le tambour cherche sa position : on anime !
+                                   if (iconPos) {
+                                   iconPos.className = "fa-solid fa-crosshairs fa-spin";
+                                   iconPos.style.color = "var(--accent-purple)";
+                                   }
+                                   if (textPos) textPos.innerText = "Positionnement en cours...";
+                                   } else {
+                                   // Repos : on remet l'affichage normal
+                                   if (iconPos) {
+                                   iconPos.className = "fa-solid fa-crosshairs";
+                                   iconPos.style.color = ""; // Enlève la couleur forcée
+                                   }
+                                   if (textPos) textPos.innerText = "Positionnement Tambour";
+                                   }
+                                    
                                     if (espMode === 5) {
                                         titre.style.fontSize = "26px";
                                         titre.innerHTML = 'Positionnement <i class="fa-solid fa-hourglass-half fa-spin" style="margin-left: 12px; color: var(--accent-blue);"></i>';
