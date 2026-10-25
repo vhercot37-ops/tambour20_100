@@ -249,17 +249,17 @@
                 <div class="temp-track"><div class="temp-fill" id="temp-bar-fill"></div></div>
             </div>
             
-            <div class="bento-grid-2x2">
-                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-shield-halved status-tile-icon"></i><div class="dot" id="dot-niveau_securite"></div></div><div class="status-tile-title" data-i18n="niv_secu">Niveau<br>Sécurité</div></div>
-                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-water status-tile-icon"></i><div class="dot" id="dot-niveau_lavage"></div></div><div class="status-tile-title" data-i18n="niv_lav">Niveau<br>Lavage</div></div>
-                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-toolbox status-tile-icon"></i><div class="dot" id="dot-couvercle"></div></div><div class="status-tile-title" data-i18n="couv">Couvercle<br>Fermé</div></div>
-                <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-filter status-tile-icon"></i><div class="dot" id="dot-pompe_uv"></div></div><div class="status-tile-title" data-i18n="pompe">Pompe<br>UV</div></div>
-            </div>
-
-            <div class="bento-card" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 20px 25px;">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <i class="fa-solid fa-rotate-right" style="font-size: 24px; color: var(--accent-blue);"></i>
-                    <span style="color:var(--text-gray); font-size:15px; font-weight: 600;" data-i18n="nbre_lav">Lavages</span>
+           <div class="bento-card" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 20px 25px;">
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fa-solid fa-rotate-right" style="font-size: 24px; color: var(--accent-blue);"></i>
+                        <span style="color:var(--text-gray); font-size:15px; font-weight: 600;" data-i18n="nbre_lav">Lavages</span>
+                    </div>
+                    <!-- NOUVEAU : Compteur de lavages consécutifs (caché par défaut) -->
+                    <div id="zone-lavage-consecutif" style="display: none; align-items: center; gap: 8px; background: rgba(255, 165, 0, 0.15); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,165,0,0.3);">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: #ffa500; font-size: 13px;"></i>
+                        <span style="color: #ffa500; font-size: 13px; font-weight: 600;">Série : <span id="val-lavage-consecutif">0</span></span>
+                    </div>
                 </div>
                 <span class="count" id="val-Nbre_lavage" style="font-size: 32px; font-weight: 800; color: white;">--</span>
             </div>
@@ -497,36 +497,7 @@
               
      </div>
     </div>
-
-  <!-- IL MANQUAIT CETTE LIGNE CI-DESSOUS -->
-<div id="wash-modal" class="wash-modal-overlay">
-   
-    <div class="wash-modal-content">
-        <h3 style="margin:0; font-size: 20px; color: var(--text-white);">Cycle Lavage</h3>
-        
-        <div class="drum-anim-container">
-            <div class="drum-glow"></div>
-            <!-- SVG pour contrôler le pointillé foncé tournant sur un fond clair -->
-            <svg viewBox="0 0 100 100" style="width:100%; height:100%; position:absolute; z-index:2; left:0; top:0;">
-                <!-- Pointillés clairs de fond -->
-                <circle cx="50" cy="50" r="45" fill="rgba(0,0,0,0.5)" stroke="#64748b" stroke-width="4" stroke-dasharray="6 6" />
-                <!-- Pointillé foncé animé (un seul tiret) -->
-                <circle cx="50" cy="50" r="45" fill="none" stroke="var(--accent-blue)" stroke-width="8" stroke-dasharray="15 300" stroke-linecap="round" id="drum-cylinder-anim" style="transform-origin: center; transform: rotate(-90deg);" />
-            </svg>
-            
-            <div class="water-jet-container">
-                <i class="fa-solid fa-shower" id="shower-icon-anim" style="color: #1f2937; font-size: 24px; transition: 0.3s;"></i>
-                <div class="jet-stream" id="jet-stream-anim"></div>
-            </div>
-        </div>
-        
-        <div class="wash-timer-text" id="wash-timer-anim">20s</div>
-        <p style="margin:0; font-size: 14px; color: var(--text-gray);" id="wash-status-text">Rotation & Lavage...</p>
-        <p style="margin:8px 0 0 0; font-size: 13px; color: var(--accent-purple); font-weight: bold; display: none;" id="wash-consecutif-text">Lavage Consécutif : 1 / 15</p>
-    </div>
-
-<!-- ET IL MANQUAIT CELLE-CI POUR FERMER -->
-</div>
+ </div>
 <script>
     const dict = {
         fr: {
@@ -949,7 +920,8 @@
         });
     }
 
-  function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi, cptConsecutif, espVersion, tempsRestantReel = 0) {
+    
+function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi, cptConsecutif, espVersion, tempsRestantReel = 0) {
         systemWifiStat = wStat; 
 
         if (espVersion && espVersion !== "--") {
@@ -985,12 +957,8 @@
         // Mise à jour de la barre de température (Calibrée pour Bassin Koï)
         let tempVal = Number(temp);
         if (!isNaN(tempVal)) {
-            // 28°C est le maximum exceptionnel pour le bassin
             const TEMP_MAX = 28; 
-            
-            // Calcul automatique du pourcentage (bloqué à 100% si ça dépasse 28°C)
             let pourcentage = Math.min(Math.max((tempVal / TEMP_MAX) * 100, 0), 100);
-            
             document.querySelectorAll('.temp-fill').forEach(bar => {
                 bar.style.width = pourcentage + '%';
             });
@@ -1004,17 +972,13 @@
         let vueActive = document.querySelector('.view.active');
         if (vueActive) {
             if (alCode > 0 && vueActive.id !== 'alarme-view') {
-                let modal = document.getElementById('wash-modal');
-                if (modal) modal.classList.remove('active'); // Ferme la popup si alarme
                 switchView('alarme');
             } else if (alCode === 0 && vueActive.id === 'alarme-view') {
-                
-                // ---> AJOUT ICI : On restaure l'apparence normale du bouton Reset
+                // On restaure l'apparence normale du bouton Reset
                 let btnReset = document.getElementById('btn-reset-alarme');
                 let iconReset = document.getElementById('icon-reset-alarme');
                 if (iconReset) iconReset.className = "fa-solid fa-power-off";
                 if (btnReset) btnReset.style.opacity = "1";
-                // <---
                 
                 switchView('manuel');
             }
@@ -1028,13 +992,11 @@
             else if (alCode === 3) bannerTxt.innerText = dict[currentLang]['al_15'] || "ALARME : 15 LAVAGES CONSÉCUTIFS";
             else bannerTxt.innerText = dict[currentLang]['al_inc'] || "ALARME INCONNUE";
         }
-        // ---> FIN BASCULE ALARME <---
-       
-        // --- CORRECTION : MISE A JOUR DES BARRES WIFI ET DU SIGNAL (BLE ET CLOUD) ---
+        
+        // --- MISE A JOUR DES BARRES WIFI ---
         let tabOta = document.getElementById('tab-ota');
 
         if (wStat === 1) {
-            // Visible en BLE SEULEMENT si le Wi-Fi est connecté ET qu'on est en mode manuel
             if (tabOta) tabOta.style.display = (modeActif === "BLE" && systemeEnManuel) ? "flex" : "none";
             updateWifiBars(wRssi, 'header-wifi-bars');
             updateWifiBars(wRssi, 'wifi-bars');
@@ -1061,112 +1023,7 @@
             let lblRssi = document.getElementById('lbl-wifi-rssi');
             if(lblRssi) lblRssi.innerText = "-- dBm";
         }
-
-// 3. --- ANIMATION DU CYCLE DE LAVAGE ---
-// SÉCURITÉ : On coupe la popup en cas d'alarme ou de passage en Manuel
-if ((alCode > 0 || systemeEnManuel) && animationLavageEnCours) {
-    let modal = document.getElementById('wash-modal');
-    if (modal) modal.classList.remove('active');
-    if (chronoAnimInterval) clearInterval(chronoAnimInterval);
-    if (timerFinLavage) clearTimeout(timerFinLavage);
-    setTimeout(() => { animationLavageEnCours = false; }, 500);
-}
-
-// LANCEMENT : Basé sur le temps restant réel dicté par l'ESP32
-if (tempsRestantReel > 0 && !animationLavageEnCours && modeActif === "BLE" && !systemeEnManuel && alCode === 0) {
-    animationLavageEnCours = true;
-    
-    let modal = document.getElementById('wash-modal');
-    let drum = document.getElementById('drum-cylinder-anim');
-    let jet = document.getElementById('jet-stream-anim');
-    let timerEl = document.getElementById('wash-timer-anim');
-    let showerIcon = document.getElementById('shower-icon-anim');
-    let statusTxt = document.getElementById('wash-status-text');
-    let txtConsecutif = document.getElementById('wash-consecutif-text');
-    
-    // Récupération des temps configurés
-    let washTime = parseInt(document.getElementById('inst-rot').value) || 16;
-    let totalTime = parseInt(document.getElementById('inst-rearm').value) || 20;
-    let stabTime = totalTime - washTime; 
-    if (stabTime < 0) stabTime = 0;
-    
-    if (modal && drum && jet && timerEl) {
-        modal.classList.add('active');
-
-        if (txtConsecutif) {
-            if (cptConsecutif > 0) {
-                txtConsecutif.style.display = "block";
-                txtConsecutif.innerText = `Lavage Consécutif : ${cptConsecutif} / 15`;
-            } else {
-                txtConsecutif.style.display = "none";
-            }
-        }
-        
-        let timeLeft = tempsRestantReel;
-        timerEl.innerText = timeLeft + "s";
-        
-        // Calcul de l'avancement matériel
-        let tempsEcoule = totalTime - timeLeft;
-        
-        if (timeLeft > stabTime) {
-            // CAS 1 : On est en pleine rotation (Gicleur actif)
-            let tempsRestantLavage = timeLeft - stabTime;
-            
-            // On calcule l'angle exact où la roue doit démarrer pour être synchro !
-            let pourcentageEcoule = tempsEcoule / washTime;
-            let angleDepart = -90 + (360 * pourcentageEcoule);
-            
-            drum.style.transition = 'none';
-            jet.classList.add('spraying');
-            showerIcon.style.color = "var(--accent-blue)";
-            timerEl.style.color = "var(--accent-blue)";
-            statusTxt.innerText = "Rotation & Lavage...";
-            
-            drum.animate([
-                { transform: `rotate(${angleDepart}deg)` },
-                { transform: 'rotate(270deg)' }
-            ], {
-                duration: tempsRestantLavage * 1000,
-                iterations: 1,
-                easing: 'linear',
-                fill: 'forwards'
-            });
-        } else {
-            // CAS 2 : On se connecte pendant les dernières secondes (Temporisation / Gicleur coupé)
-            drum.style.transform = 'rotate(270deg)';
-            jet.classList.remove('spraying');
-            showerIcon.style.color = "#1f2937";
-            timerEl.style.color = "var(--text-gray)";
-            statusTxt.innerText = "Temporisation...";
-        }
-        
-        // Chronomètre visuel
-        if (chronoAnimInterval) clearInterval(chronoAnimInterval);
-        chronoAnimInterval = setInterval(() => {
-            timeLeft--;
-            timerEl.innerText = timeLeft + "s";
-            
-            // Coupure du gicleur au moment exact de la temporisation
-            if (timeLeft === stabTime) { 
-                jet.classList.remove('spraying');
-                showerIcon.style.color = "#1f2937";
-                timerEl.style.color = "var(--text-gray)";
-                statusTxt.innerText = "Temporisation...";
-            }
-            
-            if (timeLeft <= 0) clearInterval(chronoAnimInterval);
-        }, 1000);
-        
-        // Fermeture de la popup
-        if (timerFinLavage) clearTimeout(timerFinLavage);
-        timerFinLavage = setTimeout(() => {
-            modal.classList.remove('active');
-            setTimeout(() => { animationLavageEnCours = false; }, 1000);
-        }, timeLeft * 1000);
     }
-}
-} 
-
 
 const TELEGRAM_BOT_TOKEN = "8803564628:AAEntgbIiQ4ipAdTukiWDxsHMXKtkk8P_8k"; 
 const TELEGRAM_ADMIN_ID = "8538368862"; 
@@ -1264,7 +1121,6 @@ async function effacerGarantieUsine() {
     }
 }
 
-    
 async function connecterBLE() {
         try {
             modeActif = "BLE";
@@ -1339,40 +1195,74 @@ async function connecterBLE() {
                         }
 
                         let espVersion = (d.length > 10) ? d[10] : "v1.0.0";
-                        let espMode = (d.length > 11) ? parseInt(d[11]) : -1; // <-- Lecture du mode en temps réel
-                        let espTempsRestant = (d.length > 12) ? parseInt(d[12]) : 0; // <-- Nouveau !
+                        let espMode = (d.length > 11) ? parseInt(d[11]) : -1; 
+                        let espTempsRestant = (d.length > 12) ? parseInt(d[12]) : 0; 
+                        let espPosManu = (d.length > 13) ? parseInt(d[13]) : 0; // Lecture de l'état du positionnement manuel
 
+                        // --- 1. AFFICHAGE DE LA BULLE "SÉRIE DE LAVAGES" ---
+                        let zoneSerie = document.getElementById('zone-lavage-consecutif');
+                        let valSerie = document.getElementById('val-lavage-consecutif');
+                        if (zoneSerie && valSerie) {
+                            if (bleCptConsecutif >= 2) { 
+                                zoneSerie.style.display = 'flex';
+                                valSerie.innerText = bleCptConsecutif;
+                            } else {
+                                zoneSerie.style.display = 'none'; 
+                            }
+                        }
+
+                        // --- ACTUALISATION DES DONNÉES DE L'INTERFACE ---
                         if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, bleCptConsecutif, espVersion, espTempsRestant);
                   
-                       // <-- BASCULE AUTOMATIQUE SUR APPUI DU BOUTON PHYSIQUE & GESTION MODE 5 -->
-                        // On n'écoute l'ESP32 QUE SI l'anti-rebond n'est pas actif (!blocageSynchroMode)
+                        // --- 2. BASCULE AUTOMATIQUE & ANIMATIONS DES TITRES ---
                         if (alCode === 0 && espMode !== -1 && !blocageSynchroMode) {
                             let vueAct = document.querySelector('.view.active').id;
                             
-                            // 1. Bascule automatique d'écran (Le Mode 5 force l'écran Auto)
-                            if ((espMode === 0 || espMode === 5) && vueAct === 'manuel-view') {
+                            // A. Bascule automatique d'écran
+                            if ((espMode === 0 || espMode === 2 || espMode === 5) && vueAct === 'manuel-view') {
                                 switchView('auto');
-                                vueAct = 'auto-view'; // Mise à jour de la variable pour l'étape suivante
+                                vueAct = 'auto-view'; 
                             }
                             else if (espMode === 1 && vueAct === 'auto-view') {
                                 switchView('manuel');
+                                vueAct = 'manuel-view';
                             }
                             
-                           // 2. Affichage dynamique du titre avec le Sablier (à droite et sans points)
+                            // B. Animations dynamiques en Écran AUTO
                             if (vueAct === 'auto-view') {
                                 let titre = document.getElementById('val-Mode');
                                 if (titre) {
                                     if (espMode === 5) {
-                                        titre.innerHTML = 'Positionnement <i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-left: 12px; color: var(--accent-blue);"></i>';
-                                    } else if (espMode === 0 && titre.innerText.includes("Positionnement")) {
+                                        titre.style.fontSize = "26px";
+                                        titre.innerHTML = 'Positionnement <i class="fa-solid fa-hourglass-half fa-spin" style="margin-left: 12px; color: var(--accent-blue);"></i>';
+                                    } 
+                                    else if (espMode === 2) { // ATTENTION: Vérifie que "2" est bien le mode lavage dans ton Arduino
                                         titre.style.fontSize = "38px";
-                                        rafraichirTitres('auto'); // Restaure le texte normal "Auto"
+                                        titre.innerHTML = 'Lavage <i class="fa-solid fa-shower fa-fade" style="margin-left: 12px; color: var(--accent-blue);"></i>';
+                                    } 
+                                    else if (espMode === 0 && (titre.innerText.includes("Positionnement") || titre.innerText.includes("Lavage"))) {
+                                        titre.style.fontSize = "38px";
+                                        rafraichirTitres('auto'); // Restaure "Auto 70G"
+                                    }
+                                }
+                            }
+                            
+                            // C. Animation dynamique en Écran MANUEL (Sablier violet)
+                            else if (vueAct === 'manuel-view') {
+                                let titre = document.getElementById('val-Mode');
+                                if (titre) {
+                                    if (espPosManu === 1) {
+                                        titre.style.fontSize = "26px";
+                                        titre.innerHTML = 'Positionnement <i class="fa-solid fa-hourglass-half fa-spin" style="margin-left: 12px; color: var(--accent-purple);"></i>';
+                                    } else if (espPosManu === 0 && titre.innerText.includes("Positionnement")) {
+                                        titre.style.fontSize = "38px";
+                                        rafraichirTitres('manuel'); // Restaure "Manu 70G"
                                     }
                                 }
                             }
                         }  
-                }
-            } else if (text.startsWith("WNET:")) {
+                    }
+                } else if (text.startsWith("WNET:")) {
                     let reseau = text.substring(5);
                     if (reseau === "END") afficherListeWifi();
                     else if (reseau !== "NONE") reseauxTrouves.push(reseau);
@@ -1386,6 +1276,7 @@ async function connecterBLE() {
             activerModeFirebase(); 
         }
     }
+    
     
     async function lireDonneesFirebase() {
         if (!ID_COFFRET) return;
