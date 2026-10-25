@@ -57,15 +57,18 @@
         .temp-value-large { font-size: 52px; font-weight: 800; color: #ffffff; letter-spacing: -2px; margin-bottom: 15px; }
         .temp-value-large span { font-size: 22px; color: var(--text-gray); font-weight: 600; margin-left: 4px; letter-spacing: 0; }
         .temp-track { width: 100%; height: 14px; background: #000000; border-radius: 12px; overflow: hidden; border: 1px solid #1f2937; }
-     .temp-fill { 
-            height: 100%; 
-            width: 0%; 
-            border-radius: 10px; 
-            /* Dégradé inversé : Départ (Rouge clair) -> Milieu (Rouge vif) -> Fin (Bordeaux) */
-            background: linear-gradient(90deg, #f87171 0%, #ef4444 60%, #7f1d1d 100%);
-            box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); /* Conserve le halo rouge vif */
-            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
+        .temp-fill {
+          height: 100%;
+          border-radius: 20px;
+          /* Le nouveau dégradé : Bleu très foncé pur (0%) -> Rouge vif pur (100%) */
+          background: linear-gradient(90deg, #001acc 0%, #ff0000 100%);
+         /* L'astuce mathématique de révélation */
+         background-size: calc(10000% / var(--pourcentage, 100)) 100%;
+         background-position: left center;
+         background-repeat: no-repeat;
+         /* Pour que la barre glisse de façon fluide */
+         transition: width 0.4s ease-out;
+         }
         .btn-action-manuel { flex: 1; background-color: var(--bg-card); border: 1px solid var(--border-card); color: white; padding: 22px 15px; border-radius: 20px; font-weight: 700; font-size: 15px; text-transform: uppercase; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; transition: all 0.1s ease; user-select: none; -webkit-user-select: none; }
         .btn-action-manuel i { font-size: 28px; color: var(--text-gray); transition: 0.2s; }
         .btn-action-manuel.active { background-color: rgba(59, 130, 246, 0.1); border-color: var(--accent-blue); }
@@ -937,9 +940,11 @@ function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode,
             let pourcentage = Math.min(Math.max((tempVal / TEMP_MAX) * 100, 0), 100);
             document.querySelectorAll('.temp-fill').forEach(bar => {
                 bar.style.width = pourcentage + '%';
+                // --- NOUVELLE LIGNE : On envoie le pourcentage au CSS ---
+                bar.style.setProperty('--pourcentage', pourcentage > 1 ? pourcentage : 1);
             });
         }
-
+    
         // Sidebar ID Box
         let sideBox = document.getElementById('sidebar-box-id');
         if (sideBox && ID_COFFRET) sideBox.innerText = ID_COFFRET;
