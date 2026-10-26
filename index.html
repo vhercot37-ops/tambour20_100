@@ -524,6 +524,8 @@
             menu_ota: "Mise à jour", menu_lang: "Langue / Taal",
             menu_pdf: "Manuel d'utilisation",
             menu_installer: "Installateur",
+            wifi_conn: "Connecté", wifi_dec: "Déconnecté", ota_no_update: "À jour", ota_update_found: "Disponible",
+            menu_dealer: "Contact Revendeur", titre_dealer: "Votre Installateur",
             niv_secu: "Niveau Sécurité", niv_lav: "Niveau Lavage", couv: "Couvercle", pompe: "Pompe UV", nbre_lav: "Nombre de Lavages",
             btn_rot: "Rotation", btn_lav: "Lavage", titre_config: "Paramètres du Tambour", lbl_modele: "Modèle :", lbl_mode: "Mode :",
             opt_grav: "Gravitaire (G)", opt_pomp: "Pompage (P)", btn_save_tamb: "Enregistrer", titre_wifi: "Connexion Wi-Fi",
@@ -542,6 +544,8 @@
             menu_ota: "Update", menu_lang: "Langue / Taal",
             menu_pdf: "Handleiding",
             menu_installer: "Installateur",
+            wifi_conn: "Verbonden", wifi_dec: "Niet verbonden", ota_no_update: "Up-to-date", ota_update_found: "Beschikbaar",
+            menu_dealer: "Uw Installateur", titre_dealer: "Uw Installateur",
             niv_secu: "Beveiligingsniveau", niv_lav: "Spoelniveau", couv: "Deksel", pompe: "UV Pomp", nbre_lav: "Aantal Spoelingen",
             btn_rot: "Rotatie", btn_lav: "Spoelen", titre_config: "Trommel Instellingen", lbl_modele: "Model:", lbl_mode: "Modus:",
             opt_grav: "Zwaartekracht (G)", opt_pomp: "Pomp (P)", btn_save_tamb: "Opslaan", titre_wifi: "Wi-Fi Instellen",
@@ -745,11 +749,58 @@
         
         if (target !== 'alarme' && modeActif === "BLE") { envoyerCommande("PAGE", target.toUpperCase()); }
         if (target === 'history' && modeActif === "FIREBASE") { lireHistoriqueFirebase(); }
+        if (target === 'dealer') { chargerInfoDealer(); }
+        
     }
 
     function lierTelegram() {
         if (!ID_COFFRET) { alert("Erreur : Identifiant introuvable."); return; }
         window.open(`https://t.me/Vincent2010Bot?start=${encodeURIComponent(ID_COFFRET)}`, '_blank');
+    }
+
+
+    async function chargerInfoDealer() {
+        let elNom = document.getElementById('dlr-nom');
+        let elAdr = document.getElementById('dlr-adresse');
+        let elTel = document.getElementById('dlr-tel');
+        let elMail = document.getElementById('dlr-email');
+        let elWeb = document.getElementById('dlr-web');
+        
+        if (elNom) elNom.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Recherche...';
+        
+        if (!ID_COFFRET || ID_COFFRET === "Coffret_01") {
+            if (elNom) elNom.innerText = "Aucun coffret sélectionné";
+            return;
+        }
+        
+        try {
+            // Étape 1 : Demander au coffret quel est son ID de revendeur
+            let resClient = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/dealer_id.json?auth=${FIREBASE_AUTH}`);
+            let dealerId = await resClient.json();
+            
+            if (!dealerId) {
+                if (elNom) elNom.innerText = "Aucun revendeur associé.";
+                if (elAdr) elAdr.innerText = "Contactez le support";
+                return;
+            }
+            
+            // Étape 2 : Chercher la carte d'identité du revendeur dans l'annuaire global
+            let resDealer = await fetch(`${FIREBASE_HOST}dealers/${dealerId}.json?auth=${FIREBASE_AUTH}`);
+            let data = await resDealer.json();
+            
+            if (data) {
+                if (elNom) elNom.innerText = data.nom || "Nom inconnu";
+                if (elAdr) elAdr.innerText = data.adresse || "--";
+                if (elTel) elTel.innerText = data.telephone || "--";
+                if (elMail) elMail.innerText = data.email || "--";
+                if (elWeb) elWeb.innerText = data.website || "--";
+            } else {
+                if (elNom) elNom.innerText = "Fiche revendeur introuvable.";
+            }
+        } catch (e) {
+            console.error("Erreur Dealer :", e);
+            if (elNom) elNom.innerText = "Erreur de connexion";
+        }
     }
     
     async function lireHistoriqueFirebase() {
