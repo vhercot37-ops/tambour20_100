@@ -215,6 +215,7 @@
         <div class="sidebar-item" id="tab-ota" onclick="switchView('ota')"><i class="fa-solid fa-download"></i> <span data-i18n="menu_ota">Mise à jour</span></div>
         <div class="sidebar-item" id="tab-lang" onclick="switchView('lang')"><i class="fa-solid fa-language"></i> <span data-i18n="menu_lang">Langue / Taal</span></div>
         <div class="sidebar-item" id="tab-pdf" onclick="switchView('pdf')"><i class="fa-solid fa-file-pdf"></i> <span data-i18n="menu_pdf">Manuel</span></div>
+        <div class="sidebar-item" id="tab-dealer" onclick="switchView('dealer')" style="display: none;"><i class="fa-solid fa-address-card"></i> <span data-i18n="menu_dealer">Contact Revendeur</span></div>
         <div class="sidebar-item" id="tab-installer" onclick="switchView('installer')" style="display: none;"><i class="fa-solid fa-user-gear"></i> <span data-i18n="menu_installer">Installateur</span></div>
         <div id="sidebar-box-id" style="margin-top: auto; padding: 15px; text-align: center; color: var(--accent-blue); font-size: 14px; font-weight: 800; border-top: 1px solid var(--border-card); background: rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 20px;">Aucun coffret</div>
     </div>
@@ -474,14 +475,45 @@
             </div>
         </div>
 
+        
+        
          <div id="pdf-view" class="view">
             <div class="telegram-config-block" style="height: 70vh; padding: 15px; display: flex; flex-direction: column;">
                 <h3 data-i18n="menu_pdf" style="margin-top: 0; margin-bottom: 15px;">Manuel d'utilisation</h3>
                 <iframe src="https://firebasestorage.googleapis.com/v0/b/tambour20100-29236.firebasestorage.app/o/Manuel%20d'utilisation%20filtre%2020-100%2030-50-70.pdf?alt=media&token=4f6dcd61-d0ed-4537-84a7-b39efce1f13e" style="flex: 1; width: 100%; border: none; border-radius: 12px; background: white;"></iframe>
             </div>
+         </div>  
+
+         <div id="dealer-view" class="view">
+            <div class="telegram-config-block">
+                <h3 data-i18n="titre_dealer">Votre Installateur</h3>
+                <div style="background:#000000; padding:25px; border-radius:12px; margin-bottom:15px; border:1px solid #374151; text-align: left;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <i class="fa-solid fa-store" style="font-size: 45px; color: var(--accent-blue);"></i>
+                    </div>
+                    <h4 id="dlr-nom" style="margin: 0 0 20px 0; color: white; text-align: center; font-size: 22px;">Recherche en cours...</h4>
+                    
+                    <p style="margin: 12px 0; font-size: 15px; display: flex; align-items: center; gap: 12px;">
+                        <i class="fa-solid fa-location-dot" style="color: var(--text-gray); font-size: 20px; width: 25px; text-align: center;"></i> 
+                        <span id="dlr-adresse" style="color: white; line-height: 1.4;">--</span>
+                    </p>
+                    <p style="margin: 12px 0; font-size: 15px; display: flex; align-items: center; gap: 12px;">
+                        <i class="fa-solid fa-phone" style="color: var(--text-gray); font-size: 18px; width: 25px; text-align: center;"></i> 
+                        <span id="dlr-tel" style="color: white;">--</span>
+                    </p>
+                    <p style="margin: 12px 0; font-size: 15px; display: flex; align-items: center; gap: 12px;">
+                        <i class="fa-solid fa-envelope" style="color: var(--text-gray); font-size: 18px; width: 25px; text-align: center;"></i> 
+                        <span id="dlr-email" style="color: white;">--</span>
+                    </p>
+                    <p style="margin: 12px 0; font-size: 15px; display: flex; align-items: center; gap: 12px;">
+                        <i class="fa-solid fa-globe" style="color: var(--text-gray); font-size: 18px; width: 25px; text-align: center;"></i> 
+                        <span id="dlr-web" style="color: white;">--</span>
+                    </p>
+                </div>
+            </div>
          </div>
-              
-     </div>
+        
+     </div>    
     </div>
  </div>
 <script>
@@ -829,7 +861,7 @@
         if (modeActif === "FIREBASE") {
             if (tabAutoText) tabAutoText.innerText = "Monitoring";
 
-            ['tab-history', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "flex"; });
+            ['tab-history', 'tab-telegram', 'tab-dealer'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "flex"; });
             ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-ota', 'tab-pdf'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
 
             if (['manuel-view', 'config-view', 'wifi-view', 'ota-view'].includes(activeView)) {
@@ -845,6 +877,9 @@
            ['tab-config', 'tab-wifi', 'tab-pdf'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = styleConfig; });
 
             // L'affichage de l'onglet OTA est maintenant géré par l'état du Wi-Fi
+            // Affichage du bouton Dealer uniquement en BLE Manuel
+            let elDealer = document.getElementById('tab-dealer');
+            if (elDealer) elDealer.style.display = isManuel ? "flex" : "none";
 
            if (['history-view', 'telegram-view'].includes(activeView) || (!isManuel && ['config-view', 'wifi-view', 'ota-view', 'pdf-view'].includes(activeView))) {
                 if (activeView !== 'auto-view') { setTimeout(() => switchView('auto'), 10); }
