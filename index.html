@@ -97,7 +97,16 @@
         .lang-btn { flex: 1; padding: 16px; background: #000000; border: 1px solid #374151; color: white; font-weight: 700; border-radius: 14px; cursor: pointer;}
         .lang-btn.active { background: var(--accent-purple); border-color: var(--accent-purple); }
         
-        .chart-container { background: var(--bg-card); border-radius: 24px; padding: 20px; margin-bottom: 15px; border: 1px solid var(--border-card); }
+        .chart-container { 
+            background: var(--bg-card); 
+            border-radius: 24px; 
+            padding: 15px; /* J'ai un peu réduit le padding pour laisser plus de place au graphique */
+            margin-bottom: 15px; 
+            border: 1px solid var(--border-card); 
+            height: 35vh; /* Définit la hauteur à 35% de l'écran */
+            min-height: 250px; /* Assure une hauteur minimale */
+            position: relative; /* Indispensable pour que Chart.js respecte la hauteur */
+        }
         .progress-container { width: 100%; background-color: #000000; border-radius: 8px; margin-top: 15px; overflow: hidden; display: none; border: 1px solid #374151;}
         .progress-bar { height: 20px; background-color: var(--dot-green); width: 0%; transition: width 0.3s; }
         
@@ -952,6 +961,7 @@ async function chargerInfoDealer() {
 
         const commonOptions = { 
             responsive: true, 
+            maintainAspectRatio: false, // <--- NOUVELLE LIGNE INDISPENSABLE
             plugins: { legend: { labels: { color: '#ffffff' } } }, 
             scales: { 
                 x: { ticks: { color: '#94a3b8' }, grid: { color: '#1f2937' } }, 
