@@ -1519,53 +1519,54 @@ async function connecterBLE() {
             if(text) text.innerText = "Erreur App<->Cloud";
         }
     }
-    
-   async function activerModeFirebase() {
 
-       // --- DÉBUT DE LA MODIFICATION ---
-    // Si l'ID est celui par défaut, on demande à l'utilisateur de le saisir
-    if (!ID_COFFRET || ID_COFFRET === "Coffret_01") {
-        let idSaisi = prompt("Saisissez l'identifiant de votre coffret (visible en bas du menu sur votre GSM) :", "Coffret_");
-        if (idSaisi && idSaisi.trim() !== "") {
-            ID_COFFRET = idSaisi.trim();
-            localStorage.setItem("tambour_id", ID_COFFRET);
-        } else {
-            alert("Connexion Cloud annulée : Identifiant requis.");
-            return; // On arrête tout si aucun ID n'est fourni
+
+    
+async function activerModeFirebase() {
+        // 1. Vérification de l'ID (Instantané)
+        if (!ID_COFFRET || ID_COFFRET === "Coffret_01") {
+            let idSaisi = prompt("Saisissez l'identifiant de votre coffret (visible en bas du menu sur votre GSM) :", "Coffret_");
+            if (idSaisi && idSaisi.trim() !== "") {
+                ID_COFFRET = idSaisi.trim();
+                localStorage.setItem("tambour_id", ID_COFFRET);
+            } else {
+                alert("Connexion Cloud annulée : Identifiant requis.");
+                return; // On arrête tout si aucun ID n'est fourni
+            }
         }
-    }
-    // --- FIN DE LA MODIFICATION ---
-       
-       if (ID_COFFRET) {
+
+        // 2. CHANGEMENTS VISUELS IMMÉDIATS (Le bouton réagit à la milliseconde)
+        modeActif = "FIREBASE";
+        premiereSynchroFaite = false; 
+        attenteDonneesFraiches = true;
+        dernierPing = -1;
+        tempsDernierPing = Date.now();
+        
+        let btnBle = document.getElementById('btn-mode-ble');
+        let btnCloud = document.getElementById('btn-mode-cloud');
+        if(btnBle) btnBle.className = "mode-btn";
+        if(btnCloud) btnCloud.className = "mode-btn active"; // Le bouton devient bleu tout de suite !
+        
+        adapterInterfaceSelonMode(); 
+        
+        let titre = document.getElementById('val-Mode');
+        if (titre) titre.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Connexion...';
+        afficherMaitresDonnees("--.-", null, null, null, null, "--", "--", 0, 0, -100);
+
+        // 3. APPEL RÉSEAU EN ARRIÈRE-PLAN (Prend son temps sans figer l'écran)
+        if (ID_COFFRET) {
             try {
-                await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
+                // On retire le "await" pour ne pas bloquer le fil d'exécution
+                fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
                     method: 'PATCH', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ 
                         mode_ble: false,
                         dernier_ping_timestamp: Date.now()
                     })
-                });
-            } catch(e) { console.error("Erreur mode_ble false", e); }
+                }).catch(e => console.error("Erreur mode_ble false", e));
+            } catch(e) {}
         }
-
-        modeActif = "FIREBASE";
-        premiereSynchroFaite = false; 
-        
-        attenteDonneesFraiches = true;
-        dernierPing = -1;
-        tempsDernierPing = Date.now();
-         
-        adapterInterfaceSelonMode(); 
-        
-        let titre = document.getElementById('val-Mode');
-        if (titre) titre.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Connexion...';
-        afficherMaitresDonnees("--.-", null, null, null, null, "--", "--", 0, 0, -100);
-        
-        let btnBle = document.getElementById('btn-mode-ble');
-        let btnCloud = document.getElementById('btn-mode-cloud');
-        if(btnBle) btnBle.className = "mode-btn";
-        if(btnCloud) btnCloud.className = "mode-btn active";
         
         setTimeout(() => { if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect(); }, 500);
         
@@ -1574,6 +1575,7 @@ async function connecterBLE() {
         timerFirebase = setInterval(lireDonneesFirebase, 5000);
     }
 
+    
     function scannerWifi() { 
         let btn = document.getElementById('btn-scanner');
         let icon = document.getElementById('icon-scanner');
