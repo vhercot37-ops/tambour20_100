@@ -767,7 +767,7 @@
     }
 
 
-    async function chargerInfoDealer() {
+async function chargerInfoDealer() {
         let elNom = document.getElementById('dlr-nom');
         let elAdr = document.getElementById('dlr-adresse');
         let elTel = document.getElementById('dlr-tel');
@@ -782,7 +782,7 @@
         }
         
         try {
-            // Étape 1 : Demander au coffret quel est son ID de revendeur
+            // 1. Demander au coffret quel est son ID de revendeur
             let resClient = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/dealer_id.json?auth=${FIREBASE_AUTH}`);
             let dealerId = await resClient.json();
             
@@ -792,16 +792,56 @@
                 return;
             }
             
-            // Étape 2 : Chercher la carte d'identité du revendeur dans l'annuaire global
+            // 2. Chercher la carte d'identité du revendeur
             let resDealer = await fetch(`${FIREBASE_HOST}dealers/${dealerId}.json?auth=${FIREBASE_AUTH}`);
             let data = await resDealer.json();
             
             if (data) {
                 if (elNom) elNom.innerText = data.nom || "Nom inconnu";
-                if (elAdr) elAdr.innerText = data.adresse || "--";
-                if (elTel) elTel.innerText = data.telephone || "--";
-                if (elMail) elMail.innerText = data.email || "--";
-                if (elWeb) elWeb.innerText = data.website || "--";
+                
+                // Style commun pour montrer que c'est cliquable (souligné)
+                const styleLien = 'style="color: inherit; text-decoration: underline;"';
+
+                // --- ADRESSE ACTIVE (Ouvre Google Maps) ---
+                if (elAdr) {
+                    if (data.adresse) {
+                        let adresseEncodee = encodeURIComponent(data.adresse);
+                        elAdr.innerHTML = `<a href="https://www.google.com/maps/search/?api=1&query=${adresseEncodee}" target="_blank" ${styleLien}>${data.adresse}</a>`;
+                    } else {
+                        elAdr.innerText = "--";
+                    }
+                }
+                
+                // --- TÉLÉPHONE ACTIF (Ouvre le composeur du GSM) ---
+                if (elTel) {
+                    if (data.telephone) {
+                        // On enlève les espaces pour que le téléphone comprenne bien le numéro
+                        let telPropre = data.telephone.replace(/\s+/g, '');
+                        elTel.innerHTML = `<a href="tel:${telPropre}" ${styleLien}>${data.telephone}</a>`;
+                    } else {
+                        elTel.innerText = "--";
+                    }
+                }
+                
+                // --- EMAIL ACTIF (Ouvre Outlook/Gmail/Apple Mail) ---
+                if (elMail) {
+                    if (data.email) {
+                        elMail.innerHTML = `<a href="mailto:${data.email}" ${styleLien}>${data.email}</a>`;
+                    } else {
+                        elMail.innerText = "--";
+                    }
+                }
+                
+                // --- SITE WEB ACTIF (Ouvre un nouvel onglet) ---
+                if (elWeb) {
+                    if (data.website) {
+                        // On sécurise le lien au cas où tu aurais oublié le "https://" dans Firebase
+                        let urlWeb = data.website.startsWith('http') ? data.website : 'https://' + data.website;
+                        elWeb.innerHTML = `<a href="${urlWeb}" target="_blank" ${styleLien}>${data.website}</a>`;
+                    } else {
+                        elWeb.innerText = "--";
+                    }
+                }
             } else {
                 if (elNom) elNom.innerText = "Fiche revendeur introuvable.";
             }
