@@ -774,83 +774,83 @@ async function chargerInfoDealer() {
         let elMail = document.getElementById('dlr-email');
         let elWeb = document.getElementById('dlr-web');
         
+        // Nouveaux éléments pour le logo
+        let elLogoCont = document.getElementById('dlr-logo-container');
+        let elLogo = document.getElementById('dlr-logo');
+        
         if (elNom) elNom.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Recherche...';
         
         if (!ID_COFFRET || ID_COFFRET === "Coffret_01") {
             if (elNom) elNom.innerText = "Aucun coffret sélectionné";
+            if (elLogoCont) elLogoCont.style.display = "none";
             return;
         }
         
         try {
-            // 1. Demander au coffret quel est son ID de revendeur
             let resClient = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/dealer_id.json?auth=${FIREBASE_AUTH}`);
             let dealerId = await resClient.json();
             
             if (!dealerId) {
                 if (elNom) elNom.innerText = "Aucun revendeur associé.";
                 if (elAdr) elAdr.innerText = "Contactez le support";
+                if (elLogoCont) elLogoCont.style.display = "none";
                 return;
             }
             
-            // 2. Chercher la carte d'identité du revendeur
             let resDealer = await fetch(`${FIREBASE_HOST}dealers/${dealerId}.json?auth=${FIREBASE_AUTH}`);
             let data = await resDealer.json();
             
             if (data) {
                 if (elNom) elNom.innerText = data.nom || "Nom inconnu";
                 
-                // Style commun pour montrer que c'est cliquable (souligné)
+                // --- GESTION DU LOGO ---
+                if (elLogoCont && elLogo) {
+                    if (data.logo_url && data.logo_url.trim() !== "") {
+                        elLogo.src = data.logo_url;
+                        elLogoCont.style.display = "block"; // On affiche le cadre
+                    } else {
+                        elLogoCont.style.display = "none"; // On le cache s'il n'y a pas d'image
+                    }
+                }
+
                 const styleLien = 'style="color: inherit; text-decoration: underline;"';
 
-                // --- ADRESSE ACTIVE (Ouvre Google Maps) ---
                 if (elAdr) {
                     if (data.adresse) {
                         let adresseEncodee = encodeURIComponent(data.adresse);
                         elAdr.innerHTML = `<a href="https://www.google.com/maps/search/?api=1&query=${adresseEncodee}" target="_blank" ${styleLien}>${data.adresse}</a>`;
-                    } else {
-                        elAdr.innerText = "--";
-                    }
+                    } else { elAdr.innerText = "--"; }
                 }
                 
-                // --- TÉLÉPHONE ACTIF (Ouvre le composeur du GSM) ---
                 if (elTel) {
                     if (data.telephone) {
-                        // On enlève les espaces pour que le téléphone comprenne bien le numéro
                         let telPropre = data.telephone.replace(/\s+/g, '');
                         elTel.innerHTML = `<a href="tel:${telPropre}" ${styleLien}>${data.telephone}</a>`;
-                    } else {
-                        elTel.innerText = "--";
-                    }
+                    } else { elTel.innerText = "--"; }
                 }
                 
-                // --- EMAIL ACTIF (Ouvre Outlook/Gmail/Apple Mail) ---
                 if (elMail) {
                     if (data.email) {
                         elMail.innerHTML = `<a href="mailto:${data.email}" ${styleLien}>${data.email}</a>`;
-                    } else {
-                        elMail.innerText = "--";
-                    }
+                    } else { elMail.innerText = "--"; }
                 }
                 
-                // --- SITE WEB ACTIF (Ouvre un nouvel onglet) ---
                 if (elWeb) {
                     if (data.website) {
-                        // On sécurise le lien au cas où tu aurais oublié le "https://" dans Firebase
                         let urlWeb = data.website.startsWith('http') ? data.website : 'https://' + data.website;
                         elWeb.innerHTML = `<a href="${urlWeb}" target="_blank" ${styleLien}>${data.website}</a>`;
-                    } else {
-                        elWeb.innerText = "--";
-                    }
+                    } else { elWeb.innerText = "--"; }
                 }
             } else {
                 if (elNom) elNom.innerText = "Fiche revendeur introuvable.";
+                if (elLogoCont) elLogoCont.style.display = "none";
             }
         } catch (e) {
             console.error("Erreur Dealer :", e);
             if (elNom) elNom.innerText = "Erreur de connexion";
+            if (elLogoCont) elLogoCont.style.display = "none";
         }
     }
-
 
         async function chargerListeDealersInstallateur() {
         let select = document.getElementById('inst-dealer');
