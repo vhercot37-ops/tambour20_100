@@ -802,7 +802,16 @@ async function chargerInfoDealer() {
             let data = await resDealer.json();
             
             if (data) {
-                if (elNom) elNom.innerText = data.nom || "Nom inconnu";
+                // --- 1. GESTION DU NOM ---
+                if (elNom) {
+                    if (data.nom && data.nom.trim() !== "") {
+                        elNom.innerText = data.nom;
+                        elNom.style.display = "block"; // Affiche le nom s'il existe
+                    } else {
+                        elNom.innerText = "";
+                        elNom.style.display = "none"; // Cache complètement le texte si vide
+                    }
+                }
                 
                 // --- 1. GESTION DE L'IMAGE (LOGO PNG) ---
                 if (elLogoCont && elLogo) {
