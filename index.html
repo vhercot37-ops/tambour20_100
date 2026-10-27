@@ -496,8 +496,9 @@
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_dealer">Votre Installateur</h3>
                 <div style="background:#000000; padding:25px; border-radius:12px; margin-bottom:15px; border:1px solid #374151; text-align: left;">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <i class="fa-solid fa-store" style="font-size: 45px; color: var(--accent-blue);"></i>
+                   <!-- COLLE CECI À LA PLACE : -->
+                    <div id="dlr-logo-container" style="text-align: center; margin-bottom: 20px; display: none;">
+                    <img id="dlr-logo" src="" alt="Logo Revendeur" style="max-width: 100%; max-height: 150px; border-radius: 8px; object-fit: contain; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
                     </div>
                     <h4 id="dlr-nom" style="margin: 0 0 20px 0; color: white; text-align: center; font-size: 22px;">Recherche en cours...</h4>
                     
@@ -774,7 +775,7 @@ async function chargerInfoDealer() {
         let elMail = document.getElementById('dlr-email');
         let elWeb = document.getElementById('dlr-web');
         
-        // Nouveaux éléments pour le logo
+        // Nouveaux éléments pour le logo (Image PNG)
         let elLogoCont = document.getElementById('dlr-logo-container');
         let elLogo = document.getElementById('dlr-logo');
         
@@ -803,18 +804,20 @@ async function chargerInfoDealer() {
             if (data) {
                 if (elNom) elNom.innerText = data.nom || "Nom inconnu";
                 
-                // --- GESTION DU LOGO ---
+                // --- 1. GESTION DE L'IMAGE (LOGO PNG) ---
                 if (elLogoCont && elLogo) {
                     if (data.logo_url && data.logo_url.trim() !== "") {
                         elLogo.src = data.logo_url;
-                        elLogoCont.style.display = "block"; // On affiche le cadre
+                        elLogoCont.style.display = "block"; // Affiche l'image
                     } else {
-                        elLogoCont.style.display = "none"; // On le cache s'il n'y a pas d'image
+                        elLogoCont.style.display = "none"; // Cache le cadre si pas d'image
                     }
                 }
 
-                const styleLien = 'style="color: inherit; text-decoration: underline;"';
+                // Style pour montrer que le texte est un lien cliquable
+                const styleLien = 'style="color: #60a5fa; text-decoration: underline;"';
 
+                // --- 2. TEXTES ACTIFS (Google Maps, Tel, Email, Web) ---
                 if (elAdr) {
                     if (data.adresse) {
                         let adresseEncodee = encodeURIComponent(data.adresse);
@@ -852,7 +855,8 @@ async function chargerInfoDealer() {
         }
     }
 
-        async function chargerListeDealersInstallateur() {
+    
+    async function chargerListeDealersInstallateur() {
         let select = document.getElementById('inst-dealer');
         if (!select) return;
         
