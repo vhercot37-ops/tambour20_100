@@ -624,7 +624,7 @@
     const FIREBASE_HOST = "https://tambour20100-29236-default-rtdb.firebaseio.com/";
     const FIREBASE_AUTH = "rsihDyLcNkHwThAEuCIbkjFm8bwPbnmKxHIr6mkT";
     
-    let ID_COFFRET = localStorage.getItem("tambour_id") || "Coffret_01"; 
+    let ID_COFFRET = localStorage.getItem("tambour_id") || "Box_01"; 
     let bleDevice = null;
     let rxCharacteristic = null;
     let txCharacteristic = null;
@@ -1597,7 +1597,7 @@ async function connecterBLE() {
     
 async function activerModeFirebase() {
         // 1. Vérification de l'ID (Instantané)
-        if (!ID_COFFRET || ID_COFFRET === "Coffret_01") {
+        if (!ID_COFFRET || ID_COFFRET === "Box_01") {
             let idSaisi = prompt("Saisissez l'identifiant de votre coffret (visible en bas du menu sur votre GSM) :", "Coffret_");
             if (idSaisi && idSaisi.trim() !== "") {
                 ID_COFFRET = idSaisi.trim();
