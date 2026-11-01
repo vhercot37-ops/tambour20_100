@@ -1598,7 +1598,7 @@ async function connecterBLE() {
 async function activerModeFirebase() {
         // 1. Vérification de l'ID (Instantané)
         if (!ID_COFFRET || ID_COFFRET === "Box_01") {
-            let idSaisi = prompt("Saisissez l'identifiant de votre coffret (visible en bas du menu sur votre GSM) :", "Coffret_");
+            let idSaisi = prompt("Saisissez l'identifiant de votre coffret (visible en bas du menu sur votre GSM) :", "Box_");
             if (idSaisi && idSaisi.trim() !== "") {
                 ID_COFFRET = idSaisi.trim();
                 localStorage.setItem("tambour_id", ID_COFFRET);
