@@ -1842,72 +1842,86 @@ async function activerModeFirebase() {
             }
         }, 500);
     }
+
     
 function initBoutonsManuels() {
-        const lier = (idBtn, nomAction) => {
-            const btn = document.getElementById(idBtn);
-            if (!btn) return;
+    const lier = (idBtn, nomAction) => {
+        const btn = document.getElementById(idBtn);
+        if (!btn) return;
+        
+        const onDown = (e) => { 
+            e.preventDefault(); 
+            btn.classList.add('active'); 
+            envoyerCommande(nomAction, 1); 
             
-            const onDown = (e) => { 
-                e.preventDefault(); 
-                btn.classList.add('active'); 
-                envoyerCommande(nomAction, 1); 
-                
-                // --- Blocage visuel immédiat à l'appui ---
-                if (idBtn === 'btn-positionnement') {
-                    let btnRot = document.getElementById('btn-man-rotation');
-                    if (btnRot) {
-                        btnRot.style.opacity = "0.2";
-                        btnRot.style.pointerEvents = "none";
-                        btnRot.classList.remove('active'); 
-                    }
+            // --- Blocage et Changement de titre immédiat ---
+            if (idBtn === 'btn-positionnement') {
+                let btnRot = document.getElementById('btn-man-rotation');
+                if (btnRot) {
+                    btnRot.style.opacity = "0.2";
+                    btnRot.style.pointerEvents = "none";
+                    btnRot.classList.remove('active'); 
                 }
-            };
-            
-            const onUp = (e) => { 
-                e.preventDefault(); 
-                btn.classList.remove('active'); 
-                envoyerCommande(nomAction, 0); 
-                
-                // ON NE DÉBLOQUE PLUS LE BOUTON ICI.
-                // On laisse la routine de réception des données (BLE/Firebase) 
-                // s'en charger quand le titre de la page redeviendra normal.
-            };
-            
-            btn.addEventListener('mousedown', onDown); 
-            btn.addEventListener('mouseup', onUp); 
-            btn.addEventListener('mouseleave', onUp); 
-            btn.addEventListener('touchstart', onDown, {passive: false}); 
-            btn.addEventListener('touchend', onUp, {passive: false}); 
-            btn.addEventListener('touchcancel', onUp, {passive: false});
+                let titre = document.getElementById('val-Mode');
+                if (titre) titre.innerHTML = 'Positionnement <i class="fa-solid fa-hourglass-half fa-spin" style="margin-left: 12px; color: var(--accent-purple);"></i>';
+            }
         };
         
-        lier('btn-man-rotation', 'Rotation'); 
-        lier('btn-man-lavage', 'Lavage');
-        lier('btn-positionnement', 'POS_TAMBOUR');
-    }
-            
+        const onUp = (e) => { 
+            e.preventDefault(); 
+            btn.classList.remove('active'); 
+            envoyerCommande(nomAction, 0); 
+        };
+        
+        btn.addEventListener('mousedown', onDown); 
+        btn.addEventListener('mouseup', onUp); 
+        btn.addEventListener('mouseleave', onUp); 
+        btn.addEventListener('touchstart', onDown, {passive: false}); 
+        btn.addEventListener('touchend', onUp, {passive: false}); 
+        btn.addEventListener('touchcancel', onUp, {passive: false});
+    };
+    
+    lier('btn-man-rotation', 'Rotation'); 
+    lier('btn-man-lavage', 'Lavage');
+    lier('btn-positionnement', 'POS_TAMBOUR');
+}
+
+    
 function toggleSidebarMenu() { 
         let btn = document.querySelector('.menu-toggle-btn');
         let menu = document.getElementById('sidebarMenu');
         if(menu) menu.classList.toggle('open'); 
     }
     
-    document.addEventListener('DOMContentLoaded', () => {
-        initBoutonsManuels(); 
-        chargerMemos(); 
-        adapterInterfaceSelonMode(); 
+   document.addEventListener('DOMContentLoaded', () => {
+    initBoutonsManuels(); 
+    chargerMemos(); 
+    adapterInterfaceSelonMode(); 
+    
+    switchView('ble'); 
+    
+    setLang(currentLang); 
+    
+    let textStatus = document.getElementById('app-conn-text');
+    if (textStatus) {
+        textStatus.removeAttribute('data-i18n');
+        textStatus.innerText = "Déconnecté";
+    }
+
+    // --- NOUVEAU : LA SENTINELLE DU BOUTON ROTATION ---
+    setInterval(() => {
+        let titre = document.getElementById('val-Mode');
+        let btnRot = document.getElementById('btn-man-rotation');
         
-        switchView('ble'); 
-        
-        setLang(currentLang); 
-        
-        let textStatus = document.getElementById('app-conn-text');
-        if (textStatus) {
-            textStatus.removeAttribute('data-i18n');
-            textStatus.innerText = "Déconnecté";
+        if (titre && btnRot) {
+            // Si le titre ne contient PAS le mot "Positionnement", on débloque !
+            if (!titre.innerText.includes("Positionnement")) {
+                btnRot.style.opacity = "1";
+                btnRot.style.pointerEvents = "auto";
+            }
         }
-    });
+    }, 500); // Vérifie toutes les demi-secondes
+});
 
     function verifierMotDePasseInstallateur() {
         const inputPass = document.getElementById('inst-pass-input').value;
