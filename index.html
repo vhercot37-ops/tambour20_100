@@ -1334,7 +1334,7 @@ async function connecterBLE() {
             if(dotStatus) { dotStatus.className = "fa-brands fa-bluetooth pulsing"; dotStatus.style.color = "#f59e0b"; }
 
             bleDevice = await navigator.bluetooth.requestDevice({ 
-                filters: [{ namePrefix: 'Tambour_' }], 
+                filters: [{ namePrefix: 'Box_' }], 
                 optionalServices: [SERVICE_UUID] 
             });
             
