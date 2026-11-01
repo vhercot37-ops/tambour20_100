@@ -159,15 +159,18 @@
      <!-- L'icône unique pour l'écran d'accueil de l'iPhone -->
      <link rel="apple-touch-icon" href="./icon.png">
 
-        
-    /* --- AJUSTEMENTS ÉCRAN MANUEL SANS SCROLLING --- */
-    /* Rend le bouton Positionnement plus fin, avec icône et texte alignés à l'horizontale */
+   /* Rend le bouton Positionnement plus fin, avec icône et texte alignés à l'horizontale */
     .btn-thin-manuel {
-        flex-direction: row; 
-        padding: 15px !important; 
-        margin-bottom: 15px;
+        flex-direction: row !important; 
+        padding: 16px !important; 
+        margin-bottom: 15px !important;
+        justify-content: center !important;
+        gap: 12px !important;
     }
-    .btn-thin-manuel i { font-size: 22px; }
+    .btn-thin-manuel i { 
+        font-size: 24px !important; 
+        margin-bottom: 0 !important;
+    }
 
     /* Écrase légèrement les 4 tuiles du bas (annule le format carré 1/1) */
     .compact-grid .status-tile {
