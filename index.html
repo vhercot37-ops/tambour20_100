@@ -1441,7 +1441,7 @@ async function connecterBLE() {
                                     
                                     if (espMode === 5) {
                                         titre.style.fontSize = "26px";
-                                        titre.innerHTML = 'Positionnement <i class="fa-solid fa-hourglass-half fa-spin" style="margin-left: 12px; color: var(--accent-blue);"></i>';
+                                        titre.innerHTML = 'Positionnement <i class="fa-solid fa-arrows-rotate fa-spin" style="margin-left: 12px; color: var(--accent-blue);"></i>';
                                     } 
                                     else if (espMode === 2) { // ATTENTION: Vérifie que "2" est bien le mode lavage dans ton Arduino
                                         titre.style.fontSize = "38px";
@@ -1863,7 +1863,10 @@ function initBoutonsManuels() {
                     btnRot.classList.remove('active'); 
                 }
                 let titre = document.getElementById('val-Mode');
-                if (titre) titre.innerHTML = 'Positionnement <i class="fa-solid fa-arrows-rotate fa-spin" style="margin-left: 12px; color: var(--accent-purple);"></i>';
+                if (titre) {
+                             titre.style.fontSize = "26px";
+                             titre.innerHTML = 'Positionnement <i class="fa-solid fa-arrows-rotate fa-spin" style="margin-left: 12px; color: var(--accent-purple);"></i>';
+                           }
             }
         };
         
