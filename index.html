@@ -1853,7 +1853,7 @@ function initBoutonsManuels() {
                 btn.classList.add('active'); 
                 envoyerCommande(nomAction, 1); 
                 
-                // --- Blocage immédiat si on lance le Positionnement ---
+                // --- Blocage visuel immédiat à l'appui ---
                 if (idBtn === 'btn-positionnement') {
                     let btnRot = document.getElementById('btn-man-rotation');
                     if (btnRot) {
@@ -1869,15 +1869,9 @@ function initBoutonsManuels() {
                 btn.classList.remove('active'); 
                 envoyerCommande(nomAction, 0); 
                 
-                // --- NOUVEAU : Déblocage immédiat au relâchement ---
-                if (idBtn === 'btn-positionnement') {
-                    let btnRot = document.getElementById('btn-man-rotation');
-                    if (btnRot) {
-                        // On réactive visuellement le bouton et les clics
-                        btnRot.style.opacity = "1";
-                        btnRot.style.pointerEvents = "auto";
-                    }
-                }
+                // ON NE DÉBLOQUE PLUS LE BOUTON ICI.
+                // On laisse la routine de réception des données (BLE/Firebase) 
+                // s'en charger quand le titre de la page redeviendra normal.
             };
             
             btn.addEventListener('mousedown', onDown); 
@@ -1892,7 +1886,6 @@ function initBoutonsManuels() {
         lier('btn-man-lavage', 'Lavage');
         lier('btn-positionnement', 'POS_TAMBOUR');
     }
-    
             
 function toggleSidebarMenu() { 
         let btn = document.querySelector('.menu-toggle-btn');
