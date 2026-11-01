@@ -1460,8 +1460,8 @@ async function connecterBLE() {
                                 if (titre) {
                                     if (espPosManu === 1) {
                                         titre.style.fontSize = "26px";
-                                        titre.innerHTML = 'Positionnement <i class="fa-solid fa-hourglass-half fa-spin" style="margin-left: 12px; color: var(--accent-purple);"></i>';
-                                    } else if (espPosManu === 0 && titre.innerText.includes("Positionnement")) {
+                                        titre.innerHTML = 'Positionnement <i class="fa-solid fa-arrows-rotate fa-spin" style="margin-left: 12px; color: var(--accent-purple);"></i>';
+                                        } else if (espPosManu === 0 && titre.innerText.includes("Positionnement")) {
                                         titre.style.fontSize = "38px";
                                         rafraichirTitres('manuel'); // Restaure "Manu 70G"
                                     }
