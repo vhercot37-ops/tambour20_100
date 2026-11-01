@@ -1847,16 +1847,46 @@ function initBoutonsManuels() {
     const lier = (idBtn, nomAction) => {
         const btn = document.getElementById(idBtn);
         if (!btn) return;
-        const onDown = (e) => { e.preventDefault(); btn.classList.add('active'); envoyerCommande(nomAction, 1); };
-        const onUp = (e) => { e.preventDefault(); btn.classList.remove('active'); envoyerCommande(nomAction, 0); };
-        btn.addEventListener('mousedown', onDown); btn.addEventListener('mouseup', onUp); btn.addEventListener('mouseleave', onUp); 
-        btn.addEventListener('touchstart', onDown, {passive: false}); btn.addEventListener('touchend', onUp, {passive: false}); btn.addEventListener('touchcancel', onUp, {passive: false});
+        
+        const onDown = (e) => { 
+            e.preventDefault(); 
+            btn.classList.add('active'); 
+            envoyerCommande(nomAction, 1); 
+            
+            // --- NOUVEAU : Blocage immédiat si on lance le Positionnement ---
+            if (idBtn === 'btn-positionnement') {
+                let btnRot = document.getElementById('btn-man-rotation');
+                if (btnRot) {
+                    btnRot.style.opacity = "0.2";
+                    btnRot.style.pointerEvents = "none";
+                    btnRot.classList.remove('active'); // Sécurité
+                }
+            }
+        };
+        
+        const onUp = (e) => { 
+            e.preventDefault(); 
+            btn.classList.remove('active'); 
+            envoyerCommande(nomAction, 0); 
+            
+            // Note : On ne réactive pas le bouton Rotation ici au relâchement, 
+            // on laisse la fonction d'écoute BLE (afficherMaitresDonnees) 
+            // s'en charger quand l'ESP32 confirmera que le positionnement est fini.
+        };
+        
+        btn.addEventListener('mousedown', onDown); 
+        btn.addEventListener('mouseup', onUp); 
+        btn.addEventListener('mouseleave', onUp); 
+        btn.addEventListener('touchstart', onDown, {passive: false}); 
+        btn.addEventListener('touchend', onUp, {passive: false}); 
+        btn.addEventListener('touchcancel', onUp, {passive: false});
     };
     
     lier('btn-man-rotation', 'Rotation'); 
     lier('btn-man-lavage', 'Lavage');
-    lier('btn-positionnement', 'POS_TAMBOUR'); // NOUVEAU BOUTON (Vérifie le mot-clé pour ton ESP32)
+    lier('btn-positionnement', 'POS_TAMBOUR');
 }
+    
             
 function toggleSidebarMenu() { 
         let btn = document.querySelector('.menu-toggle-btn');
