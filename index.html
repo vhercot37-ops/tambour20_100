@@ -10,7 +10,7 @@
     <meta name="theme-color" content="#000000">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <style>
         :root { 
             --bg-main: #000000;
@@ -23,16 +23,16 @@
             --accent-purple: #9d4edd; 
             --accent-blue: #3b82f6; 
         }
-        
+
         body { background-color: var(--bg-main); color: var(--text-white); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; overflow-x: hidden; }
        .phone-container { width: 100%; max-width: 500px; background-color: var(--bg-main); padding: max(env(safe-area-inset-top, 20px), 20px) 20px 30px 20px; box-sizing: border-box; display: flex; flex-direction: column; position: relative; min-height: 100vh; overflow-x: hidden; }
-        
+
         header { text-align: center; margin-bottom: 25px; position: relative; display: flex; flex-direction: column; width: 100%; padding: 0; }
         .header-title-row { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 15px; }
         .main-title { font-size: 38px; font-weight: 900; margin: 0; text-align: left; color: var(--text-white); letter-spacing: -0.5px; flex: 1; }
         .menu-toggle-btn { background: var(--bg-card); border: 1px solid var(--border-card); color: var(--text-white); width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; transition: 0.3s; font-size: 16px; margin-left: 15px; flex-shrink: 0; }
         .menu-toggle-btn.disabled { opacity: 0.3; pointer-events: none; }
-        
+
         .sidebar-menu { position: absolute; top: 0; right: -280px; width: 260px; height: 100%; background-color: rgba(17, 24, 39, 0.95); backdrop-filter: blur(10px); border-left: 1px solid var(--border-card); z-index: 99; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 80px 15px 20px 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
         .sidebar-menu.open { right: 0; }
         .sidebar-item { background: transparent; border: none; color: var(--text-gray); padding: 14px 16px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
@@ -41,18 +41,18 @@
         .view { display: none; animation: fadeIn 0.3s ease; } 
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
+
         .bento-card { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 24px; padding: 22px; margin-bottom: 15px; position: relative; overflow: hidden; }
         .bento-grid-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
         .status-tile { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1 / 1; }
         .status-tile-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .status-tile-icon { font-size: 26px; color: var(--text-gray); opacity: 0.7; }
         .status-tile-title { font-size: 14px; font-weight: 600; color: var(--text-gray); margin-top: auto; line-height: 1.2; }
-        
+
         .dot { width: 14px; height: 14px; border-radius: 50%; background-color: #374151; flex-shrink: 0; transition: all 0.3s ease; }
         .dot.green { background-color: var(--dot-green); box-shadow: 0 0 12px rgba(16, 185, 129, 0.6); }
         .dot.red { background-color: var(--dot-red); box-shadow: 0 0 12px rgba(239, 68, 68, 0.8); }
-        
+
         .temp-header { color: var(--text-gray); font-size: 13px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
         .temp-value-large { font-size: 52px; font-weight: 800; color: #ffffff; letter-spacing: -2px; margin-bottom: 15px; }
         .temp-value-large span { font-size: 22px; color: var(--text-gray); font-weight: 600; margin-left: 4px; letter-spacing: 0; }
@@ -82,21 +82,21 @@
         .btn-action-manuel.active i { color: var(--accent-blue); }
         #btn-man-rotation.active { background-color: rgba(157, 78, 221, 0.1); border-color: var(--accent-purple); }
         #btn-man-rotation.active i { color: var(--accent-purple); }
-        
+
         .alarm-banner { background-color: rgba(220, 38, 38, 0.1); color: #f87171; padding: 18px; border-radius: 20px; font-weight: 800; text-align: center; margin-bottom: 15px; font-size: 16px; border: 1px solid #ef4444; box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.1); }
-        
+
         .telegram-config-block { background-color: var(--bg-card); border-radius: 24px; padding: 25px; text-align: center; margin-top: 10px; border: 1px solid var(--border-card); }
         .auth-input { width: 100%; padding: 16px; margin-top: 5px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #374151; background-color: #000000; color: white; font-size: 16px; box-sizing: border-box; }
         .auth-btn { width: 100%; background-color: var(--accent-blue); color: white; border: none; padding: 18px; border-radius: 16px; font-weight: 700; cursor: pointer; font-size: 15px; transition: transform 0.1s; display: flex; justify-content: center; align-items: center; gap: 10px; }
         .auth-btn:active { transform: scale(0.97); }
-        
+
         .conn-bar { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
         .mode-btn { width: 100%; padding: 18px; border-radius: 16px; border: 1px solid #374151; background: #000000; color: white; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px;}
         .mode-btn.active { border-color: var(--accent-blue); background: var(--accent-blue); }
-        
+
         .lang-btn { flex: 1; padding: 16px; background: #000000; border: 1px solid #374151; color: white; font-weight: 700; border-radius: 14px; cursor: pointer;}
         .lang-btn.active { background: var(--accent-purple); border-color: var(--accent-purple); }
-        
+
         .chart-container { 
             background: var(--bg-card); 
             border-radius: 24px; 
@@ -109,14 +109,14 @@
         }
         .progress-container { width: 100%; background-color: #000000; border-radius: 8px; margin-top: 15px; overflow: hidden; display: none; border: 1px solid #374151;}
         .progress-bar { height: 20px; background-color: var(--dot-green); width: 0%; transition: width 0.3s; }
-        
+
         .signal-bars { display: inline-flex; align-items: flex-end; gap: 3px; height: 14px; }
         .bar { width: 4px; background-color: #374151; border-radius: 2px; transition: 0.3s; }
         .bar-1 { height: 4px; } .bar-2 { height: 7px; } .bar-3 { height: 10px; } .bar-4 { height: 14px; }
-        
+
         @keyframes pulse-dot { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
         .pulsing { animation: pulse-dot 1.5s infinite; }
-        
+
         .pwd-container { position: relative; width: 100%; }
         .pwd-icon { position: absolute; right: 15px; top: 18px; cursor: pointer; color: var(--text-gray); }
 
@@ -130,7 +130,7 @@
         box-sizing: border-box; padding: 20px;
     }
     .wash-modal-overlay.active { opacity: 1; pointer-events: all; }
-    
+
     .wash-modal-content {
         background: var(--bg-card); border: 1px solid var(--border-card);
         border-radius: 32px; padding: 30px 20px; width: 100%; max-width: 280px;
@@ -172,7 +172,7 @@
     }
     .compact-grid .status-tile-icon { font-size: 22px; }
     .compact-grid .status-tile-title { margin-top: 8px; font-size: 13px; }
-        
+
     </style>
 </head>
 <body>
@@ -193,7 +193,7 @@
                 <i class="fa-brands fa-telegram" id="telegram-status-icon" style="color: #374151; font-size: 22px; margin-left: 5px; transition: 0.3s;"></i>
             </div>
         </div>
-        
+
         <!-- Ligne 2 : Le grand titre ET le bouton menu alignés -->
         <div class="header-title-row">
             <div class="main-title" id="val-Mode">Auto 70G</div>
@@ -206,17 +206,17 @@
         <div style="font-size: 32px; color: var(--accent-blue); margin-bottom: 10px;"><i class="fa-solid fa-file-contract"></i></div>
         <h3 style="margin: 0 0 10px 0; color: var(--text-white);">Activation Garantie</h3>
         <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 20px;">Pour activer la garantie de votre coffret, veuillez renseigner vos coordonnées.</p>
-        
+
         <input type="text" id="gar-nom" placeholder="Nom complet" class="auth-input" style="text-align: left; padding: 14px; margin-bottom: 10px;">
         <input type="email" id="gar-email" placeholder="Adresse E-mail" class="auth-input" style="text-align: left; padding: 14px; margin-bottom: 10px;">
         <input type="tel" id="gar-tel" placeholder="Numéro de téléphone" class="auth-input" style="text-align: left; padding: 14px; margin-bottom: 20px;">
-        
+
         <button class="auth-btn" style="background-color: var(--dot-green);" onclick="validerGarantie()"><i class="fa-solid fa-check"></i> Activer ma garantie</button>
     </div>
 </div>
-       
+
     </header>
-    
+
     <div class="sidebar-menu" id="sidebarMenu">
         <div class="sidebar-item active" id="tab-auto" onclick="switchView('auto')"><i class="fa-solid fa-gauge"></i> <span data-i18n="menu_auto">Mode Auto</span></div>
         <div class="sidebar-item" id="tab-manuel" onclick="switchView('manuel')"><i class="fa-solid fa-hand-pointer"></i> <span data-i18n="menu_manuel">Mode Manuel</span></div>
@@ -239,10 +239,11 @@
                 Dans Safari, touchez <i class="fa-solid fa-arrow-up-from-bracket" style="color: white; margin: 0 3px;"></i><br>puis <strong>"Sur l'écran d'accueil"</strong>.
             </p>
         </div>
-        
+
         <!-- L'ID du coffret reste en dessous -->
         <div id="sidebar-box-id" style="padding: 15px; text-align: center; color: var(--accent-blue); font-size: 14px; font-weight: 800; border-top: 1px solid var(--border-card); background: rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 20px;">Aucun coffret</div>
     </div>
+
     </div>
     <div id="dashboard-content">
         <div id="auto-view" class="view active">
@@ -259,7 +260,7 @@
             <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-toolbox status-tile-icon"></i><div class="dot" id="dot-couvercle"></div></div><div class="status-tile-title" data-i18n="couv">Couvercle<br>Fermé</div></div>
             <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-filter status-tile-icon"></i><div class="dot" id="dot-pompe_uv"></div></div><div class="status-tile-title" data-i18n="pompe">Pompe<br>UV</div></div>
         </div>
-            
+
            <div class="bento-card" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 20px 25px;">
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     <div style="display: flex; align-items: center; gap: 15px;">
@@ -278,7 +279,7 @@
 
 
   <div id="manuel-view" class="view">
-        
+
         <!-- 1. Température -->
         <div class="bento-card">
             <div class="temp-header"><span data-i18n="temp_eau">Température Eau</span> <i class="fa-solid fa-temperature-half"></i></div>
@@ -303,7 +304,7 @@
             <i class="fa-solid fa-crosshairs" id="icon-btn-pos"></i>
             <span id="text-btn-pos">Positionnement Tambour</span>
         </div>
-      
+
             <!-- 3. Statuts (Version compactée) -->
         <div class="bento-grid-2x2 compact-grid">
             <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-shield-halved status-tile-icon"></i><div class="dot" id="dot-niveau_securite-man"></div></div><div class="status-tile-title" data-i18n="niv_secu">Niveau<br>Sécurité</div></div>
@@ -316,20 +317,20 @@
 
         <div id="alarme-view" class="view">
             <div class="alarm-banner"><i class="fa-solid fa-triangle-exclamation" style="margin-right:8px;"></i> <span id="alarm-banner-text">ALARME</span></div>
-            
+
             <div class="bento-card">
                 <div class="temp-header"><span data-i18n="temp_eau">Température Eau</span></div>
                 <div class="temp-value-large" id="val-temperature-al">--.-<span>°C</span></div>
                 <div class="temp-track"><div class="temp-fill" id="temp-bar-fill-al"></div></div>
             </div>
-            
+
             <div class="bento-grid-2x2">
                 <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-shield-halved status-tile-icon"></i><div class="dot" id="dot-niveau_securite-al"></div></div><div class="status-tile-title" data-i18n="niv_secu">Sécurité</div></div>
                 <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-water status-tile-icon"></i><div class="dot" id="dot-niveau_lavage-al"></div></div><div class="status-tile-title" data-i18n="niv_lav">Lavage</div></div>
                 <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-toolbox status-tile-icon"></i><div class="dot" id="dot-couvercle-al"></div></div><div class="status-tile-title" data-i18n="couv">Couvercle</div></div>
                 <div class="status-tile"><div class="status-tile-header"><i class="fa-solid fa-filter status-tile-icon"></i><div class="dot" id="dot-pompe_uv-al"></div></div><div class="status-tile-title" data-i18n="pompe">UV</div></div>
             </div>
-            
+
                 <button class="auth-btn" id="btn-reset-alarme" style="background-color: #dc2626; margin-top: 10px;" onclick="resetAlarme()"><i class="fa-solid fa-power-off" id="icon-reset-alarme"></i> <span data-i18n="btn_reset">Reset Alarme</span></button>
         </div>
 
@@ -348,7 +349,7 @@
                 <button class="auth-btn" onclick="sauvegarderTambour()"><i class="fa-solid fa-save"></i> <span data-i18n="btn_save_tamb">Enregistrer</span></button>
             </div>
         </div>
-    
+
         <div id="wifi-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_wifi">Connexion Wi-Fi</h3>
@@ -390,13 +391,13 @@
         <div id="ota-view" class="view">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_ota">Mise à jour du système</h3>
-                
+
                 <div id="ota-wifi-error" style="display:none; background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 12px; padding: 12px; margin-bottom: 15px;">
                     <p style="color: #ef4444; font-size: 13px; margin: 0; font-weight: bold;"><i class="fa-solid fa-wifi-slash"></i> Le coffret doit être connecté au Wi-Fi pour se mettre à jour.</p>
                 </div>
 
                 <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;" data-i18n="desc_ota" id="ota-desc-text">Vérifiez si une nouvelle version est disponible.</p>
-                
+
                 <div id="ota-info-box" style="background:#000000; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #374151;">
                     <p style="margin:0 0 5px 0; font-size:14px; text-align: left;"><span data-i18n="lbl_ver_act">Version actuelle :</span> <strong id="lbl-version-actuelle" style="color:var(--text-white);">v1.0.0</strong></p>
                     <p style="margin:0; font-size:14px; text-align: left;"><span data-i18n="lbl_ver_dispo">Version dispo. :</span> <strong id="lbl-version-dispo" style="color:var(--text-gray);">Recherche...</strong></p>
@@ -411,7 +412,7 @@
 
                 <button class="auth-btn" id="btn-check-ota" style="background-color: #0ea5e9; margin-bottom:10px;" onclick="verifierMaj()"><i class="fa-solid fa-arrows-rotate"></i> <span data-i18n="btn_check_ota">Vérifier</span></button>
                 <button class="auth-btn" id="btn-start-ota" style="background-color: var(--dot-green); display:none;" onclick="lancerMaj()"><i class="fa-solid fa-download"></i> <span data-i18n="btn_start_ota">Installer</span></button>
-                
+
                 <div class="progress-container" id="ota-progress-container"><div class="progress-bar" id="ota-progress-bar"></div></div>
             </div>
         </div>
@@ -430,16 +431,16 @@
         </div>
         <h3 style="margin-bottom: 8px;">Accès Installateur</h3>
         <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px;">Saisissez le mot de passe pour accéder aux réglages usine.</p>
-        
+
        <div class="pwd-container" style="margin-bottom: 15px;">
         <input type="text" id="inst-pass-input" autocomplete="off" spellcheck="false" placeholder="Mot de passe" class="auth-input" style="-webkit-text-security: disc; width: 100%; text-align: center; font-size: 1.1rem; padding-right: 40px;">
         <i class="fa-solid fa-eye pwd-icon" id="toggleInstPwdIcon" onclick="toggleInstPasswordVis()"></i>
     </div>
-        
+
         <button onclick="verifierMotDePasseInstallateur()" class="auth-btn" style="width: 100%;">
             <i class="fa-solid fa-lock-open"></i> Déverrouiller
         </button>
-        
+
         <p id="inst-pass-error" style="color: #ef4444; display: none; margin-top: 12px; font-weight: 600; font-size: 0.9rem;">
             <i class="fa-solid fa-triangle-exclamation"></i> Mot de passe incorrect !
         </p>
@@ -483,7 +484,7 @@
                 <option value="loading">Chargement des revendeurs...</option>
             </select>
         </div>
-        
+
         <button onclick="envoyerConfigInstallateur()" class="auth-btn" style="width: 100%; margin-top: 15px; background-color: var(--dot-green);">
             <i class="fa-solid fa-floppy-disk"></i> Enregistrer & Envoyer
         </button>
@@ -493,7 +494,7 @@
             <i class="fa-solid fa-eraser"></i> Effacer Garantie (Sortie d'Usine)
         </button>
     </div>
-        
+
     </div>
 </div>
 
@@ -507,8 +508,8 @@
             </div>
         </div>
 
-        
-        
+
+
          <div id="pdf-view" class="view">
             <div class="telegram-config-block" style="height: 70vh; padding: 15px; display: flex; flex-direction: column;">
                 <h3 data-i18n="menu_pdf" style="margin-top: 0; margin-bottom: 15px;">Manuel d'utilisation</h3>
@@ -525,7 +526,7 @@
                     <img id="dlr-logo" src="" alt="Logo Revendeur" style="max-width: 100%; max-height: 150px; border-radius: 8px; object-fit: contain; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
                     </div>
                     <h4 id="dlr-nom" style="margin: 0 0 20px 0; color: white; text-align: center; font-size: 22px;">Recherche en cours...</h4>
-                    
+
                     <p style="margin: 12px 0; font-size: 15px; display: flex; align-items: center; gap: 12px;">
                         <i class="fa-solid fa-location-dot" style="color: var(--text-gray); font-size: 20px; width: 25px; text-align: center;"></i> 
                         <span id="dlr-adresse" style="color: white; line-height: 1.4;">--</span>
@@ -545,12 +546,12 @@
                 </div>
             </div>
          </div>
-        
+
      </div>    
     </div>
  </div>
 <script>
-    
+
     const dict = {
         fr: {
             status_wait: "Attente...", menu_auto: "Mode Auto", menu_manuel: "Mode Manuel", menu_config: "Configuration",
@@ -630,7 +631,7 @@
     const CHARACTERISTIC_UUID_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
     const FIREBASE_HOST = "https://tambour20100-29236-default-rtdb.firebaseio.com/";
     const FIREBASE_AUTH = "rsihDyLcNkHwThAEuCIbkjFm8bwPbnmKxHIr6mkT";
-    
+
     let ID_COFFRET = localStorage.getItem("tambour_id") || "Box_01"; 
     let bleDevice = null;
     let rxCharacteristic = null;
@@ -642,26 +643,26 @@
     let chartWashInstance = null;
     let systemeEnManuel = false; 
     let premiereSynchroFaite = false; 
-    
+
     // --- VARIABLES ANIMATION LAVAGE BLE ---
     let animationLavageEnCours = false;
     let chronoAnimInterval = null;
     let timerFinLavage = null;
-    
+
     // --- CORRECTION : AJOUT FONCTION SAUVEGARDER TAMBOUR ---
     function sauvegarderTambour() {
         let modeleEl = document.getElementById('config-modele-select');
         let modeEl = document.getElementById('config-mode-select');
-        
+
         if (modeleEl && modeEl) {
             let modele = modeleEl.value;
             let mode = modeEl.value;
-            
+
             localStorage.setItem("tambour_modele", modele);
             localStorage.setItem("tambour_mode", mode);
-            
+
             envoyerCommande("CFG", modele + "," + mode);
-            
+
             alert(dict[currentLang]['btn_save_tamb'] + " OK !");
             rafraichirTitres('config');
         }
@@ -691,15 +692,15 @@
 
         let titre = document.getElementById('val-Mode');
         if(!titre) return;
-        
+
         if (vue === 'alarme') { titre.style.fontSize = "26px"; } else { titre.style.fontSize = "38px"; }
-        
+
         // Sablier animé pendant l'attente Firebase
         if (modeActif === "FIREBASE" && !premiereSynchroFaite && (vue === 'auto' || vue === 'manuel' || vue === 'alarme')) {
             titre.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Connexion...'; 
             return; 
         }
-        
+
        if (vue === 'auto') {
             let avecPos = localStorage.getItem("inst_pos") !== "0";
             if (modeActif === "FIREBASE" && dernierModeFirebase !== "") {
@@ -729,7 +730,7 @@
                 // En Cloud : construit un objet JSON propre (ex: { "Reset": 1 })
                 let payload = {};
                 payload[action] = valeur; 
-                
+
                 await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
@@ -763,28 +764,28 @@
         timerBlocageMode = setTimeout(() => { blocageSynchroMode = false; }, 1500); 
        }
        // -------------------------------------------------
-        
+
         if (target === 'manuel') systemeEnManuel = true;
         if (target === 'auto') systemeEnManuel = false;
-        
+
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         let targetView = document.getElementById(`${target}-view`);
         if(targetView) targetView.classList.add('active');
-        
+
         let tabObj = document.getElementById(`tab-${target}`);
         if(tabObj) tabObj.classList.add('active');
-        
+
         rafraichirTitres(target); 
         let menu = document.getElementById('sidebarMenu');
         if(menu) menu.classList.remove('open');
-        
+
         adapterInterfaceSelonMode();
-        
+
         if (target !== 'alarme' && modeActif === "BLE") { envoyerCommande("PAGE", target.toUpperCase()); }
         if (target === 'history' && modeActif === "FIREBASE") { lireHistoriqueFirebase(); }
         if (target === 'dealer') { chargerInfoDealer(); }
-        
+
     }
 
     function lierTelegram() {
@@ -799,33 +800,33 @@ async function chargerInfoDealer() {
         let elTel = document.getElementById('dlr-tel');
         let elMail = document.getElementById('dlr-email');
         let elWeb = document.getElementById('dlr-web');
-        
+
         // Nouveaux éléments pour le logo (Image PNG)
         let elLogoCont = document.getElementById('dlr-logo-container');
         let elLogo = document.getElementById('dlr-logo');
-        
+
         if (elNom) elNom.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Recherche...';
-        
+
         if (!ID_COFFRET || ID_COFFRET === "Coffret_01") {
             if (elNom) elNom.innerText = "Aucun coffret sélectionné";
             if (elLogoCont) elLogoCont.style.display = "none";
             return;
         }
-        
+
         try {
             let resClient = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/dealer_id.json?auth=${FIREBASE_AUTH}`);
             let dealerId = await resClient.json();
-            
+
             if (!dealerId) {
                 if (elNom) elNom.innerText = "Aucun revendeur associé.";
                 if (elAdr) elAdr.innerText = "Contactez le support";
                 if (elLogoCont) elLogoCont.style.display = "none";
                 return;
             }
-            
+
             let resDealer = await fetch(`${FIREBASE_HOST}dealers/${dealerId}.json?auth=${FIREBASE_AUTH}`);
             let data = await resDealer.json();
-            
+
             if (data) {
                 // --- 1. GESTION DU NOM ---
                 if (elNom) {
@@ -837,7 +838,7 @@ async function chargerInfoDealer() {
                         elNom.style.display = "none"; // Cache complètement le texte si vide
                     }
                 }
-                
+
                 // --- 1. GESTION DE L'IMAGE (LOGO PNG) ---
                 if (elLogoCont && elLogo) {
                     if (data.logo_url && data.logo_url.trim() !== "") {
@@ -858,20 +859,20 @@ async function chargerInfoDealer() {
                         elAdr.innerHTML = `<a href="https://www.google.com/maps/search/?api=1&query=${adresseEncodee}" target="_blank" ${styleLien}>${data.adresse}</a>`;
                     } else { elAdr.innerText = "--"; }
                 }
-                
+
                 if (elTel) {
                     if (data.telephone) {
                         let telPropre = data.telephone.replace(/\s+/g, '');
                         elTel.innerHTML = `<a href="tel:${telPropre}" ${styleLien}>${data.telephone}</a>`;
                     } else { elTel.innerText = "--"; }
                 }
-                
+
                 if (elMail) {
                     if (data.email) {
                         elMail.innerHTML = `<a href="mailto:${data.email}" ${styleLien}>${data.email}</a>`;
                     } else { elMail.innerText = "--"; }
                 }
-                
+
                 if (elWeb) {
                     if (data.website) {
                         let urlWeb = data.website.startsWith('http') ? data.website : 'https://' + data.website;
@@ -889,18 +890,18 @@ async function chargerInfoDealer() {
         }
     }
 
-    
+
     async function chargerListeDealersInstallateur() {
         let select = document.getElementById('inst-dealer');
         if (!select) return;
-        
+
         try {
             // 1. On récupère tout l'annuaire des dealers
             let res = await fetch(`${FIREBASE_HOST}dealers.json?auth=${FIREBASE_AUTH}`);
             let dealers = await res.json();
-            
+
             select.innerHTML = '<option value="">Aucun revendeur</option>';
-            
+
             // 2. On crée une ligne dans la liste pour chaque dealer trouvé
             if (dealers) {
                 for (let key in dealers) {
@@ -910,7 +911,7 @@ async function chargerInfoDealer() {
                     select.appendChild(opt);
                 }
             }
-            
+
             // 3. On sélectionne automatiquement celui qui est déjà enregistré pour ce client (s'il y en a un)
             if (ID_COFFRET && ID_COFFRET !== "Coffret_01") {
                 let resClient = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/dealer_id.json?auth=${FIREBASE_AUTH}`);
@@ -924,12 +925,12 @@ async function chargerInfoDealer() {
             select.innerHTML = '<option value="">Erreur de chargement</option>';
         }
     }
-     
+
     async function lireHistoriqueFirebase() {
         if (!ID_COFFRET) return;
         let titre = document.getElementById('val-Mode');
         if(titre) titre.innerText = "Connexion...";
-        
+
         try {
             let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/historique.json?auth=${FIREBASE_AUTH}`);
             if (response.ok) {
@@ -939,7 +940,7 @@ async function chargerInfoDealer() {
                 } else { afficherMessageAucuneDonnee(); }
             } else { afficherMessageAucuneDonnee(); }
         } catch (error) { console.error(error); afficherMessageAucuneDonnee(); }
-        
+
         if(titre) titre.innerText = dict[currentLang]['menu_history'] || "Historique";
     }
 
@@ -1008,13 +1009,13 @@ async function chargerInfoDealer() {
         });
     }
 
-    
+
     function adapterInterfaceSelonMode() {
         if (miseAJourEnCours) return; // <-- NOUVELLE LIGNE À AJOUTER ICI
         let activeEl = document.querySelector('.view.active');
         if(!activeEl) return;
         let activeView = activeEl.id;
-        
+
         let isManuel = systemeEnManuel; 
         let tabAutoText = document.querySelector('#tab-auto span');
 
@@ -1089,7 +1090,7 @@ async function chargerInfoDealer() {
     if (iosPrompt) {
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-        
+
         // Apparaît SEULEMENT sur iPhone, hors plein écran, en BLE + Mode Manuel
         if (isIOS && !isStandalone && modeActif === "BLE" && systemeEnManuel) {
             iosPrompt.style.display = "block";
@@ -1097,7 +1098,7 @@ async function chargerInfoDealer() {
             iosPrompt.style.display = "none";
         }
     }
-        
+
     }
 
     function gererBadgeDot(id, status) {
@@ -1112,15 +1113,15 @@ async function chargerInfoDealer() {
     function updateWifiBars(rssi, containerId) {
         let container = document.getElementById(containerId);
         if (!container) return;
-        
+
         let bars = container.querySelectorAll('.bar');
         let activeCount = 0;
-        
+
         if (rssi > -60) activeCount = 4;
         else if (rssi > -70) activeCount = 3;
         else if (rssi > -80) activeCount = 2;
         else if (rssi >= -95) activeCount = 1;
-        
+
         bars.forEach((bar, index) => {
             if (index < activeCount) {
                 bar.style.backgroundColor = "var(--dot-green)";
@@ -1130,7 +1131,7 @@ async function chargerInfoDealer() {
         });
     }
 
-    
+
 function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi, cptConsecutif, espVersion, tempsRestantReel = 0) {
         systemWifiStat = wStat; 
 
@@ -1175,7 +1176,7 @@ function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode,
                 bar.style.setProperty('--pourcentage', pourcentage > 1 ? pourcentage : 1);
             });
         }
-    
+
         // Sidebar ID Box
         let sideBox = document.getElementById('sidebar-box-id');
         if (sideBox && ID_COFFRET) sideBox.innerText = ID_COFFRET;
@@ -1191,7 +1192,7 @@ function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode,
                 let iconReset = document.getElementById('icon-reset-alarme');
                 if (iconReset) iconReset.className = "fa-solid fa-power-off";
                 if (btnReset) btnReset.style.opacity = "1";
-                
+
                 switchView('manuel');
             }
         }
@@ -1204,7 +1205,7 @@ function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode,
             else if (alCode === 3) bannerTxt.innerText = dict[currentLang]['al_15'] || "ALARME : 15 LAVAGES CONSÉCUTIFS";
             else bannerTxt.innerText = dict[currentLang]['al_inc'] || "ALARME INCONNUE";
         }
-        
+
         // --- MISE A JOUR DES BARRES WIFI ---
         let tabOta = document.getElementById('tab-ota');
 
@@ -1212,7 +1213,7 @@ function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode,
             if (tabOta) tabOta.style.display = (modeActif === "BLE" && systemeEnManuel) ? "flex" : "none";
             updateWifiBars(wRssi, 'header-wifi-bars');
             updateWifiBars(wRssi, 'wifi-bars');
-            
+
             let lblStat = document.getElementById('lbl-wifi-status');
             if(lblStat) {
                 lblStat.innerText = dict[currentLang]['wifi_conn'] || "Connecté";
@@ -1226,7 +1227,7 @@ function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode,
             if (activeEl && activeEl.id === 'ota-view') switchView('auto');
             updateWifiBars(-100, 'header-wifi-bars');
             updateWifiBars(-100, 'wifi-bars');
-            
+
             let lblStat = document.getElementById('lbl-wifi-status');
             if(lblStat) {
                 lblStat.innerText = dict[currentLang]['wifi_dec'] || "Déconnecté";
@@ -1239,11 +1240,11 @@ function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode,
 
 const TELEGRAM_BOT_TOKEN = "8803564628:AAEntgbIiQ4ipAdTukiWDxsHMXKtkk8P_8k"; 
 const TELEGRAM_ADMIN_ID = "8538368862"; 
-    
+
 async function verifierGarantiePopup(id) {
     if (!id || id === "Coffret_01" || garantieVerifiee) return;
     garantieVerifiee = true; 
-    
+
     try {
         let response = await fetch(`${FIREBASE_HOST}Garantie/${id}.json?auth=${FIREBASE_AUTH}`);
         let data = await response.json();
@@ -1259,7 +1260,7 @@ async function verifierGarantiePopup(id) {
         let nom = document.getElementById('gar-nom').value.trim();
         let email = document.getElementById('gar-email').value.trim();
         let tel = document.getElementById('gar-tel').value.trim();
-        
+
         if (nom === "" || email === "") { 
             alert("Veuillez remplir au moins votre nom et votre email."); 
             return; 
@@ -1298,7 +1299,7 @@ async function verifierGarantiePopup(id) {
             document.getElementById('gar-nom').value = "";
             document.getElementById('gar-email').value = "";
             document.getElementById('gar-tel').value = "";
-            
+
             if (btn) {
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> Activer ma garantie';
                 btn.disabled = false;
@@ -1308,7 +1309,7 @@ async function verifierGarantiePopup(id) {
             let modal = document.getElementById('garantie-modal');
             if (modal) modal.classList.remove('active');
             alert("Merci ! Votre garantie a été activée avec succès.");
-            
+
         } catch (e) {
             console.error(e); 
             alert("Erreur de connexion, veuillez réessayer.");
@@ -1339,18 +1340,18 @@ async function connecterBLE() {
             premiereSynchroFaite = false; 
             garantieVerifiee = false;
             let avertissementFirebaseFait = false; 
-            
+
             adapterInterfaceSelonMode(); 
             if (timerFirebase) clearInterval(timerFirebase);
-            
+
             let btnBle = document.getElementById('btn-mode-ble');
             let btnCloud = document.getElementById('btn-mode-cloud');
             if(btnBle) btnBle.className = "mode-btn active";
             if(btnCloud) btnCloud.className = "mode-btn";
-            
+
             let textStatus = document.getElementById('app-conn-text');
             if(textStatus) { textStatus.removeAttribute('data-i18n'); textStatus.innerText = "Sélectionnez le coffret..."; }
-            
+
             let dotStatus = document.getElementById('app-conn-dot');
             if(dotStatus) { dotStatus.className = "fa-brands fa-bluetooth pulsing"; dotStatus.style.color = "#f59e0b"; }
 
@@ -1358,7 +1359,7 @@ async function connecterBLE() {
                 filters: [{ namePrefix: 'Box_' }], 
                 optionalServices: [SERVICE_UUID] 
             });
-            
+
             bleDevice.addEventListener('gattserverdisconnected', () => { setTimeout(activerModeFirebase, 2000); });
             const server = await bleDevice.gatt.connect();
             const service = await server.getPrimaryService(SERVICE_UUID);
@@ -1371,7 +1372,7 @@ async function connecterBLE() {
             await txCharacteristic.startNotifications();
             txCharacteristic.addEventListener('characteristicvaluechanged', (e) => {
                 let text = new TextDecoder("utf-8").decode(e.target.value);
-                
+
                 if (text.startsWith("MODE:")) {
                     let modeStr = text.substring(5).trim().toUpperCase();
                     if (!premiereSynchroFaite || document.querySelector('.view.active').id === 'ble-view') {
@@ -1387,20 +1388,20 @@ async function connecterBLE() {
                         ID_COFFRET = nouvelID;
                         localStorage.setItem("tambour_id", ID_COFFRET);
                         verifierGarantiePopup(ID_COFFRET);
-                        
+
                         if (!avertissementFirebaseFait) {
                             avertissementFirebaseFait = true;
                             fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
                                 method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode_ble: true })
                             }).catch(err => console.error("Erreur Firebase mode_ble", err));
                         }
-                        
+
                         let d = parts[1].split(",");
                         let alCode = (d.length > 6) ? parseInt(d[6]) : 0;
                         let wStat = (d.length > 7) ? parseInt(d[7]) : 0;
                         let wRssi = (d.length > 8) ? parseInt(d[8]) : 0;
                         let bleCptConsecutif = (d.length > 9) ? parseInt(d[9]) : 0;
-                        
+
                         if (!premiereSynchroFaite && alCode > 0) {
                             premiereSynchroFaite = true;
                             switchView('alarme');
@@ -1414,23 +1415,22 @@ async function connecterBLE() {
                         let zoneSerie = document.getElementById('zone-lavage-consecutif');
                         let valSerie = document.getElementById('val-lavage-consecutif');
                         if (zoneSerie && valSerie) {
-                         // S'affiche SEULEMENT en BLE et si la série est >= 2
-                            if (modeActif === "BLE" && cptConsecutif >= 2) {
-                               zoneSerie.style.display = 'flex';
-                               valSerie.innerText = cptConsecutif;
-                               } else {
-                                         zoneSerie.style.display = 'none'; // Effacé en Cloud ou si la série est < 2
-                                      }
-                              }
+                            if (bleCptConsecutif >= 2) { 
+                                zoneSerie.style.display = 'flex';
+                                valSerie.innerText = bleCptConsecutif;
+                            } else {
+                                zoneSerie.style.display = 'none'; 
+                            }
+                        }
 
                         // --- ACTUALISATION DES DONNÉES DE L'INTERFACE ---
-                        
+
                          if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, bleCptConsecutif, espVersion);
-                        
+
                         // --- 2. BASCULE AUTOMATIQUE & ANIMATIONS DES TITRES ---
                         if (alCode === 0 && espMode !== -1 && !blocageSynchroMode) {
                             let vueAct = document.querySelector('.view.active').id;
-                            
+
                             // A. Bascule automatique d'écran
                             if ((espMode === 0 || espMode === 2 || espMode === 5) && vueAct === 'manuel-view') {
                                 switchView('auto');
@@ -1440,7 +1440,7 @@ async function connecterBLE() {
                                 switchView('manuel');
                                 vueAct = 'manuel-view';
                             }
-                            
+
                             // B. Animations dynamiques en Écran AUTO
                             if (vueAct === 'auto-view') {
                                 let titre = document.getElementById('val-Mode');
@@ -1449,7 +1449,7 @@ async function connecterBLE() {
                                     // --- ANIMATION DU BOUTON POSITIONNEMENT ---
                                    let iconPos = document.getElementById('icon-btn-pos');
                                    let textPos = document.getElementById('text-btn-pos');
-        
+
                                    if (espPosManu === 1) {
                                    // Le tambour cherche sa position : on anime !
                                    if (iconPos) {
@@ -1465,7 +1465,7 @@ async function connecterBLE() {
                                    }
                                    if (textPos) textPos.innerText = "Positionnement Tambour";
                                    }
-                                    
+
                                     if (espMode === 5) {
                                         titre.style.fontSize = "26px";
                                         titre.innerHTML = 'Positionnement <i class="fa-solid fa-arrows-rotate fa-spin" style="margin-left: 12px; color: var(--accent-blue);"></i>';
@@ -1480,7 +1480,7 @@ async function connecterBLE() {
                                     }
                                 }
                             }
-                            
+
                             // C. Animation dynamique en Écran MANUEL (Sablier violet)
                             else if (vueAct === 'manuel-view') {
                                 let titre = document.getElementById('val-Mode');
@@ -1502,21 +1502,21 @@ async function connecterBLE() {
                     else if (reseau !== "NONE") reseauxTrouves.push(reseau);
                 }
             });
-            
+
             envoyerCommande("GET_MODE", "");
-            
+
         } catch (error) { 
             console.warn("Connexion BLE annulée ou échouée:", error); 
             activerModeFirebase(); 
         }
     }
-    
-    
+
+
     async function lireDonneesFirebase() {
         if (!ID_COFFRET) return;
         let dot = document.getElementById('app-conn-dot');
         let text = document.getElementById('app-conn-text');
-        
+
         try {
             //let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`);
             let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}&_=${Date.now()}`, { cache: 'no-store' });
@@ -1525,8 +1525,8 @@ async function connecterBLE() {
                 if (data) {
                     let pingActuel = data.ping !== undefined ? data.ping : 0;
 
-                    
-                    
+
+
                     if (attenteDonneesFraiches) {
                         if (dernierPing === -1) {
                             dernierPing = pingActuel; 
@@ -1569,7 +1569,7 @@ async function connecterBLE() {
                         wStat = data.wifi_stat !== undefined ? data.wifi_stat : 0;
                         wRssi = data.wifi_rssi !== undefined ? data.wifi_rssi : 0;
                         cptConsecutif = data.lavages_consecutifs !== undefined ? data.lavages_consecutifs : 0; // <-- NOUVELLE LIGNE
-                        
+
                         if (data.Mode !== undefined) {
                             dernierModeFirebase = data.Mode; 
                         }
@@ -1579,7 +1579,7 @@ async function connecterBLE() {
                             if (alarme > 0) { switchView('alarme'); } 
                             else { switchView('auto'); }
                         }
-                        
+
                         if (data.Mode !== undefined) {
                             let activeEl = document.querySelector('.view.active');
                             if (activeEl && (activeEl.id === 'auto-view' || activeEl.id === 'alarme-view')) {
@@ -1587,7 +1587,7 @@ async function connecterBLE() {
                                 if(titre) titre.innerText = data.Mode;
                             }
                         }
-                        
+
                         let teleIcon = document.getElementById('telegram-status-icon');
                         if (teleIcon) {
                             if (data.telegram_chat_id && String(data.telegram_chat_id).length > 4) { teleIcon.style.color = "#0ea5e9"; } 
@@ -1616,7 +1616,7 @@ async function connecterBLE() {
     }
 
 
-    
+
 async function activerModeFirebase() {
         // 1. Vérification de l'ID (Instantané)
         if (!ID_COFFRET || ID_COFFRET === "Box_01") {
@@ -1636,14 +1636,14 @@ async function activerModeFirebase() {
         attenteDonneesFraiches = true;
         dernierPing = -1;
         tempsDernierPing = Date.now();
-        
+
         let btnBle = document.getElementById('btn-mode-ble');
         let btnCloud = document.getElementById('btn-mode-cloud');
         if(btnBle) btnBle.className = "mode-btn";
         if(btnCloud) btnCloud.className = "mode-btn active"; // Le bouton devient bleu tout de suite !
-        
+
         adapterInterfaceSelonMode(); 
-        
+
         let titre = document.getElementById('val-Mode');
         if (titre) titre.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Connexion...';
         afficherMaitresDonnees("--.-", null, null, null, null, "--", "--", 0, 0, -100);
@@ -1662,15 +1662,15 @@ async function activerModeFirebase() {
                 }).catch(e => console.error("Erreur mode_ble false", e));
             } catch(e) {}
         }
-        
+
         setTimeout(() => { if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect(); }, 500);
-        
+
         lireDonneesFirebase();
         if (timerFirebase) clearInterval(timerFirebase);
         timerFirebase = setInterval(lireDonneesFirebase, 5000);
     }
 
-    
+
     function scannerWifi() { 
         let btn = document.getElementById('btn-scanner');
         let icon = document.getElementById('icon-scanner');
@@ -1679,19 +1679,19 @@ async function activerModeFirebase() {
         reseauxTrouves = []; 
         envoyerCommande("SCAN", ""); 
     }
-    
+
     function afficherListeWifi() {
         let btn = document.getElementById('btn-scanner');
         let icon = document.getElementById('icon-scanner');
         if(btn) btn.disabled = false;
         if(icon) icon.className = "fa-solid fa-magnifying-glass";
-        
+
         let select = document.getElementById('wifi-ssid-select');
         if(!select) return;
         select.innerHTML = '<option value="">-- Sélectionnez --</option>'; 
-        
+
         let memoSSID = localStorage.getItem("wifi_ssid") || "";
-        
+
         if (memoSSID && !reseauxTrouves.includes(memoSSID)) {
             let opt = document.createElement('option');
             opt.value = memoSSID; opt.innerHTML = memoSSID;
@@ -1704,10 +1704,10 @@ async function activerModeFirebase() {
             if(net === memoSSID) opt.selected = true;
             select.appendChild(opt);
         });
-        
+
         if(memoSSID) select.value = memoSSID;
     }
-    
+
     function togglePasswordVis() {
     let input = document.getElementById("wifi-password-input");
     let icon = document.getElementById("togglePasswordIcon");
@@ -1722,19 +1722,19 @@ async function activerModeFirebase() {
         }
     }
 }
-    
+
     function sauvegarderWifiClient() { 
         let ssidEl = document.getElementById('wifi-ssid-select');
         let passEl = document.getElementById('wifi-password-input');
         if(!ssidEl || !passEl) return;
-        
+
         let ssid = ssidEl.value;
         let pass = passEl.value;
         if(ssid === "") { alert("Veuillez sélectionner un réseau."); return; }
-        
+
         localStorage.setItem("wifi_ssid", ssid);
         localStorage.setItem("wifi_pass", pass);
-        
+
         envoyerCommande("WIFI", ssid + "|" + pass); 
         alert("Identifiants Wi-Fi envoyés au boîtier !");
     }
@@ -1743,7 +1743,7 @@ async function activerModeFirebase() {
         let memoPass = localStorage.getItem("wifi_pass");
         let passInput = document.getElementById('wifi-password-input');
         if(memoPass && passInput) passInput.value = memoPass;
-        
+
         let memoSSID = localStorage.getItem("wifi_ssid");
         let select = document.getElementById('wifi-ssid-select');
         if(memoSSID && select) {
@@ -1756,7 +1756,7 @@ async function activerModeFirebase() {
 
         let memRot = localStorage.getItem("inst_rot");
         if(memRot) { let r = document.getElementById('inst-rot'); if(r) r.value = memRot; }
-    
+
         let memRearm = localStorage.getItem("inst_rearm");
         if(memRearm) { let rm = document.getElementById('inst-rearm'); if(rm) rm.value = memRearm; }
 
@@ -1765,7 +1765,7 @@ async function activerModeFirebase() {
             let chkPos = document.getElementById('inst-pos'); 
             if(chkPos) chkPos.checked = (memPos === "1"); 
         }
-        
+
     }
 
     async function verifierMaj() {
@@ -1791,7 +1791,7 @@ async function activerModeFirebase() {
                     if(lblDispo) lblDispo.innerText = data.versionNew;
                     otaUrl = data.urlNew;
                     otaVersion = data.versionNew; 
-                    
+
                     let btnStart = document.getElementById('btn-start-ota');
                     if(data.versionNew !== currentFirmwareVersion) {
                         if(lblDispo) lblDispo.style.color = "var(--dot-green)";
@@ -1814,26 +1814,26 @@ async function activerModeFirebase() {
 
     function lancerMaj() {
         if(otaUrl === "" || systemWifiStat !== 1) return;
-        
+
         miseAJourEnCours = true; 
-        
+
         envoyerCommande("UPDATE_OTA", otaUrl + "|" + otaVersion);
-        
+
         let container = document.getElementById('ota-progress-container');
         if(container) container.style.display = 'block';
-        
+
         document.getElementById('btn-check-ota').style.display = 'none';
         document.getElementById('btn-start-ota').style.display = 'none';
         document.getElementById('ota-info-box').style.display = 'none';
         document.getElementById('ota-desc-text').style.display = 'none';
-        
+
         let warningBlock = document.getElementById('ota-warning-block');
         if(warningBlock) warningBlock.style.display = 'block';
-        
+
         let bar = document.getElementById('ota-progress-bar');
         let width = 0;
         let phase = "downloading"; 
-        
+
         let int = setInterval(() => {
             if (phase === "downloading") {
                 width += 2; 
@@ -1848,14 +1848,14 @@ async function activerModeFirebase() {
                 if (currentFirmwareVersion === otaVersion) {
                     clearInterval(int); 
                     miseAJourEnCours = false; 
-                    
+
                     if(bar) { 
                         bar.style.width = '100%'; 
                         bar.style.backgroundColor = "var(--dot-green)"; 
                     }
                     warningBlock.style.display = 'none';
                     alert("Mise à jour installée avec succès ! Le coffret est maintenant en " + currentFirmwareVersion);
-                    
+
                     setTimeout(() => { 
                         adapterInterfaceSelonMode();
                         switchView('auto'); 
@@ -1870,17 +1870,17 @@ async function activerModeFirebase() {
         }, 500);
     }
 
-    
+
 function initBoutonsManuels() {
     const lier = (idBtn, nomAction) => {
         const btn = document.getElementById(idBtn);
         if (!btn) return;
-        
+
         const onDown = (e) => { 
             e.preventDefault(); 
             btn.classList.add('active'); 
             envoyerCommande(nomAction, 1); 
-            
+
             // --- Blocage et Changement de titre immédiat ---
             if (idBtn === 'btn-positionnement') {
                 let btnRot = document.getElementById('btn-man-rotation');
@@ -1902,13 +1902,13 @@ function initBoutonsManuels() {
                            }
             }
         };
-        
+
         const onUp = (e) => { 
             e.preventDefault(); 
             btn.classList.remove('active'); 
             envoyerCommande(nomAction, 0); 
         };
-        
+
         btn.addEventListener('mousedown', onDown); 
         btn.addEventListener('mouseup', onUp); 
         btn.addEventListener('mouseleave', onUp); 
@@ -1916,28 +1916,28 @@ function initBoutonsManuels() {
         btn.addEventListener('touchend', onUp, {passive: false}); 
         btn.addEventListener('touchcancel', onUp, {passive: false});
     };
-    
+
     lier('btn-man-rotation', 'Rotation'); 
     lier('btn-man-lavage', 'Lavage');
     lier('btn-positionnement', 'POS_TAMBOUR');
 }
 
-    
+
 function toggleSidebarMenu() { 
         let btn = document.querySelector('.menu-toggle-btn');
         let menu = document.getElementById('sidebarMenu');
         if(menu) menu.classList.toggle('open'); 
     }
-    
+
    document.addEventListener('DOMContentLoaded', () => {
     initBoutonsManuels(); 
     chargerMemos(); 
     adapterInterfaceSelonMode(); 
-    
+
     switchView('ble'); 
-    
+
     setLang(currentLang); 
-    
+
     let textStatus = document.getElementById('app-conn-text');
     if (textStatus) {
         textStatus.removeAttribute('data-i18n');
@@ -1988,7 +1988,7 @@ function envoyerConfigInstallateur() {
         localStorage.setItem("inst_rot", rot);
         localStorage.setItem("inst_rearm", rearm);
         localStorage.setItem("inst_pos", pos); 
-        
+
         // 1. Envoi au boîtier (BLE)
         const tramePayload = `${pos},${rot},${rearm},${couv}`;
         envoyerCommande("CFG_INST", tramePayload);
@@ -2019,7 +2019,7 @@ function envoyerConfigInstallateur() {
         }
     }
 }
-    
+
 </script>
 </body>
 </html>
