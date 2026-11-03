@@ -1414,13 +1414,14 @@ async function connecterBLE() {
                         let zoneSerie = document.getElementById('zone-lavage-consecutif');
                         let valSerie = document.getElementById('val-lavage-consecutif');
                         if (zoneSerie && valSerie) {
-                            if (bleCptConsecutif >= 2) { 
-                                zoneSerie.style.display = 'flex';
-                                valSerie.innerText = bleCptConsecutif;
-                            } else {
-                                zoneSerie.style.display = 'none'; 
-                            }
-                        }
+                         // S'affiche SEULEMENT en BLE et si la série est >= 2
+                            if (modeActif === "BLE" && cptConsecutif >= 2) {
+                               zoneSerie.style.display = 'flex';
+                               valSerie.innerText = cptConsecutif;
+                               } else {
+                                         zoneSerie.style.display = 'none'; // Effacé en Cloud ou si la série est < 2
+                                      }
+                              }
 
                         // --- ACTUALISATION DES DONNÉES DE L'INTERFACE ---
                         
