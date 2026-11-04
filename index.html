@@ -609,6 +609,7 @@
     let isInstallateurDeverrouille = false;
     let blocageSynchroMode = false;
     let timerBlocageMode = null;
+    let blocageAffichageTitreManu = false; // Empêche le titre "Manu..." d'apparaître pendant le positionnement
 
     function setLang(lang) {
         currentLang = lang;
@@ -712,7 +713,15 @@
                 titre.innerText = `Auto ${modele}${mode}`;
             }
         }
-        else if (vue === 'manuel') titre.innerText = (currentLang==='fr') ? `Manu ${modele}${mode}` : `Hand ${modele}${mode}`;
+           
+       else if (vue === 'manuel') {
+            if (blocageAffichageTitreManu) {
+                // On ne touche pas au titre, on le laisse sur "Positionnement"
+            } else {
+                titre.innerText = (currentLang==='fr') ? `Manu ${modele}${mode}` : `Hand ${modele}${mode}`;
+            }
+        }
+            
         else if (vue === 'alarme') titre.innerText = dict[currentLang]['titre_alarme']; 
         else titre.innerText = dict[currentLang]['menu_' + vue] || "Dashboard";
     }
@@ -1872,22 +1881,21 @@ async function activerModeFirebase() {
 
 
 function initBoutonsManuels() {
-
-      const lier = (idBtn, nomAction) => {
+    const lier = (idBtn, nomAction) => {
         const btn = document.getElementById(idBtn);
         if (!btn) return;
 
-        let estPresse = false; // NOUVEAU : Mémoire pour éviter le déclenchement au survol
+        let estPresse = false;
+        btn.style.touchAction = 'none'; 
 
         const onDown = (e) => { 
             e.preventDefault(); 
-            if (estPresse) return; // Ignore si déjà pressé
-            estPresse = true;      // Mémorise le clic
+            if (estPresse) return;
+            estPresse = true;
             
             btn.classList.add('active'); 
             envoyerCommande(nomAction, 1); 
 
-            // --- Blocage et Changement de titre immédiat ---
             if (idBtn === 'btn-positionnement') {
                 let btnRot = document.getElementById('btn-man-rotation');
                 let btnLav = document.getElementById('btn-man-lavage'); 
@@ -1901,6 +1909,10 @@ function initBoutonsManuels() {
                    btnLav.style.pointerEvents = "none";
                    btnLav.classList.remove('active'); 
                 }
+                
+                // On active le bouclier anti-clignotement !
+                blocageAffichageTitreManu = true;
+                
                 let titre = document.getElementById('val-Mode');
                 if (titre) {
                              titre.style.fontSize = "26px";
@@ -1911,27 +1923,32 @@ function initBoutonsManuels() {
 
         const onUp = (e) => { 
             e.preventDefault(); 
-            if (!estPresse) return; // NOUVEAU : Si la souris sort sans avoir cliqué, on annule l'action !
-            estPresse = false;      // Réinitialise la mémoire
+            if (!estPresse) return;
+            estPresse = false;
             
             btn.classList.remove('active'); 
             envoyerCommande(nomAction, 0); 
+            
+            // On désactive le bouclier 1.5 seconde après le relâchement, 
+            // le temps que les communications BLE et Firebase se stabilisent
+            if (idBtn === 'btn-positionnement') {
+                setTimeout(() => {
+                    blocageAffichageTitreManu = false;
+                    rafraichirTitres('manuel'); // Force la mise à jour une fois le délai passé
+                }, 1500); 
+            }
         };
 
-        btn.addEventListener('mousedown', onDown); 
-        btn.addEventListener('mouseup', onUp); 
-        btn.addEventListener('mouseleave', onUp); 
-        btn.addEventListener('touchstart', onDown, {passive: false}); 
-        btn.addEventListener('touchend', onUp, {passive: false}); 
-        btn.addEventListener('touchcancel', onUp, {passive: false});
+        btn.addEventListener('pointerdown', onDown);
+        btn.addEventListener('pointerup', onUp);
+        btn.addEventListener('pointerleave', onUp);
+        btn.addEventListener('pointercancel', onUp);
     };
 
     lier('btn-man-rotation', 'Rotation'); 
     lier('btn-man-lavage', 'Lavage');
     lier('btn-positionnement', 'POS_TAMBOUR');
 }
-
-
 function toggleSidebarMenu() { 
         let btn = document.querySelector('.menu-toggle-btn');
         let menu = document.getElementById('sidebarMenu');
