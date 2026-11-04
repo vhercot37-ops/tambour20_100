@@ -1490,16 +1490,29 @@ async function connecterBLE() {
                                 }
                             }
 
-                            // C. Animation dynamique en Écran MANUEL (Sablier violet)
+                           // C. Animation dynamique en Écran MANUEL (Pilotée 100% par l'ESP32)
                             else if (vueAct === 'manuel-view') {
                                 let titre = document.getElementById('val-Mode');
                                 if (titre) {
                                     if (espPosManu === 1) {
+                                        // L'ESP32 cherche : on maintient l'affichage et les boutons verrouillés
                                         titre.style.fontSize = "26px";
                                         titre.innerHTML = 'Positionnement <i class="fa-solid fa-arrows-rotate fa-spin" style="margin-left: 12px; color: var(--accent-purple);"></i>';
-                                        } else if (espPosManu === 0 && titre.innerText.includes("Positionnement")) {
+                                        
+                                        let btnRot = document.getElementById('btn-man-rotation');
+                                        let btnLav = document.getElementById('btn-man-lavage');
+                                        if (btnRot) { btnRot.style.opacity = "0.2"; btnRot.style.pointerEvents = "none"; }
+                                        if (btnLav) { btnLav.style.opacity = "0.2"; btnLav.style.pointerEvents = "none"; }
+                                        
+                                    } else if (espPosManu === 0 && titre.innerText.includes("Positionnement")) {
+                                        // L'ESP32 a terminé : on restaure "Manu..." et on déverrouille les boutons
                                         titre.style.fontSize = "38px";
-                                        rafraichirTitres('manuel'); // Restaure "Manu 70G"
+                                        rafraichirTitres('manuel'); 
+                                        
+                                        let btnRot = document.getElementById('btn-man-rotation');
+                                        let btnLav = document.getElementById('btn-man-lavage');
+                                        if (btnRot) { btnRot.style.opacity = "1"; btnRot.style.pointerEvents = "auto"; }
+                                        if (btnLav) { btnLav.style.opacity = "1"; btnLav.style.pointerEvents = "auto"; }
                                     }
                                 }
                             }
@@ -1884,7 +1897,6 @@ function initBoutonsManuels() {
     const lier = (idBtn, nomAction) => {
         const btn = document.getElementById(idBtn);
         if (!btn) return;
-
         let estPresse = false;
         btn.style.touchAction = 'none'; 
 
@@ -1892,32 +1904,20 @@ function initBoutonsManuels() {
             e.preventDefault(); 
             if (estPresse) return;
             estPresse = true;
-            
             btn.classList.add('active'); 
             envoyerCommande(nomAction, 1); 
 
             if (idBtn === 'btn-positionnement') {
                 let btnRot = document.getElementById('btn-man-rotation');
                 let btnLav = document.getElementById('btn-man-lavage'); 
-                if (btnRot) {
-                    btnRot.style.opacity = "0.2";
-                    btnRot.style.pointerEvents = "none";
-                    btnRot.classList.remove('active'); 
-                }
-                if (btnLav) { 
-                   btnLav.style.opacity = "0.2";
-                   btnLav.style.pointerEvents = "none";
-                   btnLav.classList.remove('active'); 
-                }
-                
-                // On active le bouclier anti-clignotement !
-                blocageAffichageTitreManu = true;
+                if (btnRot) { btnRot.style.opacity = "0.2"; btnRot.style.pointerEvents = "none"; btnRot.classList.remove('active'); }
+                if (btnLav) { btnLav.style.opacity = "0.2"; btnLav.style.pointerEvents = "none"; btnLav.classList.remove('active'); }
                 
                 let titre = document.getElementById('val-Mode');
                 if (titre) {
-                             titre.style.fontSize = "26px";
-                             titre.innerHTML = 'Positionnement <i class="fa-solid fa-arrows-rotate fa-spin" style="margin-left: 12px; color: var(--accent-purple);"></i>';
-                           }
+                    titre.style.fontSize = "26px";
+                    titre.innerHTML = 'Positionnement <i class="fa-solid fa-arrows-rotate fa-spin" style="margin-left: 12px; color: var(--accent-purple);"></i>';
+                }
             }
         };
 
@@ -1925,18 +1925,9 @@ function initBoutonsManuels() {
             e.preventDefault(); 
             if (!estPresse) return;
             estPresse = false;
-            
             btn.classList.remove('active'); 
             envoyerCommande(nomAction, 0); 
-            
-            // On désactive le bouclier 1.5 seconde après le relâchement, 
-            // le temps que les communications BLE et Firebase se stabilisent
-            if (idBtn === 'btn-positionnement') {
-                setTimeout(() => {
-                    blocageAffichageTitreManu = false;
-                    rafraichirTitres('manuel'); // Force la mise à jour une fois le délai passé
-                }, 1500); 
-            }
+            // AUCUN DELAI ICI : L'interface attendra sagement le retour Bluetooth de l'ESP32 !
         };
 
         btn.addEventListener('pointerdown', onDown);
@@ -1949,6 +1940,8 @@ function initBoutonsManuels() {
     lier('btn-man-lavage', 'Lavage');
     lier('btn-positionnement', 'POS_TAMBOUR');
 }
+
+    
 function toggleSidebarMenu() { 
         let btn = document.querySelector('.menu-toggle-btn');
         let menu = document.getElementById('sidebarMenu');
@@ -1970,23 +1963,6 @@ function toggleSidebarMenu() {
         textStatus.innerText = "Déconnecté";
     }
 
-    // --- NOUVEAU : LA SENTINELLE DU BOUTON ROTATION ---
-    setInterval(() => {
-        let titre = document.getElementById('val-Mode');
-        let btnRot = document.getElementById('btn-man-rotation');
-        let btnLav = document.getElementById('btn-man-lavage'); // <-- AJOUT
-        if (titre && btnRot) {
-            // Si le titre ne contient PAS le mot "Positionnement", on débloque !
-            if (!titre.innerText.includes("Positionnement")) {
-                btnRot.style.opacity = "1";
-                btnRot.style.pointerEvents = "auto";
-         //   }
-          //  if (btnLav) { // <-- AJOUT : On débloque le lavage
-                btnLav.style.opacity = "1";
-                btnLav.style.pointerEvents = "auto";
-            }
-        }
-    }, 500); // Vérifie toutes les demi-secondes
 });
 
     function verifierMotDePasseInstallateur() {
