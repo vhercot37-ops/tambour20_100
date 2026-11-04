@@ -1872,25 +1872,31 @@ async function activerModeFirebase() {
 
 
 function initBoutonsManuels() {
-    const lier = (idBtn, nomAction) => {
+
+      const lier = (idBtn, nomAction) => {
         const btn = document.getElementById(idBtn);
         if (!btn) return;
 
+        let estPresse = false; // NOUVEAU : Mémoire pour éviter le déclenchement au survol
+
         const onDown = (e) => { 
             e.preventDefault(); 
+            if (estPresse) return; // Ignore si déjà pressé
+            estPresse = true;      // Mémorise le clic
+            
             btn.classList.add('active'); 
             envoyerCommande(nomAction, 1); 
 
             // --- Blocage et Changement de titre immédiat ---
             if (idBtn === 'btn-positionnement') {
                 let btnRot = document.getElementById('btn-man-rotation');
-                let btnLav = document.getElementById('btn-man-lavage'); // <-- AJOUT
+                let btnLav = document.getElementById('btn-man-lavage'); 
                 if (btnRot) {
                     btnRot.style.opacity = "0.2";
                     btnRot.style.pointerEvents = "none";
                     btnRot.classList.remove('active'); 
                 }
-                if (btnLav) { // <-- AJOUT : On grise le lavage
+                if (btnLav) { 
                    btnLav.style.opacity = "0.2";
                    btnLav.style.pointerEvents = "none";
                    btnLav.classList.remove('active'); 
@@ -1905,6 +1911,9 @@ function initBoutonsManuels() {
 
         const onUp = (e) => { 
             e.preventDefault(); 
+            if (!estPresse) return; // NOUVEAU : Si la souris sort sans avoir cliqué, on annule l'action !
+            estPresse = false;      // Réinitialise la mémoire
+            
             btn.classList.remove('active'); 
             envoyerCommande(nomAction, 0); 
         };
