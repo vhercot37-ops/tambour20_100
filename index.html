@@ -1343,15 +1343,27 @@ async function effacerGarantieUsine() {
     }
 }
 
+const handleBleDisconnect = () => {
+    setTimeout(activerModeFirebase, 2000);
+};
+    
 async function connecterBLE() {
         try {
 
-            // --- 1. COUPURE AUTOMATIQUE ET SILENCIEUSE DE L'ANCIEN COFFRET ---
+      // --- 1. COUPURE AUTOMATIQUE ET SILENCIEUSE DE L'ANCIEN COFFRET ---
         if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) {
-            console.log("[BLE] Changement de coffret : Déconnexion automatique de l'ancien...");
-            bleDevice.gatt.disconnect();
+            console.log("[BLE] Déconnexion automatique de l'ancien coffret...");
             
-            // Petite pause de 500ms indispensable pour laisser le Bluetooth du téléphone respirer
+            // A. On empêche le passage automatique en Cloud
+            bleDevice.removeEventListener('gattserverdisconnected', handleBleDisconnect);
+            
+            // B. STOPPER LES NOTIFICATIONS (Indispensable pour vider la mémoire du téléphone)
+            if (txCharacteristic) {
+                try { await txCharacteristic.stopNotifications(); } catch(e) {}
+            }
+            
+            // C. Déconnecter physiquement
+            bleDevice.gatt.disconnect();
             await new Promise(resolve => setTimeout(resolve, 500)); 
         }
             
@@ -1379,7 +1391,7 @@ async function connecterBLE() {
                 optionalServices: [SERVICE_UUID] 
             });
 
-            bleDevice.addEventListener('gattserverdisconnected', () => { setTimeout(activerModeFirebase, 2000); });
+            bleDevice.addEventListener('gattserverdisconnected', handleBleDisconnect);
             const server = await bleDevice.gatt.connect();
             const service = await server.getPrimaryService(SERVICE_UUID);
             rxCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_RX);
