@@ -1345,7 +1345,16 @@ async function effacerGarantieUsine() {
 
 async function connecterBLE() {
         try {
-          
+
+            // --- 1. COUPURE AUTOMATIQUE ET SILENCIEUSE DE L'ANCIEN COFFRET ---
+        if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) {
+            console.log("[BLE] Changement de coffret : Déconnexion automatique de l'ancien...");
+            bleDevice.gatt.disconnect();
+            
+            // Petite pause de 500ms indispensable pour laisser le Bluetooth du téléphone respirer
+            await new Promise(resolve => setTimeout(resolve, 500)); 
+        }
+            
             modeActif = "BLE";
             premiereSynchroFaite = false; 
             garantieVerifiee = false;
