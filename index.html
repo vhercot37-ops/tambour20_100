@@ -1345,6 +1345,7 @@ async function effacerGarantieUsine() {
 
 async function connecterBLE() {
         try {
+          
             modeActif = "BLE";
             premiereSynchroFaite = false; 
             garantieVerifiee = false;
@@ -1380,7 +1381,7 @@ async function connecterBLE() {
 
             await txCharacteristic.startNotifications();
             txCharacteristic.addEventListener('characteristicvaluechanged', (e) => {
-                let text = new TextDecoder("utf-8").decode(e.target.value);
+                let text = new TextDecoder("utf-8").decode(e.target.value).trim();
 
                                 if (text.startsWith("MODE:")) {
                     let modeStr = text.substring(5).trim().toUpperCase();
@@ -1391,6 +1392,7 @@ async function connecterBLE() {
                     }
                 } 
 
+             // --- NOUVEAU BLOC A AJOUTER POUR LA SYNCHRO MAÎTRE ---
                 else if (text.startsWith("SYNC_CFG:")) {
                     console.log("[BLE] Configuration Maître reçue de l'ESP32 :", text);
                     let dataStr = text.substring(9);
@@ -1402,9 +1404,11 @@ async function connecterBLE() {
                         let rearm = p[2];
                         let couv = p[3];
                         let modeTambour = p[4];   // 0 = Gravitaire (G), 1 = Pompage (P)
-                        let modeleTambour = p[5]; // 30, 50, 70, 90, 120
+                        
+                        // Sécurité : Si le modèle vaut "0" ou est vide, on force "30" par défaut
+                        let modeleTambour = (p[5] === "0" || !p[5]) ? "30" : p[5]; 
 
-                        // 1. Mise à jour de la mémoire du navigateur pour ce coffret spécifique
+                        // 1. Écraser la mémoire du navigateur
                         localStorage.setItem("inst_pos", pos);
                         localStorage.setItem("inst_rot", rot);
                         localStorage.setItem("inst_rearm", rearm);
@@ -1412,7 +1416,7 @@ async function connecterBLE() {
                         localStorage.setItem("tambour_mode", modeTambour === "1" ? "P" : "G");
                         localStorage.setItem("tambour_modele", modeleTambour);
 
-                        // 2. Mise à jour visuelle des formulaires Installateur et Configuration
+                        // 2. Mettre à jour visuellement les formulaires (Installateur & Config)
                         let chkPos = document.getElementById('inst-pos');
                         if (chkPos) chkPos.checked = (pos === "1");
 
@@ -1431,7 +1435,7 @@ async function connecterBLE() {
                         let selMode = document.getElementById('config-mode-select');
                         if (selMode) selMode.value = (modeTambour === "1" ? "P" : "G");
 
-                        // 3. Rafraîchissement dynamique des titres et de l'affichage
+                        // 3. Rafraîchir dynamiquement les gros titres de l'application
                         adapterInterfaceSelonMode();
                         let activeView = document.querySelector('.view.active');
                         if (activeView) {
@@ -1439,6 +1443,7 @@ async function connecterBLE() {
                         }
                     }
                 }
+                // -----------------------------------------------------
                                     
                 else if (text.startsWith("ID:")) {
                     let parts = text.split(",D:");
