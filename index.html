@@ -1382,7 +1382,7 @@ async function connecterBLE() {
             txCharacteristic.addEventListener('characteristicvaluechanged', (e) => {
                 let text = new TextDecoder("utf-8").decode(e.target.value);
 
-                if (text.startsWith("MODE:")) {
+                                if (text.startsWith("MODE:")) {
                     let modeStr = text.substring(5).trim().toUpperCase();
                     if (!premiereSynchroFaite || document.querySelector('.view.active').id === 'ble-view') {
                         premiereSynchroFaite = true;
@@ -1390,6 +1390,56 @@ async function connecterBLE() {
                         else { switchView('auto'); }
                     }
                 } 
+
+                else if (text.startsWith("SYNC_CFG:")) {
+                    console.log("[BLE] Configuration Maître reçue de l'ESP32 :", text);
+                    let dataStr = text.substring(9);
+                    let p = dataStr.split(",");
+                    
+                    if (p.length >= 6) {
+                        let pos = p[0];
+                        let rot = p[1];
+                        let rearm = p[2];
+                        let couv = p[3];
+                        let modeTambour = p[4];   // 0 = Gravitaire (G), 1 = Pompage (P)
+                        let modeleTambour = p[5]; // 30, 50, 70, 90, 120
+
+                        // 1. Mise à jour de la mémoire du navigateur pour ce coffret spécifique
+                        localStorage.setItem("inst_pos", pos);
+                        localStorage.setItem("inst_rot", rot);
+                        localStorage.setItem("inst_rearm", rearm);
+                        localStorage.setItem("inst_couv", couv);
+                        localStorage.setItem("tambour_mode", modeTambour === "1" ? "P" : "G");
+                        localStorage.setItem("tambour_modele", modeleTambour);
+
+                        // 2. Mise à jour visuelle des formulaires Installateur et Configuration
+                        let chkPos = document.getElementById('inst-pos');
+                        if (chkPos) chkPos.checked = (pos === "1");
+
+                        let inputRot = document.getElementById('inst-rot');
+                        if (inputRot) inputRot.value = rot;
+
+                        let inputRearm = document.getElementById('inst-rearm');
+                        if (inputRearm) inputRearm.value = rearm;
+
+                        let chkCouv = document.getElementById('inst-couv');
+                        if (chkCouv) chkCouv.checked = (couv === "1");
+
+                        let selMod = document.getElementById('config-modele-select');
+                        if (selMod) selMod.value = modeleTambour;
+
+                        let selMode = document.getElementById('config-mode-select');
+                        if (selMode) selMode.value = (modeTambour === "1" ? "P" : "G");
+
+                        // 3. Rafraîchissement dynamique des titres et de l'affichage
+                        adapterInterfaceSelonMode();
+                        let activeView = document.querySelector('.view.active');
+                        if (activeView) {
+                            rafraichirTitres(activeView.id.replace('-view', ''));
+                        }
+                    }
+                }
+                                    
                 else if (text.startsWith("ID:")) {
                     let parts = text.split(",D:");
                     if (parts.length >= 2) {
