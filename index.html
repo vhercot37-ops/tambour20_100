@@ -627,31 +627,38 @@
         rafraichirTitres(document.querySelector('.view.active').id.replace('-view', ''));
     }
 
-    const SERVICE_UUID           = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-    const CHARACTERISTIC_UUID_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
-    const CHARACTERISTIC_UUID_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
-    const FIREBASE_HOST = "https://tambour20100-29236-default-rtdb.firebaseio.com/";
-    const FB_P1 = "cnNpaER5TGNOS2hXVGhBRXVDSW";
-    const FB_P2 = "JrakZtOGJ3UGJubUt4SElyNm1rVA==";
-    
-    let ID_COFFRET = localStorage.getItem("tambour_id") || "Box_01"; 
-    let bleDevice = null;
-    let rxCharacteristic = null;
-    let txCharacteristic = null;
-    let modeActif = "BLE";
-    let timerFirebase = null;
-    let reseauxTrouves = [];
-    let chartTempInstance = null;
-    let chartWashInstance = null;
-    let systemeEnManuel = false; 
-    let premiereSynchroFaite = false; 
-    let memModele = null;
-    let memMode = null;
-    let animationLavageEnCours = false;
-    let chronoAnimInterval = null;
-    let timerFinLavage = null;
-    const FIREBASE_AUTH = atob(FB_P1 + FB_P2);
+   // ---------------------------------------------------------
+// PARAMÈTRES GLOBAUX & SÉCURITÉ (Base64 + Découpage)
+// ---------------------------------------------------------
+const SERVICE_UUID           = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+const CHARACTERISTIC_UUID_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+const CHARACTERISTIC_UUID_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+const FIREBASE_HOST = "https://tambour20100-29236-default-rtdb.firebaseio.com/";
+const FB_P1 = "cnNpaER5TGNOS2hXVGhBRXVDSW";
+const FB_P2 = "JrakZtOGJ3UGJubUt4SElyNm1rVA==";
+const FIREBASE_AUTH = atob(FB_P1 + FB_P2);
+const TG_P1 = "ODgwMzU2NDYyODpBQUVudGdiSWlRNG";
+const TG_P2 = "lwQWRUdWtpV0R4c0hNWEt0a2s4UF84aw==";
+const TELEGRAM_BOT_TOKEN = atob(TG_P1 + TG_P2);
+const TELEGRAM_ADMIN_ID = "8538368862";
+let ID_COFFRET = localStorage.getItem("tambour_id") || "Box_01"; 
+let bleDevice = null;
+let rxCharacteristic = null;
+let txCharacteristic = null;
+let modeActif = "BLE";
+let timerFirebase = null;
+let reseauxTrouves = [];
+let chartTempInstance = null;
+let chartWashInstance = null;
+let systemeEnManuel = false; 
+let premiereSynchroFaite = false; 
+let memModele = null;
+let memMode = null;
+let animationLavageEnCours = false;
+let chronoAnimInterval = null;
+let timerFinLavage = null;
 
+    
     // --- CORRECTION : AJOUT FONCTION SAUVEGARDER TAMBOUR ---
     function sauvegarderTambour() {
         let modeleEl = document.getElementById('config-modele-select');
@@ -1044,7 +1051,6 @@ async function chargerInfoDealer() {
                 btnPos.style.pointerEvents = "auto";   // Actif
             }
         }
-        // -----------------------------------------------------------------------------
 
         if (modeActif === "FIREBASE") {
             if (tabAutoText) tabAutoText.innerText = "Monitoring";
@@ -1143,10 +1149,7 @@ async function chargerInfoDealer() {
         });
     }
 
-    const TG_P1 = "ODgwMzU2NDYyODpBQUVudGdiSWlRNG";
-    const TG_P2 = "lwQWRUdWtpV0R4c0hNWEt0a2s4UF84aw==";
-
-function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi, cptConsecutif, espVersion, tempsRestantReel = 0) {
+  function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi, cptConsecutif, espVersion, tempsRestantReel = 0) {
         systemWifiStat = wStat; 
 
         if (espVersion && espVersion !== "--") {
@@ -1251,9 +1254,6 @@ function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode,
             if(lblRssi) lblRssi.innerText = "-- dBm";
         }
     }
-
-const TELEGRAM_BOT_TOKEN = atob(TG_P1 + TG_P2);
-const TELEGRAM_ADMIN_ID = "8538368862"; 
 
 async function verifierGarantiePopup(id) {
     if (!id || id === "Coffret_01" || garantieVerifiee) return;
@@ -1720,8 +1720,6 @@ async function connecterBLE() {
             if(text) text.innerText = "Erreur App<->Cloud";
         }
     }
-
-
 
 async function activerModeFirebase() {
         // 1. Vérification de l'ID (Instantané)
