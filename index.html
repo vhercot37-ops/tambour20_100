@@ -677,7 +677,7 @@
             envoyerCommande("RESET_ALARM", "");
         } else {
             // Mode Cloud : on met le sablier et on bloque le bouton
-            if (iconReset) iconReset.className = "fa-solid fa-hourglass-half fa-spin";
+            if (iconReset) iconReset.className = "fa-solid fa-spinner fa-spin";
             if (btnReset) btnReset.style.opacity = "0.7";
             envoyerCommande("Reset", 1);
         }
@@ -698,7 +698,7 @@
 
         // Sablier animé pendant l'attente Firebase
         if (modeActif === "FIREBASE" && !premiereSynchroFaite && (vue === 'auto' || vue === 'manuel' || vue === 'alarme')) {
-            titre.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Connexion...'; 
+            titre.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Connexion...'; 
             return; 
         }
 
@@ -1743,7 +1743,7 @@ async function activerModeFirebase() {
         adapterInterfaceSelonMode(); 
 
         let titre = document.getElementById('val-Mode');
-        if (titre) titre.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Connexion...';
+        if (titre) titre.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="font-size: 26px; margin-right: 12px; color: var(--accent-blue);"></i> Connexion...';
         afficherMaitresDonnees("--.-", null, null, null, null, "--", "--", 0, 0, -100);
 
         // 3. APPEL RÉSEAU EN ARRIÈRE-PLAN (Prend son temps sans figer l'écran)
