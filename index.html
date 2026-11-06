@@ -644,6 +644,8 @@
     let chartWashInstance = null;
     let systemeEnManuel = false; 
     let premiereSynchroFaite = false; 
+    let memModele = null;
+    let memMode = null;
 
     // --- VARIABLES ANIMATION LAVAGE BLE ---
     let animationLavageEnCours = false;
@@ -684,8 +686,9 @@
     }
 
     function rafraichirTitres(vue) {
-        let modele = localStorage.getItem("tambour_modele") || "70";
-        let mode = localStorage.getItem("tambour_mode") || "G";
+        // --- LECTURE DE LA VOIE RAPIDE EN PRIORITÉ ---
+        let modele = memModele !== null ? memModele : (localStorage.getItem("tambour_modele") || "70");
+        let mode = memMode !== null ? memMode : (localStorage.getItem("tambour_mode") || "G");
         let configMod = document.getElementById('config-modele-select');
         let configTyp = document.getElementById('config-mode-select');
         if(configMod) configMod.value = modele;
@@ -1436,7 +1439,10 @@ async function connecterBLE() {
                         localStorage.setItem("inst_couv", couv);
                         localStorage.setItem("tambour_mode", modeTambour === "1" ? "P" : "G");
                         localStorage.setItem("tambour_modele", modeleTambour);
-
+                        // --- VOIE RAPIDE POUR iOS ---
+                        memModele = modeleTambour;
+                        memMode = (modeTambour === "1" ? "P" : "G");
+                        
                         // 2. Mettre à jour visuellement les formulaires (Installateur & Config)
                         let chkPos = document.getElementById('inst-pos');
                         if (chkPos) chkPos.checked = (pos === "1");
