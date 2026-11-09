@@ -639,14 +639,14 @@ function decrypterCle(p1, p2) {
     return (p1 + p2).split('').reverse().join('');
 }
 
-// 2. Firebase (Scindé et inversé - CORRIGÉ)
-const FB_P1 = "Tkm6rIHxKmKmnbPwb8mFj";
-const FB_P2 = "kbICuEAThwHkNcLyDhisr";
+// 2. Firebase (Scindé et inversé - 100% EXACT)
+const FB_P1 = "Tkm6rIHxKmnbPwb8mFjk";
+const FB_P2 = "bICuEAhTwHkNcLyDhisr";
 const FIREBASE_AUTH = decrypterCle(FB_P1, FB_P2);
 
-// 3. Telegram (Scindé et inversé - CORRIGÉ)
+// 3. Telegram (Scindé et inversé - 100% EXACT)
 const TG_P1 = "k8_P8kktKXMHsxDWikuT";
-const TG_P2 = "dApI4QiIbgtnEAA:8264653088";
+const TG_P2 = "dApi4QiIbgtnEAA:8264653088";
 const TELEGRAM_BOT_TOKEN = decrypterCle(TG_P1, TG_P2);
 const TELEGRAM_ADMIN_ID = "8538368862";
 // ---------------------------------------------------------
@@ -1051,6 +1051,14 @@ async function chargerInfoDealer() {
         let isManuel = systemeEnManuel; 
         let tabAutoText = document.querySelector('#tab-auto span');
 
+        // FORCER LE MASQUAGE DE LA SERIE EN CLOUD ET MANUEL IMMEDIATEMENT
+        let zoneSerie = document.getElementById('zone-lavage-consecutif');
+        let valSerie = document.getElementById('val-lavage-consecutif');
+        if (zoneSerie && (modeActif === "FIREBASE" || isManuel)) {
+            zoneSerie.style.display = 'none';
+            if (valSerie) valSerie.innerText = "0";
+        }
+        
         // --- NOUVEAU : Griser et désactiver le bouton Positionnement si pas d'aimant ---
         let btnPos = document.getElementById('btn-positionnement');
         if (btnPos) {
