@@ -1236,6 +1236,26 @@ async function chargerInfoDealer() {
             else bannerTxt.innerText = dict[currentLang]['al_inc'] || "ALARME INCONNUE";
         }
 
+        // --- GESTION DE LA BULLE "SÉRIE DE LAVAGES" (Auto/Manu/Cloud) ---
+        let zoneSerie = document.getElementById('zone-lavage-consecutif');
+        let valSerie = document.getElementById('val-lavage-consecutif');
+        if (zoneSerie && valSerie) {
+            // Si on est en Mode Cloud OU en Mode Manuel : on cache la bulle et on remet à zéro
+            if (modeActif === "FIREBASE" || systemeEnManuel) {
+                zoneSerie.style.display = 'none';
+                valSerie.innerText = "0";
+            } else {
+                // En BLE et Mode Auto : on affiche uniquement si la série est de 2 ou plus
+                let cptActuel = cptConsecutif !== undefined ? cptConsecutif : 0;
+                if (cptActuel >= 2) {
+                    zoneSerie.style.display = 'flex';
+                    valSerie.innerText = cptActuel;
+                } else {
+                    zoneSerie.style.display = 'none';
+                }
+            }
+        }
+
         // --- MISE A JOUR DES BARRES WIFI ---
         let tabOta = document.getElementById('tab-ota');
 
@@ -1518,16 +1538,16 @@ async function connecterBLE() {
                         let espPosManu = (d.length > 12) ? parseInt(d[12]) : 0; // Le positionnement a glissé d'une case !
 
                         // --- 1. AFFICHAGE DE LA BULLE "SÉRIE DE LAVAGES" ---
-                        let zoneSerie = document.getElementById('zone-lavage-consecutif');
-                        let valSerie = document.getElementById('val-lavage-consecutif');
-                        if (zoneSerie && valSerie) {
-                            if (bleCptConsecutif >= 2) { 
-                                zoneSerie.style.display = 'flex';
-                                valSerie.innerText = bleCptConsecutif;
-                            } else {
-                                zoneSerie.style.display = 'none'; 
-                            }
-                        }
+                        // let zoneSerie = document.getElementById('zone-lavage-consecutif');
+                        //let valSerie = document.getElementById('val-lavage-consecutif');
+                        //if (zoneSerie && valSerie) {
+                        //    if (bleCptConsecutif >= 2) { 
+                        //        zoneSerie.style.display = 'flex';
+                        //        valSerie.innerText = bleCptConsecutif;
+                        //    } else {
+                        //        zoneSerie.style.display = 'none'; 
+                        //    }
+                        //}
 
                         // --- ACTUALISATION DES DONNÉES DE L'INTERFACE ---
 
