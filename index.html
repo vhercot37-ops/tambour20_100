@@ -639,14 +639,14 @@ function decrypterCle(p1, p2) {
     return (p1 + p2).split('').reverse().join('');
 }
 
-// 2. Firebase (Scindé et inversé)
-const FB_P1 = "Tk6rIHxKmKmnbPwB8mFj";
-const FB_P2 = "kCbICuEAhTWHkNcLyDhisr";
+// 2. Firebase (Scindé et inversé - CORRIGÉ)
+const FB_P1 = "Tkm6rIHxKmKmnbPwb8mFj";
+const FB_P2 = "kbICuEAThwHkNcLyDhisr";
 const FIREBASE_AUTH = decrypterCle(FB_P1, FB_P2);
 
-// 3. Telegram (Scindé et inversé)
+// 3. Telegram (Scindé et inversé - CORRIGÉ)
 const TG_P1 = "k8_P8kktKXMHsxDWikuT";
-const TG_P2 = "dApi4QiIbgtnEAA:8264653088";
+const TG_P2 = "dApI4QiIbgtnEAA:8264653088";
 const TELEGRAM_BOT_TOKEN = decrypterCle(TG_P1, TG_P2);
 const TELEGRAM_ADMIN_ID = "8538368862";
 // ---------------------------------------------------------
