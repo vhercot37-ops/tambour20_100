@@ -680,6 +680,10 @@ let timerFinLavage = null;
             localStorage.setItem("tambour_modele", modele);
             localStorage.setItem("tambour_mode", mode);
 
+            // 2. CORRECTION : Mise à jour de la mémoire vive (voie rapide)
+            memModele = modele;
+            memMode = mode;
+            
             envoyerCommande("CFG", modele + "," + mode);
 
             alert(dict[currentLang]['btn_save_tamb'] + " OK !");
