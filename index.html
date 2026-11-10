@@ -218,7 +218,7 @@
 
         <!-- Ligne 2 : Le grand titre ET le bouton menu alignés -->
         <div class="header-title-row">
-            <div class="main-title" id="val-Mode">Auto 70G</div>
+            <div class="main-title" id="val-Mode" onclick="ouvrirSelecteurBox()" style="cursor: pointer;">Auto 70G</div>
             <button class="menu-toggle-btn" onclick="toggleSidebarMenu()"><i class="fa-solid fa-bars" id="menu-icon"></i></button>
         </div>
 
@@ -237,6 +237,20 @@
     </div>
 </div>
 
+<!-- POPUP SÉLECTEUR DE COFFRETS -->
+<div id="selecteur-box-modal" class="wash-modal-overlay">
+    <div class="wash-modal-content" style="max-width: 320px; padding: 25px;">
+        <div style="font-size: 32px; color: var(--accent-blue); margin-bottom: 10px;"><i class="fa-solid fa-list-ul"></i></div>
+        <h3 style="margin: 0 0 15px 0; color: var(--text-white);">Mes Coffrets</h3>
+        
+        <div id="liste-coffrets-container" style="display:flex; flex-direction:column; gap:10px; width: 100%; max-height: 40vh; overflow-y: auto; margin-bottom: 15px;">
+            <!-- Les boutons générés viendront ici -->
+        </div>
+        
+        <button class="auth-btn" style="background-color: #374151;" onclick="fermerSelecteurBox()"><i class="fa-solid fa-times"></i> Fermer</button>
+    </div>
+</div>
+       
     </header>
 
     <div class="sidebar-menu" id="sidebarMenu">
@@ -689,6 +703,7 @@ let animationLavageEnCours = false;
 let chronoAnimInterval = null;
 let timerFinLavage = null;
 let memoireAlarmeForcee = 0;
+let trousseauCoffrets = JSON.parse(localStorage.getItem("tambour_trousseau")) || [];
     
     // --- CORRECTION : AJOUT FONCTION SAUVEGARDER TAMBOUR ---
     function sauvegarderTambour() {
@@ -1232,14 +1247,18 @@ async function chargerInfoDealer() {
         let elTempAl = document.getElementById('val-temperature-al');
         if (elTempAl) elTempAl.innerText = elTemp.innerText;
 
-       let elMode = document.getElementById('val-Mode');
-        if (elMode && modeStr && modeStr !== "--") {
-            let vueActuelle = document.querySelector('.view.active');
-            // On ne met à jour le titre dynamiquement QUE sur les écrans principaux
-            if (vueActuelle && (vueActuelle.id === 'auto-view' || vueActuelle.id === 'manuel-view' || vueActuelle.id === 'alarme-view')) {
-                elMode.innerText = modeStr;
-            }
+      let elMode = document.getElementById('val-Mode');
+    if (elMode && modeStr && modeStr !== "--") {
+    let vueActuelle = document.querySelector('.view.active');
+    if (vueActuelle && (vueActuelle.id === 'auto-view' || vueActuelle.id === 'manuel-view' || vueActuelle.id === 'alarme-view')) {
+        let txt = modeStr;
+        // Fait apparaitre la flèche UNIQUEMENT si on est en Cloud et qu'on a plusieurs coffrets
+        if (modeActif === "FIREBASE" && trousseauCoffrets.length > 1) {
+            txt += ' <i class="fa-solid fa-caret-down" style="font-size: 22px; color: var(--text-gray); margin-left: 8px;"></i>';
         }
+        elMode.innerHTML = txt; 
+       }
+     }
 
         let elLavages = document.getElementById('val-Nbre_lavage');
         if (elLavages) elLavages.innerText = (cpt !== null && cpt !== undefined) ? cpt : "--";
@@ -1578,6 +1597,7 @@ async function connecterBLE() {
                         let nouvelID = parts[0].replace("ID:", "").trim();
                         ID_COFFRET = nouvelID;
                         localStorage.setItem("tambour_id", ID_COFFRET);
+                        ajouterAuTrousseau(ID_COFFRET); // <--- LIGNE À AJOUTER
                         verifierGarantiePopup(ID_COFFRET);
 
                         if (!avertissementFirebaseFait) {
@@ -2189,6 +2209,56 @@ function envoyerConfigInstallateur() {
     }
 }
 
+function ajouterAuTrousseau(id) {
+    if (!id || id === "Box_01" || id === "Coffret_01") return;
+    if (!trousseauCoffrets.includes(id)) {
+        trousseauCoffrets.push(id);
+        localStorage.setItem("tambour_trousseau", JSON.stringify(trousseauCoffrets));
+    }
+}
+
+function ouvrirSelecteurBox() {
+    // Sécurité : On bloque l'ouverture si on est en BLE ou s'il n'y a qu'un seul coffret connu
+    if (modeActif !== "FIREBASE" || trousseauCoffrets.length <= 1) return; 
+    
+    let container = document.getElementById('liste-coffrets-container');
+    container.innerHTML = "";
+    
+    trousseauCoffrets.forEach(boxId => {
+        let btn = document.createElement('button');
+        btn.className = "auth-btn";
+        btn.style.marginBottom = "8px"; // Espace entre les boutons
+        if (boxId === ID_COFFRET) {
+            btn.style.backgroundColor = "var(--dot-green)";
+            btn.innerHTML = `<i class="fa-solid fa-check"></i> ${boxId}`;
+        } else {
+            btn.style.backgroundColor = "#1f2937";
+            btn.style.border = "1px solid #374151";
+            btn.innerHTML = boxId;
+            btn.onclick = () => changerDeCoffret(boxId);
+        }
+        container.appendChild(btn);
+    });
+    
+    document.getElementById('selecteur-box-modal').classList.add('active');
+}
+
+function fermerSelecteurBox() {
+    document.getElementById('selecteur-box-modal').classList.remove('active');
+}
+
+function changerDeCoffret(nouvelId) {
+    fermerSelecteurBox();
+    ID_COFFRET = nouvelId;
+    localStorage.setItem("tambour_id", ID_COFFRET);
+    
+    let titre = document.getElementById('val-Mode');
+    if (titre) titre.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Chargement...';
+    
+    // Relance instantanément la lecture Cloud sur le nouveau boîtier
+    activerModeFirebase();
+}
+    
 </script>
 </body>
 </html>
