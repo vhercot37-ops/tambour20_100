@@ -1242,14 +1242,15 @@ async function chargerInfoDealer() {
         let vueActive = document.querySelector('.view.active');
         if (vueActive) {
             if (alCode > 0) {
-                // On bascule de force UNIQUEMENT si c'est une nouvelle alarme
+                // Si c'est une nouvelle alarme, on force l'affichage de l'écran rouge
                 if (alCode !== memoireAlarmeForcee) {
                     switchView('alarme');
-                    memoireAlarmeForcee = alCode; // On mémorise qu'on l'a déjà affichée
+                    memoireAlarmeForcee = alCode;
                 }
             } else {
-                memoireAlarmeForcee = 0; // On réinitialise si l'alarme est réparée
-                if (vueActive.id === 'alarme-view') {
+                // Si l'alarme a disparu (Reset effectué)
+                if (memoireAlarmeForcee > 0) {
+                    memoireAlarmeForcee = 0;
                     // On restaure l'apparence normale du bouton Reset
                     let btnReset = document.getElementById('btn-reset-alarme');
                     let iconReset = document.getElementById('icon-reset-alarme');
