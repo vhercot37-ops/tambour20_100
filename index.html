@@ -1202,8 +1202,14 @@ async function chargerInfoDealer() {
         let elTempAl = document.getElementById('val-temperature-al');
         if (elTempAl) elTempAl.innerText = elTemp.innerText;
 
-        let elMode = document.getElementById('val-Mode');
-        if (elMode && modeStr && modeStr !== "--") elMode.innerText = modeStr;
+       let elMode = document.getElementById('val-Mode');
+        if (elMode && modeStr && modeStr !== "--") {
+            let vueActuelle = document.querySelector('.view.active');
+            // On ne met à jour le titre dynamiquement QUE sur les écrans principaux
+            if (vueActuelle && (vueActuelle.id === 'auto-view' || vueActuelle.id === 'manuel-view' || vueActuelle.id === 'alarme-view')) {
+                elMode.innerText = modeStr;
+            }
+        }
 
         let elLavages = document.getElementById('val-Nbre_lavage');
         if (elLavages) elLavages.innerText = (cpt !== null && cpt !== undefined) ? cpt : "--";
