@@ -772,7 +772,7 @@ let timerFinLavage = null;
         }
     }
 
-    function switchView(target) {
+   function switchView(target) {
 
         // --- SÉCURITÉ : Réinitialise l'onglet installateur ---
         let passInput = document.getElementById('inst-pass-input');
@@ -786,18 +786,32 @@ let timerFinLavage = null;
           if (configScreen) configScreen.style.display = "none";
           if (errEl) errEl.style.display = "none";
          }
-        // -----------------------------------------------------
-
+        // -----------------------------------------------------       
+        
         // --- AJOUT : Sécurité Anti-Rebond (Flickering) ---
         if (target === 'manuel' || target === 'auto') {
-        blocageSynchroMode = true;
-        if (timerBlocageMode) clearTimeout(timerBlocageMode);
-        // On ignore le matériel pendant 1.5 seconde le temps qu'il comprenne l'ordre
-        timerBlocageMode = setTimeout(() => { blocageSynchroMode = false; }, 1500); 
-       }
-       // -------------------------------------------------
+            blocageSynchroMode = true;
+            if (timerBlocageMode) clearTimeout(timerBlocageMode);
+            // On ignore le matériel pendant 1.5 seconde le temps qu'il comprenne l'ordre
+            timerBlocageMode = setTimeout(() => { blocageSynchroMode = false; }, 1500); 
+        }
+        // -------------------------------------------------
 
-        if (target === 'manuel') systemeEnManuel = true;
+        // --- NOUVEAU : Désactiver le bouton menu en cas d'alarme ---
+        let menuBtn = document.querySelector('.menu-toggle-btn');
+        if (menuBtn) {
+            if (target === 'alarme') {
+                menuBtn.classList.add('disabled');
+            } else {
+                menuBtn.classList.remove('disabled');
+            }
+        }
+        // -----------------------------------------------------------
+
+        if (target === 'manuel') { 
+            systemeEnManuel = true; 
+            serieMasqueeManuellement = true; // On force l'oubli de la série
+        }
         if (target === 'auto') systemeEnManuel = false;
 
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -819,7 +833,6 @@ let timerFinLavage = null;
         if (target === 'dealer') { chargerInfoDealer(); }
 
     }
-
     function lierTelegram() {
         if (!ID_COFFRET) { alert("Erreur : Identifiant introuvable."); return; }
         window.open(`https://t.me/Vincent2010Bot?start=${encodeURIComponent(ID_COFFRET)}`, '_blank');
@@ -2066,27 +2079,14 @@ function initBoutonsManuels() {
 
     
 function toggleSidebarMenu() { 
-        let btn = document.querySelector('.menu-toggle-btn');
-        let menu = document.getElementById('sidebarMenu');
-        if(menu) menu.classList.toggle('open'); 
-    }
+    let activeView = document.querySelector('.view.active');
+    // NOUVELLE LIGNE : bloque l'ouverture si on est en alarme
+    if (activeView && activeView.id === 'alarme-view') return; 
 
-   document.addEventListener('DOMContentLoaded', () => {
-    initBoutonsManuels(); 
-    chargerMemos(); 
-    adapterInterfaceSelonMode(); 
-
-    switchView('ble'); 
-
-    setLang(currentLang); 
-
-    let textStatus = document.getElementById('app-conn-text');
-    if (textStatus) {
-        textStatus.removeAttribute('data-i18n');
-        textStatus.innerText = "Déconnecté";
-    }
-
-});
+    let btn = document.querySelector('.menu-toggle-btn');
+    let menu = document.getElementById('sidebarMenu');
+    if(menu) menu.classList.toggle('open'); 
+}
 
     function verifierMotDePasseInstallateur() {
         const inputPass = document.getElementById('inst-pass-input').value;
