@@ -1710,7 +1710,7 @@ async function connecterBLE() {
                         secu = data.niveau_securite !== undefined ? data.niveau_securite : 0;
                         lav = data.niveau_lavage !== undefined ? data.niveau_lavage : 0;
                         couv = data.couvercle !== undefined ? data.couvercle : 0;
-                        uv = data.pompe_uv !== undefined ? data.pompe_uv : 0;
+                        uv = data["pompe UV"] !== undefined ? data["pompe UV"] : 0;
                         cpt = data.Nbre_lavage !== undefined ? data.Nbre_lavage : 0;
                         alarme = data.code_alarme !== undefined ? data.code_alarme : 0;
                         wStat = data.wifi_stat !== undefined ? data.wifi_stat : 0;
