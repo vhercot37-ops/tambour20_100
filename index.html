@@ -774,6 +774,12 @@ let memoireAlarmeForcee = 0;
 
    function switchView(target) {
 
+        // --- NOUVEAU : Redirection instantanée vers l'alarme si une alarme est active ---
+        if ((target === 'auto' || target === 'manuel') && memoireAlarmeForcee > 0) {
+            target = 'alarme';
+        }
+        // -----------------------------------------------------------------------------
+       
         // --- SÉCURITÉ : Réinitialise l'onglet installateur ---
         let passInput = document.getElementById('inst-pass-input');
         if (passInput) {
@@ -833,6 +839,8 @@ let memoireAlarmeForcee = 0;
         if (target === 'dealer') { chargerInfoDealer(); }
 
     }
+
+    
     function lierTelegram() {
         if (!ID_COFFRET) { alert("Erreur : Identifiant introuvable."); return; }
         window.open(`https://t.me/Vincent2010Bot?start=${encodeURIComponent(ID_COFFRET)}`, '_blank');
