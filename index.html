@@ -666,7 +666,7 @@ let memMode = null;
 let animationLavageEnCours = false;
 let chronoAnimInterval = null;
 let timerFinLavage = null;
-
+let memoireAlarmeForcee = 0;
     
     // --- CORRECTION : AJOUT FONCTION SAUVEGARDER TAMBOUR ---
     function sauvegarderTambour() {
@@ -1232,19 +1232,26 @@ async function chargerInfoDealer() {
         let sideBox = document.getElementById('sidebar-box-id');
         if (sideBox && ID_COFFRET) sideBox.innerText = ID_COFFRET;
 
-        // ---> BASCULE AUTOMATIQUE SUR L'ÉCRAN D'ALARME <---
+      // ---> BASCULE AUTOMATIQUE SUR L'ÉCRAN D'ALARME <---
         let vueActive = document.querySelector('.view.active');
         if (vueActive) {
-            if (alCode > 0 && vueActive.id !== 'alarme-view') {
-                switchView('alarme');
-            } else if (alCode === 0 && vueActive.id === 'alarme-view') {
-                // On restaure l'apparence normale du bouton Reset
-                let btnReset = document.getElementById('btn-reset-alarme');
-                let iconReset = document.getElementById('icon-reset-alarme');
-                if (iconReset) iconReset.className = "fa-solid fa-power-off";
-                if (btnReset) btnReset.style.opacity = "1";
+            if (alCode > 0) {
+                // On bascule de force UNIQUEMENT si c'est une nouvelle alarme
+                if (alCode !== memoireAlarmeForcee) {
+                    switchView('alarme');
+                    memoireAlarmeForcee = alCode; // On mémorise qu'on l'a déjà affichée
+                }
+            } else {
+                memoireAlarmeForcee = 0; // On réinitialise si l'alarme est réparée
+                if (vueActive.id === 'alarme-view') {
+                    // On restaure l'apparence normale du bouton Reset
+                    let btnReset = document.getElementById('btn-reset-alarme');
+                    let iconReset = document.getElementById('icon-reset-alarme');
+                    if (iconReset) iconReset.className = "fa-solid fa-power-off";
+                    if (btnReset) btnReset.style.opacity = "1";
 
-                switchView('manuel');
+                    switchView('manuel');
+                }
             }
         }
 
@@ -2079,14 +2086,14 @@ function initBoutonsManuels() {
 
     
 function toggleSidebarMenu() { 
-    let activeView = document.querySelector('.view.active');
-    // NOUVELLE LIGNE : bloque l'ouverture si on est en alarme
-    if (activeView && activeView.id === 'alarme-view') return; 
+            let activeView = document.querySelector('.view.active');
+            // Bloque l'ouverture si on est en alarme ET en mode BLE
+            if (activeView && activeView.id === 'alarme-view' && modeActif === "BLE") return; 
 
-    let btn = document.querySelector('.menu-toggle-btn');
-    let menu = document.getElementById('sidebarMenu');
-    if(menu) menu.classList.toggle('open'); 
-}
+            let btn = document.querySelector('.menu-toggle-btn');
+            let menu = document.getElementById('sidebarMenu');
+            if(menu) menu.classList.toggle('open'); 
+        }
 
     function verifierMotDePasseInstallateur() {
         const inputPass = document.getElementById('inst-pass-input').value;
