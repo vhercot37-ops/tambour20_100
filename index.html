@@ -797,10 +797,10 @@ let memoireAlarmeForcee = 0;
         }
         // -------------------------------------------------
 
-        // --- NOUVEAU : Désactiver le bouton menu en cas d'alarme ---
+    // --- NOUVEAU : Désactiver le bouton menu en cas d'alarme (Seulement en BLE) ---
         let menuBtn = document.querySelector('.menu-toggle-btn');
         if (menuBtn) {
-            if (target === 'alarme') {
+            if (target === 'alarme' && modeActif === "BLE") {
                 menuBtn.classList.add('disabled');
             } else {
                 menuBtn.classList.remove('disabled');
