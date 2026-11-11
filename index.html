@@ -282,7 +282,7 @@
 
     </div>
     <div id="dashboard-content">
-        <div id="auto-view" class="view active">
+        <div id="auto-view" class="view">
             <div class="bento-card">
                 <div class="temp-header"><span data-i18n="temp_eau">Température Eau</span> <i class="fa-solid fa-temperature-half"></i></div>
                 <div class="temp-value-large" id="val-temperature">--.-<span>°C</span></div>
@@ -414,7 +414,7 @@
             </div>
         </div>
 
-        <div id="ble-view" class="view">
+       <div id="ble-view" class="view active">
             <div class="telegram-config-block">
                 <h3 data-i18n="titre_conn">Choix de la Connexion</h3>
                 <div class="conn-bar">
@@ -2313,6 +2313,9 @@ function purgerMemoireInstallateur() {
         switchView('ble');
     }
 }
+
+// Force le démarrage sur l'écran de connexion au lancement de l'application
+window.addEventListener('load', () => { switchView('ble'); });
     
 </script>
 </body>
