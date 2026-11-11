@@ -878,7 +878,7 @@ let trousseauCoffrets = JSON.parse(localStorage.getItem("tambour_trousseau")) ||
         adapterInterfaceSelonMode();
 
         if (target !== 'alarme' && modeActif === "BLE") { envoyerCommande("PAGE", target.toUpperCase()); }
-        if (target === 'history' && modeActif === "FIREBASE") { lireHistoriqueFirebase(); }
+       if (target === 'history') { lireHistoriqueFirebase(); }
         if (target === 'dealer') { chargerInfoDealer(); }
 
     }
@@ -1022,44 +1022,61 @@ async function chargerInfoDealer() {
         }
     }
 
-    async function lireHistoriqueFirebase() {
-        if (!ID_COFFRET) return;
-        let titre = document.getElementById('val-Mode');
-        if(titre) titre.innerText = "Connexion...";
+ async function lireHistoriqueFirebase() {
+    if (!ID_COFFRET || ID_COFFRET === "Box_01" || ID_COFFRET === "Coffret_01") return;
+    let titre = document.getElementById('val-Mode');
+    if(titre) titre.innerText = "Chargement...";
 
-        try {
-            let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/historique.json?auth=${FIREBASE_AUTH}`);
-            if (response.ok) {
-                let data = await response.json();
-                if (data && data.jours && data.temperatures && data.lavages) {
-                    genererGraphiques(data.jours, data.temperatures, data.lavages);
-                } else { afficherMessageAucuneDonnee(); }
-            } else { afficherMessageAucuneDonnee(); }
-        } catch (error) { console.error(error); afficherMessageAucuneDonnee(); }
-
+    // 1. VÉRIFICATION DE LA CONNEXION INTERNET DU TÉLÉPHONE
+    if (!navigator.onLine) {
+        afficherMessageAucuneDonnee(true); // true indique "hors ligne"
         if(titre) titre.innerText = dict[currentLang]['menu_history'] || "Historique";
+        return; // On arrête tout pour ne pas faire planter l'application
     }
 
-    function afficherMessageAucuneDonnee() {
-        let msg = (currentLang === 'fr') ? "Pas encore de données" : "Nog geen gegevens";
-        document.querySelectorAll('.chart-container').forEach(container => {
-            let canvas = container.querySelector('canvas');
-            if (canvas) canvas.style.display = 'none';
-            let msgDiv = container.querySelector('.no-data-msg');
-            if (!msgDiv) {
-                msgDiv = document.createElement('div');
-                msgDiv.className = 'no-data-msg';
-                msgDiv.style.textAlign = 'center';
-                msgDiv.style.color = 'var(--text-gray)';
-                msgDiv.style.padding = '40px 0';
-                msgDiv.style.fontSize = '16px';
-                msgDiv.style.fontWeight = 'bold';
-                container.appendChild(msgDiv);
-            }
-            msgDiv.innerText = msg;
-            msgDiv.style.display = 'block';
-        });
+    try {
+        let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/historique.json?auth=${FIREBASE_AUTH}`);
+        if (response.ok) {
+            let data = await response.json();
+            if (data && data.jours && data.temperatures && data.lavages) {
+                genererGraphiques(data.jours, data.temperatures, data.lavages);
+            } else { afficherMessageAucuneDonnee(false); }
+        } else { afficherMessageAucuneDonnee(false); }
+    } catch (error) { 
+        console.error(error); 
+        afficherMessageAucuneDonnee(true); // Erreur réseau traitée comme "hors ligne"
     }
+
+    if(titre) titre.innerText = dict[currentLang]['menu_history'] || "Historique";
+}
+
+    function afficherMessageAucuneDonnee(horsLigne = false) {
+    let msg = "";
+    if (horsLigne) {
+        msg = (currentLang === 'fr') ? "⚠️ Pas de connexion Internet (Wi-Fi/4G) pour télécharger l'historique." : "⚠️ Geen internetverbinding (Wi-Fi/4G) om geschiedenis te downloaden.";
+    } else {
+        msg = (currentLang === 'fr') ? "Pas encore de données" : "Nog geen gegevens";
+    }
+    
+    document.querySelectorAll('.chart-container').forEach(container => {
+        let canvas = container.querySelector('canvas');
+        if (canvas) canvas.style.display = 'none';
+        let msgDiv = container.querySelector('.no-data-msg');
+        if (!msgDiv) {
+            msgDiv = document.createElement('div');
+            msgDiv.className = 'no-data-msg';
+            msgDiv.style.textAlign = 'center';
+            msgDiv.style.color = 'var(--text-gray)';
+            msgDiv.style.padding = '30px 10px';
+            msgDiv.style.fontSize = '14px';
+            msgDiv.style.fontWeight = 'bold';
+            msgDiv.style.lineHeight = '1.4';
+            container.appendChild(msgDiv);
+        }
+        msgDiv.innerText = msg;
+        msgDiv.style.display = 'block';
+    });
+}
 
    function genererGraphiques(labels, temps, lavages) {
         if (chartTempInstance) chartTempInstance.destroy();
@@ -1149,7 +1166,7 @@ async function chargerInfoDealer() {
         } else if (modeActif === "BLE") {
             if (tabAutoText) tabAutoText.innerText = dict[currentLang]['menu_auto'];
 
-            ['tab-history', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
+            [ 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
             let elMan = document.getElementById('tab-manuel'); if (elMan) elMan.style.display = "flex";
 
             let styleConfig = isManuel ? "flex" : "none";
