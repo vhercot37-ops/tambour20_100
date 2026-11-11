@@ -218,7 +218,7 @@
 
         <!-- Ligne 2 : Le grand titre ET le bouton menu alignés -->
         <div class="header-title-row">
-           <div class="main-title" id="val-Mode" style="cursor: pointer;" onclick="ouvrirSelecteurBox()">Auto 70G</div>
+         <div class="main-title" id="val-Mode" style="cursor: pointer;" onclick="ouvrirSelecteurBox()">Connexion</div>
             <button class="menu-toggle-btn" onclick="toggleSidebarMenu()"><i class="fa-solid fa-bars" id="menu-icon"></i></button>
         </div>
 
@@ -1177,7 +1177,7 @@ async function chargerInfoDealer() {
             let elDealer = document.getElementById('tab-dealer');
             if (elDealer) elDealer.style.display = isManuel ? "flex" : "none";
 
-           if (['history-view', 'telegram-view'].includes(activeView) || (!isManuel && ['config-view', 'wifi-view', 'ota-view', 'pdf-view'].includes(activeView))) {
+           if ([ 'telegram-view'].includes(activeView) || (!isManuel && ['config-view', 'wifi-view', 'ota-view', 'pdf-view'].includes(activeView))) {
                 if (activeView !== 'auto-view') { setTimeout(() => switchView('auto'), 10); }
             }
         }
