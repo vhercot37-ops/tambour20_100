@@ -2331,8 +2331,11 @@ function purgerMemoireInstallateur() {
     }
 }
 
-// Force le démarrage sur l'écran de connexion au lancement de l'application
-window.addEventListener('load', () => { switchView('ble'); });
+// Initialisation de l'application au démarrage
+window.addEventListener('load', () => { 
+    initBoutonsManuels(); // <--- C'est cette ligne qui réveille les boutons !
+    switchView('ble'); 
+});
     
 </script>
 </body>
