@@ -306,8 +306,13 @@
                     <!-- NOUVEAU : Compteur de lavages consécutifs (caché par défaut) -->
                     <div id="zone-lavage-consecutif" style="display: none; align-items: center; gap: 8px; background: rgba(255, 165, 0, 0.15); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,165,0,0.3);">
                         <i class="fa-solid fa-triangle-exclamation" style="color: #ffa500; font-size: 13px;"></i>
-                        <span style="color: #ffa500; font-size: 13px; font-weight: 600;">Série : <span id="val-lavage-consecutif">0</span></span>
+                        <span style="color: #ffa500; font-size: 13px; font-weight: 600;">Série : <span id="val-lavage-consecutif">0</span></span>    
                     </div>
+                        <!-- NOUVEAU : Alerte RTC compacte pour la carte Lavage -->
+                        <div id="alerte-rtc-lavage" style="display: none; align-items: center; gap: 8px; background: rgba(239, 68, 68, 0.15); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">
+                        <i class="fa-solid fa-battery-empty" style="color: #ef4444; font-size: 13px;"></i>
+                        <span style="color: #ef4444; font-size: 12px; font-weight: 600;">Pile/Horloge HS</span>
+                   </div>            
                 </div>
                 <span class="count" id="val-Nbre_lavage" style="font-size: 32px; font-weight: 800; color: white;">--</span>
             </div>
@@ -455,6 +460,13 @@
 
         <div id="history-view" class="view">
             <h3 style="text-align: center;" data-i18n="titre_hist">Historique (15 jours)</h3>
+
+            <!-- NOUVEAU : Bandeau d'explication RTC -->
+            <div id="alerte-rtc-historique" style="display: none; background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #f87171; padding: 12px; border-radius: 12px; margin-bottom: 15px; font-size: 13px; text-align: center; line-height: 1.4;">
+            <i class="fa-solid fa-battery-empty" style="margin-right: 5px;"></i>
+            <strong>Pile horloge à remplacer.</strong><br>L'archivage des nouveaux jours est suspendu (les anciennes données sont conservées).
+            </div>
+            
             <div class="chart-container"><canvas id="chartTemp"></canvas></div>
             <div class="chart-container"><canvas id="chartWash"></canvas></div>
         </div>
@@ -1251,8 +1263,22 @@ async function chargerInfoDealer() {
         });
     }
 
-  function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi, cptConsecutif, espVersion, tempsRestantReel = 0) {
+  function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi, cptConsecutif, espVersion, tempsRestantReel = 0, erreurRTC = 0) {
         systemWifiStat = wStat; 
+
+        // --- NOUVEAU : GESTION DES ALERTES RTC ---
+        let rtcLavage = document.getElementById('alerte-rtc-lavage');
+        let rtcHist = document.getElementById('alerte-rtc-historique');
+        if (rtcLavage && rtcHist) {
+         if (erreurRTC === 1) {
+            rtcLavage.style.display = 'flex';
+            rtcHist.style.display = 'block';
+          } else {
+            rtcLavage.style.display = 'none';
+            rtcHist.style.display = 'none';
+          }
+        }
+        // -----------------------------------------
 
         if (espVersion && espVersion !== "--") {
             currentFirmwareVersion = espVersion;
@@ -1645,6 +1671,7 @@ async function connecterBLE() {
                         let espVersion = (d.length > 10) ? d[10] : "v1.0.0";
                         let espMode = (d.length > 11) ? parseInt(d[11]) : -1; 
                         let espPosManu = (d.length > 12) ? parseInt(d[12]) : 0; // Le positionnement a glissé d'une case !
+                        let erreurRTC = (d.length > 13) ? parseInt(d[13]) : 0; // <-- NOUVEAU
 
                         // --- 1. AFFICHAGE DE LA BULLE "SÉRIE DE LAVAGES" ---
                         // let zoneSerie = document.getElementById('zone-lavage-consecutif');
@@ -1660,7 +1687,7 @@ async function connecterBLE() {
 
                         // --- ACTUALISATION DES DONNÉES DE L'INTERFACE ---
 
-                         if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, bleCptConsecutif, espVersion);
+                         if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, bleCptConsecutif, espVersion,erreurRTC));
 
                         // --- 2. BASCULE AUTOMATIQUE & ANIMATIONS DES TITRES ---
                         if (alCode === 0 && espMode !== -1 && !blocageSynchroMode) {
@@ -1817,6 +1844,7 @@ async function connecterBLE() {
                         wStat = data.wifi_stat !== undefined ? data.wifi_stat : 0;
                         wRssi = data.wifi_rssi !== undefined ? data.wifi_rssi : 0;
                         cptConsecutif = data.lavages_consecutifs !== undefined ? data.lavages_consecutifs : 0; // <-- NOUVELLE LIGNE
+                        let erreurRTC = data.erreur_rtc !== undefined ? data.erreur_rtc : 0; // <-- NOUVEAU
 
                         if (data.Mode !== undefined) {
                             dernierModeFirebase = data.Mode; 
@@ -1845,12 +1873,13 @@ async function connecterBLE() {
                         temp = "--.-"; secu = null; lav = null; couv = null; uv = null;
                         cpt = "--"; alarme = 0; wStat = 0; wRssi = -100; 
                         cptConsecutif = 0; // <-- NOUVELLE LIGNE (utilise "var" ici pour la portée globale du if/else)
+                        var erreurRTC = 0; // <-- NOUVEAU (utiliser var pour la portée)
                         let teleIcon = document.getElementById('telegram-status-icon');
                         if (teleIcon) teleIcon.style.color = "#374151";
                     }
 
                     let espVersion = data.version_actuelle !== undefined ? data.version_actuelle : "v1.0.0";
-                    afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, data.Mode, alarme, wStat, wRssi, cptConsecutif, espVersion);
+                    afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, data.Mode, alarme, wStat, wRssi, cptConsecutif, espVersion,erreurRTC);
                 } else {
                     if(dot) { dot.className = "fa-solid fa-triangle-exclamation"; dot.style.color = "#f59e0b"; }
                     if(text) text.innerText = "Pas de données";
