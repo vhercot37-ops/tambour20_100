@@ -687,15 +687,15 @@
 const SERVICE_UUID           = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
 const CHARACTERISTIC_UUID_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
 const CHARACTERISTIC_UUID_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
-const FIREBASE_HOST = "https://tambour20100-29236-default-rtdb.firebaseio.com/";
+const FIREBASE_HOST = "https://tambour20100v2-default-rtdb.europe-west1.firebasedatabase.app/";
 // 1. Fonction de décryptage 100% fiable (remplace atob)
 function decrypterCle(p1, p2) {
     return (p1 + p2).split('').reverse().join('');
 }
 
 // 2. Firebase (Scindé et inversé - 100% EXACT)
-const FB_P1 = "Tkm6rIHxKmnbPwb8mFjk";
-const FB_P2 = "bICuEAhTwHkNcLyDhisr";
+const FB_P1 = "k7jCOYcX0ktQYCPgXV3I";
+const FB_P2 = "OSqn9RVCSS508TjK8U3m";
 const FIREBASE_AUTH = decrypterCle(FB_P1, FB_P2);
 
 // 3. Telegram (Scindé et inversé - 100% EXACT)
