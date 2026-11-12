@@ -703,7 +703,7 @@ const TG_P1 = "k8_P8kktKXMHsxDWikuT";
 const TG_P2 = "dApi4QiIbgtnEAA:8264653088";
 const TELEGRAM_BOT_TOKEN = decrypterCle(TG_P1, TG_P2);
 const TELEGRAM_ADMIN_ID = "8538368862";
-// ---------------------------------------------------------
+
 let ID_COFFRET = localStorage.getItem("tambour_id") || "Box_01"; 
 let bleDevice = null;
 let rxCharacteristic = null;
@@ -722,6 +722,8 @@ let chronoAnimInterval = null;
 let timerFinLavage = null;
 let memoireAlarmeForcee = 0;
 let trousseauCoffrets = JSON.parse(localStorage.getItem("tambour_trousseau")) || [];
+let garantieVerifiee = false;
+let serieMasqueeManuellement = false;
     
     // --- CORRECTION : AJOUT FONCTION SAUVEGARDER TAMBOUR ---
     function sauvegarderTambour() {
@@ -1263,7 +1265,7 @@ async function chargerInfoDealer() {
         });
     }
 
-  function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi, cptConsecutif, espVersion, tempsRestantReel = 0, erreurRTC = 0) {
+  function afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, modeStr, alCode, wStat, wRssi, cptConsecutif, espVersion, erreurRTC = 0) {
         systemWifiStat = wStat; 
 
         // --- NOUVEAU : GESTION DES ALERTES RTC ---
@@ -1687,7 +1689,7 @@ async function connecterBLE() {
 
                         // --- ACTUALISATION DES DONNÉES DE L'INTERFACE ---
 
-                         if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, bleCptConsecutif, espVersion,erreurRTC));
+                         if (d.length >= 6) afficherMaitresDonnees(parseFloat(d[0]), parseInt(d[1]), parseInt(d[2]), parseInt(d[3]), parseInt(d[4]), d[5], "--", alCode, wStat, wRssi, bleCptConsecutif, espVersion,erreurRTC);
 
                         // --- 2. BASCULE AUTOMATIQUE & ANIMATIONS DES TITRES ---
                         if (alCode === 0 && espMode !== -1 && !blocageSynchroMode) {
