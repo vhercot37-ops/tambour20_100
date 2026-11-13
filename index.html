@@ -689,6 +689,10 @@ const CHARACTERISTIC_UUID_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
 const CHARACTERISTIC_UUID_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 const FIREBASE_HOST = "https://tambour20100v2-default-rtdb.europe-west1.firebasedatabase.app/";
 
+function decrypterCle(p1, p2) {
+    return (p1 + p2).split('').reverse().join('');
+}
+
 // 3. Telegram (Scindé et inversé - 100% EXACT)
 const TG_P1 = "k8_P8kktKXMHsxDWikuT";
 const TG_P2 = "dApi4QiIbgtnEAA:8264653088";
