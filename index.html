@@ -411,13 +411,9 @@
             </div>
         </div>
 
-        <div id="telegram-view" class="view">
-            <div class="telegram-config-block">
-                <h3 data-i18n="titre_tele">Alertes Telegram</h3>
-                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 20px;">Liez automatiquement votre compte Telegram pour recevoir les alertes de votre coffret.<br><br>Cliquez sur le bouton ci-dessous, puis appuyez sur <b>Démarrer</b> dans l'application Telegram.</p>
-                <button class="auth-btn" style="background-color: #0ea5e9; padding: 15px; margin-bottom: 15px;" onclick="lierTelegram()"><i class="fa-brands fa-telegram"></i> Lier Telegram Auto</button>
-            </div>
-        </div>
+        <button class="auth-btn" style="background-color: #0ea5e9; padding: 15px; margin-bottom: 15px;" onclick="activerFCM()">
+        <i class="fa-solid fa-bell"></i> Activer les Notifications (Push)
+        </button>
 
        <div id="ble-view" class="view active">
             <div class="telegram-config-block">
@@ -2360,6 +2356,53 @@ function purgerMemoireInstallateur() {
 window.addEventListener('load', () => { 
     initBoutonsManuels(); // <--- C'est cette ligne qui réveille les boutons !
     switchView('ble'); 
+});
+
+// 1. Initialiser Firebase
+firebase.initializeApp({
+    apiKey: "VOTRE_API_KEY",
+    projectId: "tambour20100v2",
+    messagingSenderId: "VOTRE_MESSAGING_SENDER_ID",
+    appId: "VOTRE_APP_ID"
+});
+    
+const messaging = firebase.messaging();
+
+// 2. Fonction d'activation des notifications
+async function activerFCM() {
+    if (!ID_COFFRET || ID_COFFRET === "Box_01") {
+        alert("Veuillez d'abord sélectionner ou vous connecter à un coffret.");
+        return;
+    }
+
+    try {
+        const permission = await Notification.requestPermission();
+        
+        if (permission === 'granted') {
+            // REMPLACEZ ICI PAR LA CLÉ VAPID GÉNÉRÉE À L'ÉTAPE 1
+            const token = await messaging.getToken({ vapidKey: 'VOTRE_CLE_VAPID_PUBLIQUE_ICI' });
+
+            if (token) {
+                // On enregistre le jeton dans votre base de données V2 via fetch()
+                await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/fcm_token.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(token)
+                });
+                alert("✅ Notifications activées avec succès pour ce téléphone !");
+            }
+        } else {
+            alert("❌ Autorisation des notifications refusée par le système.");
+        }
+    } catch (error) {
+        console.error("Erreur FCM :", error);
+        alert("Erreur lors de l'activation des notifications.");
+    }
+}
+
+// 3. Écouter les messages si l'application est ouverte à l'écran
+messaging.onMessage((payload) => {
+    alert(`⚠️ ${payload.notification.title}\n${payload.notification.body}`);
 });
     
 </script>
