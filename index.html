@@ -2360,10 +2360,10 @@ window.addEventListener('load', () => {
 
 // 1. Initialiser Firebase
 firebase.initializeApp({
-    apiKey: "VOTRE_API_KEY",
+    apiKey: "AIzaSyDXmUpLFbyq2riUZuHcxt8hvrjzuKiZfhk",
     projectId: "tambour20100v2",
-    messagingSenderId: "VOTRE_MESSAGING_SENDER_ID",
-    appId: "VOTRE_APP_ID"
+    messagingSenderId: "448402266936",
+    appId: "1:448402266936:web:d93726041bc48923ae3fcd"
 });
     
 const messaging = firebase.messaging();
@@ -2380,7 +2380,7 @@ async function activerFCM() {
         
         if (permission === 'granted') {
             // REMPLACEZ ICI PAR LA CLÉ VAPID GÉNÉRÉE À L'ÉTAPE 1
-            const token = await messaging.getToken({ vapidKey: 'VOTRE_CLE_VAPID_PUBLIQUE_ICI' });
+            const token = await messaging.getToken({ vapidKey: 'BF6mr3UWhfQviZyMjrDYoPoErlXo0XgB5CJTNTRzyOXxYzSxWY_K_zqTvIH0X_EPF0Utld8_ZuYRmQaOHxu4V3o' });
 
             if (token) {
                 // On enregistre le jeton dans votre base de données V2 via fetch()
