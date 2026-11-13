@@ -688,15 +688,6 @@ const SERVICE_UUID           = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
 const CHARACTERISTIC_UUID_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
 const CHARACTERISTIC_UUID_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 const FIREBASE_HOST = "https://tambour20100v2-default-rtdb.europe-west1.firebasedatabase.app/";
-// 1. Fonction de décryptage 100% fiable (remplace atob)
-function decrypterCle(p1, p2) {
-    return (p1 + p2).split('').reverse().join('');
-}
-
-// 2. Firebase (Scindé et inversé - 100% EXACT)
-const FB_P1 = "k7jCOYcX0ktQYCPgXV3I";
-const FB_P2 = "OSqn9RVCSS508TjK8U3m";
-const FIREBASE_AUTH = decrypterCle(FB_P1, FB_P2);
 
 // 3. Telegram (Scindé et inversé - 100% EXACT)
 const TG_P1 = "k8_P8kktKXMHsxDWikuT";
@@ -820,7 +811,7 @@ let serieMasqueeManuellement = false;
                 let payload = {};
                 payload[action] = valeur; 
 
-                await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, {
+                await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -924,7 +915,7 @@ async function chargerInfoDealer() {
         }
 
         try {
-            let resClient = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/dealer_id.json?auth=${FIREBASE_AUTH}`);
+            let resClient = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/dealer_id.json`);
             let dealerId = await resClient.json();
 
             if (!dealerId) {
@@ -934,7 +925,7 @@ async function chargerInfoDealer() {
                 return;
             }
 
-            let resDealer = await fetch(`${FIREBASE_HOST}dealers/${dealerId}.json?auth=${FIREBASE_AUTH}`);
+            let resDealer = await fetch(`${FIREBASE_HOST}dealers/${dealerId}.json`);
             let data = await resDealer.json();
 
             if (data) {
@@ -1007,7 +998,7 @@ async function chargerInfoDealer() {
 
         try {
             // 1. On récupère tout l'annuaire des dealers
-            let res = await fetch(`${FIREBASE_HOST}dealers.json?auth=${FIREBASE_AUTH}`);
+            let res = await fetch(`${FIREBASE_HOST}dealers.json`);
             let dealers = await res.json();
 
             select.innerHTML = '<option value="">Aucun revendeur</option>';
@@ -1024,7 +1015,7 @@ async function chargerInfoDealer() {
 
             // 3. On sélectionne automatiquement celui qui est déjà enregistré pour ce client (s'il y en a un)
             if (ID_COFFRET && ID_COFFRET !== "Coffret_01") {
-                let resClient = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/dealer_id.json?auth=${FIREBASE_AUTH}`);
+                let resClient = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/dealer_id.json`);
                 let currentDealer = await resClient.json();
                 if (currentDealer && currentDealer !== "") {
                     select.value = currentDealer;
@@ -1049,7 +1040,7 @@ async function chargerInfoDealer() {
     }
 
     try {
-        let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/historique.json?auth=${FIREBASE_AUTH}`);
+        let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}/historique.json`);
         if (response.ok) {
             let data = await response.json();
             if (data && data.jours && data.temperatures && data.lavages) {
@@ -1429,7 +1420,7 @@ async function verifierGarantiePopup(id) {
     garantieVerifiee = true; 
 
     try {
-        let response = await fetch(`${FIREBASE_HOST}Garantie/${id}.json?auth=${FIREBASE_AUTH}`);
+        let response = await fetch(`${FIREBASE_HOST}Garantie/${id}.json`);
         let data = await response.json();
         // Si le dossier est vide (null), le coffret est neuf : on affiche la popup !
         if (data === null) {
@@ -1460,7 +1451,7 @@ async function verifierGarantiePopup(id) {
 
         try {
             // A. Sauvegarde dans le classeur Firebase
-            await fetch(`${FIREBASE_HOST}Garantie/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, {
+            await fetch(`${FIREBASE_HOST}Garantie/${ID_COFFRET}.json`, {
                 method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
             });
 
@@ -1507,7 +1498,7 @@ async function effacerGarantieUsine() {
     if (!ID_COFFRET || ID_COFFRET === "Coffret_01") return;
     if (confirm(`Voulez-vous vraiment effacer la garantie du ${ID_COFFRET} pour une remise à neuf en sortie d'usine ?`)) {
         try {
-            await fetch(`${FIREBASE_HOST}Garantie/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { method: 'DELETE' });
+            await fetch(`${FIREBASE_HOST}Garantie/${ID_COFFRET}.json`, { method: 'DELETE' });
             alert("Garantie effacée avec succès ! Le coffret est prêt pour l'expédition.");
             // On ne touche plus à garantieVerifiee ici pour te laisser tester tranquillement
         } catch (e) { 
@@ -1654,7 +1645,7 @@ async function connecterBLE() {
 
                         if (!avertissementFirebaseFait) {
                             avertissementFirebaseFait = true;
-                            fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
+                            fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json`, { 
                                 method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode_ble: true })
                             }).catch(err => console.error("Erreur Firebase mode_ble", err));
                         }
@@ -1795,8 +1786,7 @@ async function connecterBLE() {
         let text = document.getElementById('app-conn-text');
 
         try {
-            //let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`);
-            let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}&_=${Date.now()}`, { cache: 'no-store' });
+            let response = await fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?_=${Date.now()}`, { cache: 'no-store' });
             if (response.ok) {
                 let data = await response.json();
                 if (data) {
@@ -1929,7 +1919,7 @@ async function activerModeFirebase() {
         if (ID_COFFRET) {
             try {
                 // On retire le "await" pour ne pas bloquer le fil d'exécution
-                fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, { 
+                fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json`, { 
                     method: 'PATCH', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ 
@@ -2061,7 +2051,7 @@ async function activerModeFirebase() {
         if(lblDispo) lblDispo.innerText = "Recherche...";
 
         try {
-            let response = await fetch(`${FIREBASE_HOST}firmware.json?auth=${FIREBASE_AUTH}`);
+            let response = await fetch(`${FIREBASE_HOST}firmware.json`);
             if(response.ok) {
                 let data = await response.json();
                 if(data && data.versionNew && data.urlNew) {
@@ -2239,7 +2229,7 @@ function envoyerConfigInstallateur() {
 
         // 2. Sauvegarde du dealer dans Firebase (CLOUD)
         if (ID_COFFRET && ID_COFFRET !== "Coffret_01") {
-            fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json?auth=${FIREBASE_AUTH}`, {
+            fetch(`${FIREBASE_HOST}clients/${ID_COFFRET}.json`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ dealer_id: dealerId })
