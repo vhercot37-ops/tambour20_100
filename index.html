@@ -1170,7 +1170,7 @@ async function chargerInfoDealer() {
             if (tabAutoText) tabAutoText.innerText = "Monitoring";
 
             ['tab-history', 'tab-dealer'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "flex"; });
-            ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-ota', 'tab-pdf', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });});
+            ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-ota', 'tab-pdf', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
 
             if (['manuel-view', 'config-view', 'wifi-view', 'ota-view','telegram-view'].includes(activeView)) {
                 setTimeout(() => switchView('auto'), 10);
