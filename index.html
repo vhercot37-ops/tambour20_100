@@ -1169,13 +1169,18 @@ async function chargerInfoDealer() {
         if (modeActif === "FIREBASE") {
             if (tabAutoText) tabAutoText.innerText = "Monitoring";
 
+            let btnNotifs = document.getElementById('btn-menu-notifs');
+            if (btnNotifs) {
+            btnNotifs.style.display = "block"; // Visible par défaut en mode Cloud
+            }
+
             ['tab-history', 'tab-dealer'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "flex"; });
             ['tab-manuel', 'tab-config', 'tab-wifi', 'tab-ota', 'tab-pdf', 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
 
             if (['manuel-view', 'config-view', 'wifi-view', 'ota-view','telegram-view'].includes(activeView)) {
                 setTimeout(() => switchView('auto'), 10);
             }
-        } else if (modeActif === "BLE") {
+            } else if (modeActif === "BLE") {
             if (tabAutoText) tabAutoText.innerText = dict[currentLang]['menu_auto'];
 
             [ 'tab-telegram'].forEach(id => { let el = document.getElementById(id); if(el) el.style.display = "none"; });
@@ -1875,13 +1880,13 @@ async function connecterBLE() {
                         }
 
                     let notifIcon = document.getElementById('notif-status-icon');
-                    if (notifIcon) {
+                    let btnNotifs = document.getElementById('btn-menu-notifs');
                     if (data.fcm_token && data.fcm_token.length > 10) { 
-                    notifIcon.style.color = "#0ea5e9"; // Cloche Bleue
+                    if (notifIcon) notifIcon.style.color = "#0ea5e9"; // Cloche Bleue
+                    if (btnNotifs) btnNotifs.style.display = "none";  // On cache le bouton si déjà activé
                     } else { 
-                    notifIcon.style.color = "#374151"; // Cloche Grise
-                    }
-                    }
+                    if (notifIcon) notifIcon.style.color = "#374151"; // Cloche Grise
+                    if (btnNotifs) btnNotifs.style.display = (modeActif === "FIREBASE") ? "block" : "none";
                     } else {
                         temp = "--.-"; secu = null; lav = null; couv = null; uv = null;
                         cpt = "--"; alarme = 0; wStat = 0; wRssi = -100; 
