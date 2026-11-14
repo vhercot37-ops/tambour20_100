@@ -1879,22 +1879,25 @@ async function connecterBLE() {
                             }
                         }
 
-                    let notifIcon = document.getElementById('notif-status-icon');
-                    let btnNotifs = document.getElementById('btn-menu-notifs');
-                    if (data.fcm_token && data.fcm_token.length > 10) { 
+                   let notifIcon = document.getElementById('notif-status-icon');
+                let btnNotifs = document.getElementById('btn-menu-notifs');
+                if (data.fcm_token && data.fcm_token.length > 10) { 
                     if (notifIcon) notifIcon.style.color = "#0ea5e9"; // Cloche Bleue
                     if (btnNotifs) btnNotifs.style.display = "none";  // On cache le bouton si déjà activé
-                    } else { 
+                } else { 
                     if (notifIcon) notifIcon.style.color = "#374151"; // Cloche Grise
                     if (btnNotifs) btnNotifs.style.display = (modeActif === "FIREBASE") ? "block" : "none";
-                    } else {
-                        temp = "--.-"; secu = null; lav = null; couv = null; uv = null;
-                        cpt = "--"; alarme = 0; wStat = 0; wRssi = -100; 
-                        cptConsecutif = 0; // <-- NOUVELLE LIGNE (utilise "var" ici pour la portée globale du if/else)
-                        var erreurRTC = 0; // <-- NOUVEAU (utiliser var pour la portée)
-                        let notifIcon = document.getElementById('notif-status-icon');
-                        if (notifIcon) notifIcon.style.color = "#374151";
-                    }
+                }
+            } else {
+                temp = "--.-"; secu = null; lav = null; couv = null; uv = null;
+                cpt = "--"; alarme = 0; wStat = 0; wRssi = -100; 
+                cptConsecutif = 0; 
+                var erreurRTC = 0; 
+                let notifIcon = document.getElementById('notif-status-icon');
+                if (notifIcon) notifIcon.style.color = "#374151";
+                let btnNotifs = document.getElementById('btn-menu-notifs');
+                if (btnNotifs) btnNotifs.style.display = "none";
+            }
 
                     let espVersion = data.version_actuelle !== undefined ? data.version_actuelle : "v1.0.0";
                     afficherMaitresDonnees(temp, secu, lav, couv, uv, cpt, data.Mode, alarme, wStat, wRssi, cptConsecutif, espVersion,erreurRTC);
